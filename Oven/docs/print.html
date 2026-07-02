@@ -1,0 +1,1462 @@
+<!DOCTYPE HTML>
+<html lang="ja" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Oven ── 言語の記録</title>
+        <meta name="robots" content="noindex">
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="依存型 + QTT + GPU 並列の実験的言語 Oven の設計と実装の記録">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon-de23e50b.svg">
+        <link rel="shortcut icon" href="favicon-8114d1fc.png">
+        <link rel="stylesheet" href="css/variables-8adf115d.css">
+        <link rel="stylesheet" href="css/general-2459343d.css">
+        <link rel="stylesheet" href="css/chrome-ae938929.css">
+        <link rel="stylesheet" href="css/print-9e4910d8.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="fonts/fonts-9644e21d.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="mdbook-highlight-css" href="highlight-493f70e1.css">
+        <link rel="stylesheet" id="mdbook-tomorrow-night-css" href="tomorrow-night-4c0ae647.css">
+        <link rel="stylesheet" id="mdbook-ayu-highlight-css" href="ayu-highlight-3fdfc3ac.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "searchindex-3d1a964c.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc-45cb7b16.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="mdbook-body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="mdbook-sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("mdbook-sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="mdbook-sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="mdbook-sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="mdbook-page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="mdbook-menu-bar-hover-placeholder"></div>
+                <div id="mdbook-menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="mdbook-sidebar-toggle" class="icon-button" for="mdbook-sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="mdbook-sidebar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M0 96C0 78.3 14.3 64 32 64H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32H32c-17.7 0-32-14.3-32-32s14.3-32 32-32H416c17.7 0 32 14.3 32 32z"/></svg></span>
+                        </label>
+                        <button id="mdbook-theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="mdbook-theme-list">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M371.3 367.1c27.3-3.9 51.9-19.4 67.2-42.9L600.2 74.1c12.6-19.5 9.4-45.3-7.6-61.2S549.7-4.4 531.1 9.6L294.4 187.2c-24 18-38.2 46.1-38.4 76.1L371.3 367.1zm-19.6 25.4l-116-104.4C175.9 290.3 128 339.6 128 400c0 3.9 .2 7.8 .6 11.6c1.8 17.5-10.2 36.4-27.8 36.4H96c-17.7 0-32 14.3-32 32s14.3 32 32 32H240c61.9 0 112-50.1 112-112c0-2.5-.1-5-.2-7.5z"/></svg></span>
+                        </button>
+                        <ul id="mdbook-theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-ayu">Ayu</button></li>
+                        </ul>
+                        <button id="mdbook-search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="mdbook-searchbar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352c79.5 0 144-64.5 144-144s-64.5-144-144-144S64 128.5 64 208s64.5 144 144 144z"/></svg></span>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Oven ── 言語の記録</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <span class=fa-svg id="print-button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M128 0C92.7 0 64 28.7 64 64v96h64V64H354.7L384 93.3V160h64V93.3c0-17-6.7-33.3-18.7-45.3L400 18.7C388 6.7 371.7 0 354.7 0H128zM384 352v32 64H128V384 368 352H384zm64 32h32c17.7 0 32-14.3 32-32V256c0-35.3-28.7-64-64-64H64c-35.3 0-64 28.7-64 64v96c0 17.7 14.3 32 32 32H64v64c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V384zm-16-88c-13.3 0-24-10.7-24-24s10.7-24 24-24s24 10.7 24 24s-10.7 24-24 24z"/></svg></span>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="mdbook-search-wrapper" class="hidden">
+                    <form id="mdbook-searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="mdbook-searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="mdbook-searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <span class=fa-svg id="fa-spin"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M304 48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zm0 416c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM48 304c26.5 0 48-21.5 48-48s-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48zm464-48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM142.9 437c18.7-18.7 18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zm0-294.2c18.7-18.7 18.7-49.1 0-67.9S93.7 56.2 75 75s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zM369.1 437c18.7 18.7 49.1 18.7 67.9 0s18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9z"/></svg></span>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="mdbook-searchresults-outer" class="searchresults-outer hidden">
+                        <div id="mdbook-searchresults-header" class="searchresults-header"></div>
+                        <ul id="mdbook-searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('mdbook-sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('mdbook-sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#mdbook-sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="mdbook-content" class="content">
+                    <main>
+                        <h1 id="oven-とは"><a class="header" href="#oven-とは">Oven とは</a></h1>
+<p>Oven は <strong>依存型(MLTT)+ 帰納型 + QTT(数量的型)を核に持つ純粋関数型言語で、書いたコードを GPU で並列実行できる</strong> ことを目指す実験的言語です。処理系は Rust で実装されています(コアは外部依存ゼロ)。</p>
+<p>一言でいえば:</p>
+<blockquote>
+<p><strong>「依存型を持つ純粋関数型言語で、しかも GPU で並列計算が走って、画像・音・アセットが作れる」</strong></p>
+</blockquote>
+<p>という、互いに引っぱり合う性質の欲張りな組み合わせです。この文書群は、その緊張をどうほどいたか(あるいはまだほどけていないか)の <strong>記録</strong> です。チュートリアルではなく、「この言語がどういう原理で出来ていて、なぜそうなったか」を、設計上の特徴から細かい言語機能までまとめてあります。</p>
+<h2 id="何をしたい言語か"><a class="header" href="#何をしたい言語か">何をしたい言語か</a></h2>
+<ul>
+<li><strong>並列計算</strong>:たくさんのデータに同じ計算を一斉にかける。GPU(compute shader)で走らせる。</li>
+<li><strong>creative coding</strong>:Shadertoy 的・Processing 的に、コードから画像や音を生成する。procedural generation。</li>
+<li><strong>アセット生成</strong>:Unity で使えるメッシュ・テクスチャをコードで吐き出す(将来)。</li>
+<li>これらを <strong>強い静的型付け・純粋関数(副作用なし)・全域(すべての計算が停止する)</strong> の上でやる。</li>
+</ul>
+<h2 id="なぜこの組み合わせか--4-つの世界の統合実験"><a class="header" href="#なぜこの組み合わせか--4-つの世界の統合実験">なぜこの組み合わせか ── 4 つの世界の統合実験</a></h2>
+<p>この言語の動機には、はっきりした個人的背景があります。作者は <strong>Rust を書き、Agda を使い、Shadertoy を使い、Houdini を使う</strong> ── 普通は交わらない 4 つの世界を日常的に行き来する人間です。そして、これらの世界は離れて見えて <strong>綺麗に統合できる</strong> はずだ、という直観があります。Oven はその直観を確かめる実験です。</p>
+<ul>
+<li><strong>Agda</strong> からは依存型と全域性を ── ただし証明のためでなく、コンパイルの道具として。</li>
+<li><strong>Rust</strong> からは資源の規律を ── ただし参照と lifetime は捨てて、線形性だけを。</li>
+<li><strong>Shadertoy</strong> からは「画像 = 座標の純粋関数」というモデルを ── ただし型を付けて。</li>
+<li><strong>Houdini</strong> からは procedural generation(recook = 再評価という参照透過性、per-point 並列、attribute = レコード)を ── ただし言語として。</li>
+</ul>
+<p>各章で見るように、これらの要求は妥協で繋がっているのではなく、多くの場所で <strong>同じ一点を指しています</strong>(全域性は型理論の衛生であると同時に GPU の物理的制約であり、<code>'0</code> 消去は proof irrelevance であると同時に単相化の根拠です)。その合流の詳細は<a href="#まとめ--どのマスにも先客がいない">他言語との比較</a>の結びで扱います。そして Oven は終点ではなく、「もっといろんなものが綺麗に表現された言語がありうる」という信念の、最初の一歩という位置づけです。</p>
+<h2 id="言語の柱"><a class="header" href="#言語の柱">言語の柱</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>柱</th><th>内容</th><th>詳細</th></tr>
+</thead>
+<tbody>
+<tr><td>型理論</td><td>MLTT + 帰納型 + QTT。<code>Type : Type</code>。Σ 型が言語の backbone</td><td><a href="#コア型理論">コア型理論</a></td></tr>
+<tr><td>全域性</td><td>自由再帰・無限ループを言語に入れない。反復は <code>case</code>(構造的再帰)のみ</td><td><a href="#反復は-case-のみ--帰納仮説の括弧-">コア型理論</a></td></tr>
+<tr><td>線形性</td><td>multiplicity <code>'0</code>(消去)/<code>'1</code>(線形)/<code>'ω</code>(無制限)で使用回数を型が数える</td><td><a href="#qtt--使用量を数える型">QTT</a></td></tr>
+<tr><td>効果</td><td>モナドなし。零幅 token を線形に「借りて返す」threading 一本で IO も GPU も表す</td><td><a href="#効果系--借りて返す">効果系</a></td></tr>
+<tr><td>GPU</td><td><code>dispatch(i in size){ body }</code> 構文が host↔GPU の境界。表現不能はコンパイルエラー</td><td><a href="#gpu-実行--dispatch-と-lowering">GPU 実行</a></td></tr>
+<tr><td>糖衣哲学</td><td>すべての糖衣は QTT の素の構造(Π・Σ・multiplicity)へ展開される。糖衣のために意味論を足さない</td><td><a href="#設計原理--何を選び何を捨てたか">設計原理</a></td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="雰囲気マンデルブロ集合を-gpu-で描く"><a class="header" href="#雰囲気マンデルブロ集合を-gpu-で描く">雰囲気:マンデルブロ集合を GPU で描く</a></h2>
+<p><code>examples/showcase.ov</code> の抜粋です。純粋なヘルパ関数(レコード・中置演算子・反復・分岐)をトップレベルで定義し、それを GPU カーネルから呼びます。カーネル境界でヘルパはインライン展開され、<code>iterate(16, …)</code> は静的アンロールされます。</p>
+<pre><code>// レコード = 名前付き Σ。型エイリアスはただの定義
+Complex  : Type = (re : F32, im : F32);
+EscState : Type = (z : Complex, cnt : U32);
+
+// z² + c(中置演算子とレコード射影 ── host でも GPU でも使える普通の関数)
+stepC : (c : Complex, z : Complex) -&gt; Complex
+  = λ(c, z) (z.re * z.re - z.im * z.im + c.re, 2.0 * z.re * z.im + c.im);
+
+// エスケープ反復:|z| ≤ 2 の間だけ z ← z²+c を進めて数える
+escape : Complex -&gt; U32
+  = λ(c) (iterate(16, λ(s : EscState)
+            case(ltF32(norm2(s.z), 4.0)) {
+              true  =&gt; (stepC(c, s.z), s.cnt + 1[U32]),
+              false =&gt; (s.z, s.cnt)
+            }, ((0.0, 0.0), 0[U32]))).cnt;
+
+// 8×8 グリッドの各スレッドが 1 画素を計算して out に書く
+let '1 out : Buffer(64[U32], Color) = newBuffer(64[U32]);
+dispatch(i in (8[U32], 8[U32], 1[U32])) {
+  store(out, i.1 * 8[U32] + i.0, toColor(escape(toC(i.0, i.1))))
+};
+readback(64[U32], out)
+</code></pre>
+<p><code>out</code> は線形(<code>'1</code>)資源で、<code>dispatch</code> が borrow-lift(消費して返す)します。<code>store</code> の効果順序は零幅の GPU token を暗黙に threading することで型に強制されますが、ユーザは token を一切書きません。</p>
+<h2 id="動かし方"><a class="header" href="#動かし方">動かし方</a></h2>
+<pre><code>cargo run -- examples/showcase.ov        # 型検査 + CPU emulation(正規化結果を表示)
+cargo run --features gpu -- --gpu examples/gpu.ov   # 実 GPU(wgpu)でも実行
+cargo run --example mandel --features gpu           # 512×512 のマンデルブロを PNG に
+cargo test                               # テストスイート(190 本超)
+</code></pre>
+<p>エディタ支援(診断・hover・定義ジャンプ・補完・Unicode 入力)は <code>editor/vscode</code> の VSCode 拡張 + <code>lsp/</code> の language server が提供します。詳細は<a href="#lsp-と-vscode-拡張">処理系の内部</a>。</p>
+<h2 id="この文書の性格と読み方"><a class="header" href="#この文書の性格と読み方">この文書の性格と読み方</a></h2>
+<ul>
+<li>これは <strong>記録</strong> です。人へ教えるためのチュートリアルではなく、「Oven という言語がどういうものか」を将来参照できる形で網羅することを目的とします。</li>
+<li><strong>実装済み・設計のみ・撤回済みを区別して書きます</strong>。設計途中の言語であり、確定していないものには印を付けます。</li>
+<li>設計の一次資料はリポジトリの <code>DESIGN.md</code>(journal 形式の設計ノート)と <code>docs/</code>(type-system / syntax / effects / library の 4 分冊)です。この文書群はそれらを別の体系に編み直したものです。</li>
+</ul>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>章</th><th>内容</th></tr>
+</thead>
+<tbody>
+<tr><td><a href="#設計原理--何を選び何を捨てたか">設計原理</a></td><td>根本の緊張(依存型 × GPU)と、それをほどく方針。言語全体を貫く原則</td></tr>
+<tr><td><a href="#コア型理論">コア型理論</a></td><td><code>Type : Type</code>・Π・Σ・<code>data</code>/<code>case</code>・NbE。言語の意味論的な核</td></tr>
+<tr><td><a href="#qtt--使用量を数える型">QTT</a></td><td>multiplicity の半環・使用量検査・<code>case</code> の合流規則・graded let</td></tr>
+<tr><td><a href="#効果系--借りて返す">効果系</a></td><td>「線形に借りて返す」一本で IO・状態・GPU 命令順を表す仕組み</td></tr>
+<tr><td><a href="#gpu-実行--dispatch-と-lowering">GPU 実行</a></td><td><code>dispatch</code>・表現可能性・ベクトル型・lowering パイプライン</td></tr>
+<tr><td><a href="#表面言語--構文と糖衣">表面言語</a></td><td>構文の細部と糖衣の展開規則。mixfix・instance 解決・module</td></tr>
+<tr><td><a href="#珍しい機能カタログ">珍しい機能カタログ</a></td><td>他の言語ではあまり見ない機能・設計の一覧(本文へのリンク集)</td></tr>
+<tr><td><a href="#他言語との比較--現代の言語の中での立ち位置">他言語との比較</a></td><td>Idris・Rust・Futhark・Clean 等との対比と、現代の言語の中での立ち位置</td></tr>
+<tr><td><a href="#処理系の内部">処理系の内部</a></td><td>Rust 実装の構造。NbE・erasure・KernelIR・LSP・テスト</td></tr>
+<tr><td><a href="#経緯--捨てた案の記録">経緯</a></td><td>捨てた案の記録。2LTT・FnMut・WriteSet・effect row・region など</td></tr>
+<tr><td><a href="#現状と未解決">現状と未解決</a></td><td>実装状況のスナップショットと、未解決の問題・既知の割り切り</td></tr>
+</tbody>
+</table>
+</div>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="設計原理--何を選び何を捨てたか"><a class="header" href="#設計原理--何を選び何を捨てたか">設計原理 ── 何を選び、何を捨てたか</a></h1>
+<p>この章は Oven 全体を貫く設計原則をまとめます。個々の機能はこの原則の帰結として読めます。</p>
+<h2 id="根本の緊張依存型のフル言語は-gpu-では走らない"><a class="header" href="#根本の緊張依存型のフル言語は-gpu-では走らない">根本の緊張:依存型のフル言語は GPU では走らない</a></h2>
+<p>Oven の出発点にして、いまも設計全体を支配している問題です。</p>
+<p><strong>MLTT + 帰納型 + QTT のフルパワーの言語は、そのままでは GPU にコンパイルできません。</strong> GPU のカーネル(compute shader)に書けるのは、おおまかに「一次の(関数を値として持ち回らない)、データサイズがコンパイル時に決まっている、動的メモリ確保がない、一般再帰がない、値型だけ」のコードです。一方、依存型言語は「型の中に任意の計算が現れ、任意の再帰があり、関数やデータを自由に持ち回る」。真っ向からぶつかります。</p>
+<h3 id="採用した方針一つの言語--消去--単相化表せなければエラー"><a class="header" href="#採用した方針一つの言語--消去--単相化表せなければエラー">採用した方針:一つの言語 + 消去 + 単相化、表せなければエラー</a></h3>
+<p>最初に検討された Two-Level Type Theory(メタレベルとオブジェクトレベルを構文で分ける)は「host 用と kernel 用のコードを書き分けたくない。一つの言語で書きたい」という理由で却下されました(→ <a href="#2ltt">経緯</a>)。採用されたのは:</p>
+<ul>
+<li>依存型では、配列の長さ <code>n</code> のような「型に出てくる数」は multiplicity <code>'0</code>(消去)にできる。全プログラムを単相化すれば <code>n</code> はコンパイル時に具体値に確定する。<strong>配列サイズが静的に決まるという点では、むしろ普通の言語より GPU 向き</strong>。</li>
+<li>ただし消去は必要条件であって十分条件ではない。消した後に「動的な再帰・動的サイズのデータ・実行時まで残る関数値」が残れば GPU に載らない。そこで <strong>「GPU で表現できないものがカーネルに混ざっていたら、コンパイルエラー」</strong>(→ <a href="#表現可能性">表現可能性</a>)。</li>
+<li>さらに「<strong>回数の決まらないループも、自由な再帰も、そもそも言語に入れない</strong>」と決めた。これで上記の (1) 動的再帰は言語レベルで存在しなくなり、言語全体が <strong>全域(total)</strong> になりました。型理論として整合的になり、GPU 化の難しさも一段下がる、一石二鳥の決断です。</li>
+</ul>
+<h2 id="原則の一覧"><a class="header" href="#原則の一覧">原則の一覧</a></h2>
+<h3 id="1-σ-をあらゆる所に使うbackbone"><a class="header" href="#1-σ-をあらゆる所に使うbackbone">1. Σ をあらゆる所に使う(backbone)</a></h3>
+<p>「関数の引数の並び(テレスコープ)」と「レコード」を同じ一つの Σ 型で表します。これにより <strong>typeclass の辞書・module・closure の環境・GPU dispatch の任意個リソース</strong> が、新しい言語機構を足さずに全部 Σ で書けます。Σ = ∃(存在量化)でもあり、依存レコードなので連想型(associated type)も自然に出ます。→ <a href="#σ型--テレスコープ--レコード">コア型理論</a></p>
+<h3 id="2-糖衣は必ず-qtt-の素の構造に展開される"><a class="header" href="#2-糖衣は必ず-qtt-の素の構造に展開される">2. 糖衣は必ず QTT の素の構造に展開される</a></h3>
+<blockquote>
+<p>「糖衣構文のために変なものを足すくらいなら、糖衣構文の方を捨てろ」</p>
+</blockquote>
+<p>Oven の syntax sugar は、剥がすと必ず素の Π・Σ・multiplicity になります。新しい意味論を糖衣のために足しません。効果記法 <code>[&amp;X] A → B</code> は <code>('1 X, A) → ('1 X, B)</code> の糖衣、借用 <code>&amp;T</code> は「<code>'1</code> で受けて結果と一緒に返す」の糖衣、<code>module</code> は「引数を取ってレコードを返す関数」の糖衣です。この原則が守られている限り、糖衣の展開結果はコア型検査器(oracle)が必ず検証できます。</p>
+<h3 id="3-型は観測可能な振る舞いを映す--関数型は-a--b-一種類"><a class="header" href="#3-型は観測可能な振る舞いを映す--関数型は-a--b-一種類">3. 型は「観測可能な振る舞い」を映す ── 関数型は <code>A → B</code> 一種類</a></h3>
+<p>closure の扱いで何度も間違えた末に到達した原則です(→ <a href="#fnmut">経緯</a>):</p>
+<ul>
+<li><strong>純粋な λ は、変数を capture していても型はただの <code>A → B</code></strong>。capture を Σ に包む closure conversion はコンパイル時の実装の話で、型には出ない。</li>
+<li><strong>効果のある関数も結局 <code>A → B</code></strong>。状態 <code>S</code> を threading する関数は <code>('1 S, A) → ('1 S, B)</code> ── ただの Π で、ドメイン/コドメインに <code>'1 S</code> が乗っているだけ。別建ての「効果あり関数型」(<code>FnMut</code> 等)は要らない。</li>
+<li><strong>closure が capture できるのは <code>'ω</code> の値だけ。<code>'1</code> 資源は常に引数で渡す</strong>。これにより関数値はすべて <code>'ω</code>(何度でも呼べる)になり、効果 token の escape 防止すら新しい規則なしで閉じます(→ <a href="#escape-は-2-規則から閉じる">効果系</a>)。</li>
+</ul>
+<h3 id="4-演算子すら特別扱いしない"><a class="header" href="#4-演算子すら特別扱いしない">4. 演算子すら特別扱いしない</a></h3>
+<p><code>*</code> は Mult(multiplicity の半環)でも F32 でも「ただの instance」です。<code>1 + 1</code> が <code>ω</code> になるのも、パーサの特別扱いではなく elaboration での instance 解決の結果です。演算子は mixfix 宣言(<code>infixl 7 _*_</code>)+ nominal 型のクラス + implicit 解決という汎用機構だけで賄われます。→ <a href="#演算子と-instance">表面言語</a></p>
+<h3 id="5-効果は線形に借りて返す一本"><a class="header" href="#5-効果は線形に借りて返す一本">5. 効果は「線形に借りて返す」一本</a></h3>
+<p>モナドはありません。IO・状態・GPU の命令順序は、すべて「線形(<code>'1</code>)の token を消費して返す」threading で表されます。State / Writer / IO が <code>[&amp;X]</code> という一つの仕組みに集約されます。→ <a href="#効果系--借りて返す">効果系</a></p>
+<h3 id="6-race-は型で追わない--compute-shader-と同じ割り切り"><a class="header" href="#6-race-は型で追わない--compute-shader-と同じ割り切り">6. race は型で追わない ── compute-shader と同じ割り切り</a></h3>
+<p>dispatch 内で多数のスレッドが同じバッファに同時アクセスするのは並列計算の本体です。スレッド間の競合の正しさ(atomic を使う・書き込み先を衝突させない)はプログラマの責任とし、型では追いません。書き込みの disjointness を型で保証しようとした案(WriteSet)は、atomic の存在により「強すぎる」ため撤回されました(→ <a href="#writeset">経緯</a>)。host 側の純粋性は「dispatch 構文が自由な <code>'1</code> 資源を borrow-lift して返す」ことで保たれます。</p>
+<h3 id="7-ad-hoc-を嫌う--原理から出ない解は暫定と明記する"><a class="header" href="#7-ad-hoc-を嫌う--原理から出ない解は暫定と明記する">7. ad-hoc を嫌う ── 原理から出ない解は「暫定」と明記する</a></h3>
+<p>設計ノート(<code>DESIGN.md</code>)の書き出しにある通り、この言語は「これで綺麗にまとまった」と思った直後に穴が見つかることを繰り返してきました。だから:</p>
+<ul>
+<li>原理から出た解と、会計上の workaround(例:線形 payload の再帰で尾を <code>'0</code> にする patch)を区別して記録する。</li>
+<li>撤回した案は消さずに残す(同じ穴に落ちないため)。→ <a href="#経緯--捨てた案の記録">経緯</a></li>
+<li>未解決・不安な点は常に明示する。→ <a href="#現状と未解決">現状と未解決</a></li>
+</ul>
+<h3 id="8-foundation-first--core-を-consistency-の-oracle-にする"><a class="header" href="#8-foundation-first--core-を-consistency-の-oracle-にする">8. foundation-first ── core を consistency の oracle にする</a></h3>
+<p>糖衣の展開規則(<code>&amp;</code> や暗黙 threading)の正しさは、紙の上で詰め切れないと判断されました(armchair では何度も後から穴が出た、という実証があるため)。方針は:</p>
+<blockquote>
+<p><strong>core(QTT 型検査器)を consistency の oracle にし、desugar の出力は必ず core で型検査し直す。</strong></p>
+</blockquote>
+<p>これにより desugar の最悪ケースは「unsoundness」ではなく「通らない」になります。紙の厳密さは core 仕様(型・使用量・NbE)に集中させ、糖衣層は「書く → core に流す → 落ちるか見る」で経験的に詰めます。</p>
+<h3 id="9-承知の上の割り切り"><a class="header" href="#9-承知の上の割り切り">9. 承知の上の割り切り</a></h3>
+<ul>
+<li><strong><code>Type : Type</code></strong>:論理的に不健全(Girard のパラドックス)で、正規化の停止保証もない(型検査器が病的入力で発散し得る)。軽い証明・実用上の不変条件チェックには全く困らないため採用。健全性が本当に必要になったら宇宙階層を導入する。</li>
+<li><strong>QTT で表せないただ一つのもの</strong>:「コピーできない資源を複数箇所から同時に読み取り専用で共有する(別名借用)」。threading は本質的に「一本の糸を一人が順に持つ」ため表せない。<code>'ω</code> のデータならコピーすればよいので、実害は限定的と見て後回し。</li>
+<li><strong>カーネルを値として持ち回れない</strong>:<code>dispatch</code> は構文であり closure 値を作らないため、「カーネルのライブラリ」は書けない。creative coding では「カーネルはその場に書く」で回ると判断。</li>
+</ul>
+<h2 id="参考にした先行"><a class="header" href="#参考にした先行">参考にした先行</a></h2>
+<ul>
+<li><strong>elaboration-zoo</strong>(András Kovács)── 依存型エラボレータの骨格。Haskell から Rust への移植(GC がないので <code>Rc</code> で値とクロージャのグラフを管理)。</li>
+<li><strong>Idris 2</strong> ── QTT を実際に実装した処理系。multiplicity・「再帰回数を usage で数えない」設計・erased index の定石。</li>
+<li><strong>Dex / Futhark</strong> ── 純粋関数を GPU にコンパイルする言語。「どんな断片なら GPU に乗るか」の設計の先例。</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="コア型理論"><a class="header" href="#コア型理論">コア型理論</a></h1>
+<p>Oven の意味論的な核です。ざっくり言うと <strong>依存型(MLTT)+ 帰納型 + QTT</strong> に <strong>GPU の表現可能性検査</strong> を乗せたもの。QTT は<a href="#qtt--使用量を数える型">次章</a>、表現可能性は <a href="#表現可能性">GPU 実行</a>で扱い、この章はそれ以外の骨格を説明します。</p>
+<h2 id="宇宙type--type"><a class="header" href="#宇宙type--type">宇宙:<code>Type : Type</code></a></h2>
+<p>型にも型があります(<code>Nat : Type</code>、<code>Bool : Type</code>)。では <code>Type</code> の型は? Oven は一番単純な <strong><code>Type : Type</code></strong> を採用します。</p>
+<p>これは <strong>論理的に不健全</strong> です。Girard のパラドックスにより、原理的には <code>False</code> すら証明できてしまいます(Agda の <code>--type-in-type</code> と同じ状況)。さらに正規化が強正規化でなくなるため、<strong>型検査器は病的入力で発散し得ます</strong>。それでも採用するのは、軽い証明・実用上の不変条件(「この添字は範囲内」など)には全く困らず、実装も使い勝手も圧倒的に楽だからです。本当に健全性が欲しくなったら宇宙階層(<code>Type0 : Type1 : …</code>)を導入します。発散は割り切って許容し、実用上の保険として timeout/fuel での打ち切りは任意で入れてよい、という立場です。</p>
+<p><code>Type : Type</code> の実利的な副産物として、<strong>型が第一級の値</strong> になります。<code>(Env : Type, env : Env, step : (Env, A) → (Env, B))</code> のように、型をフィールドに持つレコード(透明な存在型)がそのまま書けます。</p>
+<h2 id="π-型関数-適用は全面-curried"><a class="header" href="#π-型関数-適用は全面-curried">Π 型(関数)── 適用は全面 curried</a></h2>
+<p>関数の型は Π 型で、戻り型が引数に依存できます:<code>(x : A) → B(x)</code>。</p>
+<p><strong>適用は全面 curried です</strong>(2026-06-11 に Σ-domain 方式から移行・確定)。<code>(x : A, y : B) → C</code> は curried な <code>(x:A) → (y:B) → C</code> であり、<code>f(a, b)</code> は <code>f a b</code>(= <code>(f a) b</code>)です。tight な <code>f(a, b)</code> も並置 <code>f a b</code> も同じ意味になります。</p>
+<p>タプルを 1 個受け取りたいときだけ型を <code>(p : (x:A, y:B)) → C</code> と書き、<code>f((a, b))</code> で渡します(<code>f(a, b)</code> とは別物)。タプルの分解は本体で <code>let (x, y) = p; …</code>(Σ は積であって inductive ではないため、<code>case</code> ではなく分解束縛)。</p>
+<h2 id="σ型--テレスコープ--レコード"><a class="header" href="#σ型--テレスコープ--レコード">Σ型 / テレスコープ / レコード</a></h2>
+<p><strong>Oven で最も重要な構造です。</strong> 「関数の引数の並び(テレスコープ)」と「レコード(名前付きの組)」を、同じ一つの Σ 型(依存和)で表します。</p>
+<pre><code>(x : A, y : B)      // 依存した名前付きの並び。後ろの型が前の値に依存できる
+(a : Nat, b : Nat)  // 名前付き = レコード型。値は (a = 1, b = 2)、射影は r.a r.b
+(Nat, Nat)          // 無名 = タプル。射影は p.0 p.1
+()                  // 空 = Unit(型も値も ())
+</code></pre>
+<ul>
+<li><strong>Σ = ∃(存在量化)</strong> でもあります。MLTT では依存和と存在型は同じ連結子で、別の道具は要りません。</li>
+<li>依存レコードなので <strong>連想型</strong> も自然に書けます:<code>(Out : Type, mul : (A,B) → Out)</code> のように、後のフィールドの型を前のフィールドに依存させられます。</li>
+<li>この「Σ をあらゆる所に使う」方針により、typeclass 辞書・module・closure 環境・dispatch の任意個リソースが、新機構なしで全部 Σ で書けます。</li>
+</ul>
+<h2 id="帰納型は-data-宣言"><a class="header" href="#帰納型は-data-宣言">帰納型は <code>data</code> 宣言</a></h2>
+<p>帰納型はユーザが <code>data</code> で宣言します(組み込みの <code>Bool</code>/<code>Nat</code>/<code>Fin</code>/<code>Vec</code>/<code>Id</code> も <code>std/prelude.ov</code> に Oven ソースの <code>data</code> 宣言として書かれており、処理系が起動時に取り込みます)。</p>
+<pre><code>data Nat : Type {
+  zero : Nat,
+  succ : (n : Nat) -&gt; Nat,
+}
+
+// 線形 payload を入れられる cons-list。r = 要素の量(型に乗るので線形 Vec と純粋 Vec は別の型)
+data Vec [r : Mult] (A : Type) : (n : Nat) -&gt; Type {
+  vnil  : Vec(zero),
+  vcons : (m : Nat, x : 'r A, xs : 'r Vec(m)) -&gt; Vec(succ(m)),
+}
+
+// 等式。GADT の典型 ── refl が index y を x に固定する
+data Id [A : Type] (x : A) : (y : A) -&gt; Type { refl : Id(x) }
+</code></pre>
+<ul>
+<li><strong>parameter</strong>(<code>:</code> の左)は全 constructor で共有(uniform)。implicit <code>[...]</code> か explicit <code>(...)</code> かを選べます。</li>
+<li><strong>index</strong>(<code>:</code> の右)は constructor の戻り型で <code>zero</code>/<code>succ(n)</code> のように具体化されます。</li>
+<li>constructor は GADT スタイルで完全な型を書きます。量注釈 <code>'ρ</code> は constructor の引数にだけ付きます。</li>
+<li><strong>strict positivity は「inductive 型であることの定義そのもの」</strong> として要求されます。型構成子が共変 functor <code>F</code> であって初めてその initial algebra μF(帰納型)が存在する ── <code>→</code> の左などの負の位置に自己が出る宣言は受け付けません。</li>
+</ul>
+<p>型ごとの eliminator(<code>Nat-elim</code> 等)は焼き込みません。分解・再帰は次の <code>case</code> 一本で、その型付け・計算規則(iota)・QTT 合流は宣言から一般的に導かれます。</p>
+<blockquote>
+<p>当初は「帰納型はプリミティブとして固定し、型ごとの eliminator を焼き込む」方針でしたが、QTT の合流規則を型ごとに手で持つ羽目になったため、一般の <code>data</code> + <code>case</code> へ移行しました(→ <a href="#eliminator-から-case-へ">経緯</a>)。</p>
+</blockquote>
+<h2 id="反復は-case-のみ--帰納仮説の括弧-"><a class="header" href="#反復は-case-のみ--帰納仮説の括弧-">反復は <code>case</code> のみ ── 帰納仮説の括弧 <code>⟦⟧</code></a></h2>
+<p>ユーザの決定として、<strong>自由再帰も無限ループも言語に入れません</strong>。よって Oven は全域言語です。繰り返し計算は <code>case</code> 構文(構造的再帰)だけが提供します。</p>
+<p><code>case</code> は帰納型の値を constructor で 1 段分解し、各 branch でその部分構造に対する <strong>帰納仮説 <code>⟦w⟧</code></strong>(その部分構造に対する <code>case</code> の結果)を使えます:</p>
+<pre><code>// n + m(⟦k⟧ : 「k に対する case の結果」)
+case[λ(k) Nat](n) { zero =&gt; m,  succ(k) =&gt; succ(⟦k⟧) }
+
+// Bool の分岐(⟦⟧ を使わない case = 非再帰)は同じ構文の特別な場合
+case(b) { true =&gt; e1,  false =&gt; e2 }
+
+// J(等式の eliminator)も case で導出できる。K(UIP)は入れない
+J = λ[A](P, d, x, y, p) → case[λ(y, q) P(x, y, q)](p) { refl =&gt; d(x) }
+</code></pre>
+<p><code>⟦w⟧</code>(意味論の denotation bracket。ASCII 代替は <code>[[w]]</code>)は <strong>その branch の再帰パターン変数 <code>w</code> にしか適用できません</strong>。だから書けるのは構造的再帰だけで、停止性検査を別に持ち込まずに <strong>全域性が構文的に自明</strong> になります。生の eliminator の安全性をそのまま、Idris 風の書き味で使える、というのがこの構文の狙いです。</p>
+<ul>
+<li>motive <code>[P]</code> は省略可能(非依存なら期待型から推論)。</li>
+<li>iota(計算規則)は一般規則一つ:scrutinee が <code>c(as)</code> に簡約されたら branch <code>c</code> を選び、本体の <code>⟦w⟧</code> を「<code>w</code> に対する <code>case</code> の再帰結果」に置換して評価する。型ごとには持ちません。</li>
+<li><code>case</code> の QTT 使用量規則(再帰 branch と非再帰 branch の合流)は Oven の独自色が強い部分です。→ <a href="#case-の使用量規則">QTT の章</a></li>
+</ul>
+<p>生の <code>case</code> は書きづらいので、実際のコードは <code>iterate</code> のようなコンビネータで書きます(<code>iterate</code> 自身が <code>case</code> による普通の定義です):</p>
+<pre><code>iterate : [A : '0 Type] (n : Nat, f : A → A, x0 : A) → A
+iterate[A](n, f, x0) = case[λ(k) A](n) { zero =&gt; x0,  succ(k) =&gt; f(⟦k⟧) }
+</code></pre>
+<h2 id="inductive-でないものpostulate"><a class="header" href="#inductive-でないものpostulate">inductive でないもの:<code>postulate</code></a></h2>
+<p>inductive でない組み込みは <strong><code>postulate name : T</code></strong>(型だけを持つ不透明定数)で宣言します。これも <code>std/prelude.ov</code> に Oven ソースとして書かれます。実行時の意味は処理系・ランタイムが供給し、原則 eval では簡約されません。ただし少数の <strong>組み込み簡約つき postulate</strong>(数値演算、<code>set</code>/<code>get</code> の in-place 等)だけは実装が計算規則を与えます。</p>
+<pre><code>postulate F32 : Type                                  // 不透明な機械スカラ
+postulate U32 : Type
+postulate Buffer : (n : U32, A : Type) -&gt; Type        // GPU 常駐・線形資源
+postulate Array  : (n : U32, A : Type) -&gt; Type        // host 常駐・可変配列
+postulate World : Type                                // host IO の効果 token(零幅)
+postulate GPU   : Type                                // GPU カーネルの効果 token(零幅)
+postulate trustMe : [A : '0 Type] (u : Unit) -&gt; A     // 消去される公理(脱出ハッチ)
+</code></pre>
+<p><code>trustMe</code> は「面倒な証明義務を埋める」ための公理です。<code>'0</code>(消去)位置で使う限り実行時に残りません。値が要る位置で使うと実行時に stuck するので、本来の用途は証明位置に限られます。</p>
+<p>ユーザも自分の抽象定数を <code>postulate</code> で宣言できます。</p>
+<p>コアに固有の構成として <code>postulate</code> でなく直接持つのは:<code>Type</code>(宇宙)、<code>Unit</code>(Σ の終端)、第一級 <code>Mult</code>(multiplicity の半環 ── <code>case</code> 評価にすると QTT 検査が循環しうるため組み込み)の 3 つです。</p>
+<h2 id="nominal-型newtype"><a class="header" href="#nominal-型newtype">nominal 型(newtype)</a></h2>
+<p><code>nominal R(params) = Body</code> は <strong>名目的型</strong> を宣言します。<code>R(a)</code> は conversion では Body に展開されません(同形の Body を持つ <code>Add(F32)</code> と <code>Mul(F32)</code> が別の型として区別される)。一方、構築・適用・射影には透明で、値は Body の値そのもの(wrapper なし)です。</p>
+<p>これは typeclass のクラス宣言に使われます。構造的な Σ レコードでクラスを表すと、同形のクラスが conversion で同一視されて instance 解決が曖昧になる ── その問題を名目性だけで解決する、最小の newtype 機構です。→ <a href="#演算子と-instance">表面言語</a></p>
+<h2 id="型検査の枠組み双方向--使用ベクトル--nbe"><a class="header" href="#型検査の枠組み双方向--使用ベクトル--nbe">型検査の枠組み:双方向 + 使用ベクトル + NbE</a></h2>
+<ul>
+<li><strong>双方向(bidirectional)</strong>:「期待型が分かっていて検査する(checking ⇐)」と「値から型を推論する(synthesis ⇒)」を行き来します。</li>
+<li><strong>使用ベクトル</strong>:検査と同時に「どの変数を何回使ったか」(Δ)を計算して出力します(QTT のため。→ <a href="#qtt--使用量を数える型">次章</a>)。</li>
+<li><strong>NbE(Normalization by Evaluation)</strong>:依存型では「<code>Array(2+3, A)</code> と <code>Array(5, A)</code> は同じ型か」のような判定が要ります。項を一旦「意味の世界(値)」に評価してから項に書き戻す(quote)ことで正規形を求めて比較します。実装は elaboration-zoo の Rust 移植が骨格です。</li>
+</ul>
+<p>conversion(定義の等しさ)の決定事項:</p>
+<ul>
+<li><strong>iota</strong>:<code>case</code> の branch 選択 + <code>⟦⟧</code> 置換、プリミティブの組み込み簡約(数値演算・<code>set</code>/<code>get</code> 等)、<code>Mult</code> の半環演算(<code>1+1 ↝ ω</code> 等)が計算します。scrutinee が neutral なら詰まります。</li>
+<li><strong>η</strong> は Π・Σ(レコード)・Unit でやります。inductive(Bool/Nat 等)ではやりません。</li>
+<li><strong>multiplicity は型構造の一部</strong> として比較します(<code>'1 A→B</code> と <code>'ω A→B</code> は別の型)。<code>Mult</code> が第一級で半環演算を持つため、NbE が <code>'(1+1) A ≡ 'ω A</code> を計算します。<strong>使用量そのものは変換に無関係</strong>(計算に効かない)です。</li>
+<li>GPU カーネルの中身(<code>store</code>/<code>load</code> 等)は計算規則を持たない不透明な定数(neutral)として比較し、命令的な意味は codegen だけに置きます。</li>
+</ul>
+<h2 id="メタ変数と-implicit-推論"><a class="header" href="#メタ変数と-implicit-推論">メタ変数と implicit 推論</a></h2>
+<p>推論で未確定の項は <strong>メタ変数 <code>?m</code></strong> として置き、単一化(unification)が解きます。implicit 引数はメタ変数であり、埋め方は 2 通りです:</p>
+<ol>
+<li><strong>単一化</strong> で構造的に決まる(型パラメータ <code>A</code> など)</li>
+<li><strong>文脈の <code>implicit</code> 値から型で拾う</strong>(typeclass の辞書 ── いわゆる instance 解決)</li>
+</ol>
+<p>「instance 解決」は専用サブシステムではなく、「implicit 引数 = メタ変数」+「それを曖昧性なく埋める」だけの仕組みです。詳細は<a href="#演算子と-instance">表面言語の章</a>で扱います。</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="qtt--使用量を数える型"><a class="header" href="#qtt--使用量を数える型">QTT ── 使用量を数える型</a></h1>
+<p>QTT(Quantitative Type Theory)は、各変数を「何回使うか」(multiplicity)を型で数える型理論です。Oven はこれを <strong>消去</strong>(実行時に残さない)と <strong>線形性</strong>(資源をちょうど一度使う)の両方に使います。線形性は<a href="#効果系--借りて返す">効果系</a>の土台です。</p>
+<h2 id="3-つの-multiplicity"><a class="header" href="#3-つの-multiplicity">3 つの multiplicity</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>記法</th><th>名前</th><th>意味</th><th>典型的な用途</th></tr>
+</thead>
+<tbody>
+<tr><td><code>'0</code></td><td>消去</td><td>0 回。型検査には要るが実行時には消える</td><td>型インデックス・証明・サイズ</td></tr>
+<tr><td><code>'1</code></td><td>線形</td><td>ちょうど 1 回(0 回でも 2 回でもダメ)</td><td>GPU バッファ・IO token・状態</td></tr>
+<tr><td><code>'ω</code></td><td>無制限</td><td>何回でも</td><td>普通のデータ(省略時の既定)</td></tr>
+</tbody>
+</table>
+</div>
+<p>構文は型の前に <code>'</code> を置きます:<code>'0 A</code>、<code>x : '1 A</code>。すべての <code>'</code> は直後の(原子か括弧の)型に掛かり、<code>→</code> よりタイトに結合します(<code>'1 A → B</code> は <code>('1 A) → B</code>)。</p>
+<h2 id="半環と順序"><a class="header" href="#半環と順序">半環と順序</a></h2>
+<pre><code>+ :  0+x=x,  1+1=ω,  ω+_=ω        // 「2」を表す元がないので 1+1 は ω に丸める
+· :  0·x=0,  1·x=x,  ω·ω=ω
+順序 ⊑ :  反射 + 0⊑ω + 1⊑ω のみ(0 と 1 は比較不能)
+</code></pre>
+<p><code>0</code> と <code>1</code> が比較不能であることが要点です。これにより <code>'1</code> は「ちょうど一度」という厳密な線形になります(「高々一度」ではない)。</p>
+<p><strong>Mult は第一級の値です</strong>(<code>Mult : Type</code>)。半環演算 <code>+</code>/<code>·</code>/<code>⊔</code> を NbE が計算するため、<code>'(1+1) A ≡ 'ω A</code> が定義の等しさとして成立します。さらに <code>1 + 1</code> という <strong>項</strong> の評価も、専用構文ではなく <code>Add(Mult)</code> instance の解決として行われます(パーサは Mult を一切特別扱いしません)。</p>
+<h2 id="検査規則"><a class="header" href="#検査規則">検査規則</a></h2>
+<p>型検査は使用ベクトル Δ(どの変数を何回使ったか)を同時に計算します:</p>
+<ul>
+<li><strong>変数</strong>:<code>x</code> を使うと <code>(x↦1, ほか↦0)</code>。</li>
+<li><strong>適用 <code>f(a₁,…)</code></strong>:<code>Δ_f + Σ πᵢ·Δᵢ</code>。各引数の使用量を binder の multiplicity で <strong>掛けて</strong> 足します。<code>πᵢ=0</code> なら <code>0·Δᵢ=0</code> ── その引数は実行時に使われない(=消去)。</li>
+<li><strong>ラムダ</strong>:本体で <code>x</code> を <code>ρ</code> 回使うとき <code>ρ ⊑ π</code> を要求。<code>π=1</code> なら <code>ρ=1</code> 強制。</li>
+<li><strong>graded let</strong>:<code>let 'm x : T = v; t</code>。本体での使用 <code>ρ ⊑ m</code> を検査し、<code>v</code> の使用量は <code>ρ</code> 倍して足します(McBride/Idris 2 の graded let)。これで <code>'1</code> 資源(<code>Buffer</code>)を <code>let</code> でも線形に追えます ── <code>let '1 out = newBuffer(n)</code> の複製はエラーになります。mult は名前の前(<code>let '1 out = …</code>)、型注釈は省略すると値から推論、無印は <code>'ω</code> です。</li>
+<li><strong>型の検査は demand 0</strong>:型として検査される位置は使用量を 0 に強制します。型は実行時資源を食いません。</li>
+<li><strong>分岐の合流</strong>:各枝の使用ベクトルを点ごとの上限 <code>⊔</code> で合流。<code>⊔(1,0)=ω</code> なので、線形変数を片枝でしか使わないと <code>ω</code> に化けて後段の <code>'1</code> 検査で弾かれます ── 線形は「全枝でちょうど一度」。</li>
+</ul>
+<h2 id="case-の使用量規則"><a class="header" href="#case-の使用量規則"><code>case</code> の使用量規則</a></h2>
+<p>ここは Oven 独自色の強い部分です。<code>case[P](v){ c₁(xs)=&gt;b₁, … }</code> の使用量は、branch を <strong><code>⟦⟧</code> を使う(再帰)群と使わない(非再帰)群に分け、群内は <code>⊔</code>-merge、群間は SUM</strong> で測ります:</p>
+<pre><code>Δ(case) = π_scrut·Δ_scrut + ⊔(⟦⟧ 無しの branch) + ω·⊔(⟦⟧ ありの branch)
+</code></pre>
+<p>なぜこの形か:</p>
+<ul>
+<li><strong>群内 <code>⊔</code></strong>:実行時に通る branch は一つ(排他)。分岐は既存の合流と同じ。</li>
+<li><strong>再帰群に <code>ω</code> を掛ける</strong>:<code>⟦⟧</code> を使う branch は展開で動的な回数だけ走ります。外側の <code>'1</code> を capture すれば <code>ω·1=ω</code> で弾かれる ── <strong>再帰をまたぐ線形状態は <code>⟦⟧</code>(帰納仮説)を通すしかない</strong>、が型から強制されます。</li>
+<li><strong>群間が SUM である理由</strong>:fold では基底(<code>zero</code> 枝)も step(<code>succ</code> 枝)も <strong>両方</strong> 走ります。両者を同じ <code>⊔</code> プールに入れると、「基底で 1 回使った線形」と「step で 0 回」が <code>⊔(1,0)=ω</code> に化け、正当な線形 fold を誤って弾いてしまう ── 実際、以前の eliminator 版の規則(<code>⨆_c u_c·Δcapture</code>)にはこの穴がありました。基底=必ず走る(SUM)・同種枝=排他(<code>⊔</code>)・再帰=動的回数(<code>ω</code>)を分けて初めて健全かつ完全になります。</li>
+</ul>
+<p>この規則により、<strong>線形資源を基底に入れて <code>⟦⟧</code> で threading する効果ループ</strong> が型付きます:</p>
+<pre><code>// 資源 S を threading しながら n 回反復。succ 枝は ⟦k⟧(前段の結果)を線形に通すだけで
+// 外側の '1 を使わない → Δ = {s0:1} で通る
+iterateEff : [A : '0 Type, S : '0 Type]
+  (n : Nat, body : ('1 S, A) → ('1 S, A), s0 : '1 S, x0 : A) → ('1 S, A)
+iterateEff[A,S](n, body, s0, x0) =
+  case[λ(k) ('1 S, A)](n) { zero =&gt; (s0, x0),  succ(k) =&gt; body(⟦k⟧) }
+</code></pre>
+<p>先行との比較:Idris 2 は eliminator を持たず一般再帰 + totality 検査で反復を書き、再帰回数を usage で数えません(本体を 1 回検査・再帰呼び出しは 1 apply)。Oven は反復を <code>case</code> の構造的再帰に限定した代償として <code>ω</code> と群分けを規則として持ちますが、この SUM 規則で表現力は Idris の線形 fold と等価になります。</p>
+<p><strong>既知の穴(M0.5 対応予定)</strong>:一般 inductive で非再帰 constructor が動的回数走る型(例:二分木の葉)では「<code>⟦⟧</code> 無し = 高々 1 回」の前提が崩れます。組み込みの Bool/Nat/Fin/Vec は基底 constructor が高々 1 回なので健全ですが、ユーザ定義の分岐木には群の決め方の一般化が必要です。</p>
+<h2 id="scrutinee-の量は-payload-に流れる"><a class="header" href="#scrutinee-の量は-payload-に流れる">scrutinee の量は payload に流れる</a></h2>
+<p><code>case</code> で潰すと scrutinee の量が constructor payload の binder に流れます(<code>let (a,b)=p</code> でペアの量が成分に流れるのと同じ)。<code>Nat</code>/<code>Bool</code> は payload が純粋なので見えませんが、<code>Vec[1, A]</code>(線形 payload)を潰すときに効きます:</p>
+<ul>
+<li><strong><code>⟦⟧</code> を使わない branch</strong>(1 段 peel)では、尾 <code>xs</code> は 1 回しか現れないので <code>'ρ</code> のままで健全(uncons 相当)。</li>
+<li><strong><code>⟦⟧</code> を使う branch で線形データを再帰するとき</strong> は、iota で再帰位置が「branch 引数 <code>xs</code>」と「再帰結果 <code>⟦xs⟧</code>」の 2 回現れます。そこで <strong><code>xs</code> 自体は <code>'0</code>(消去)にして、使用を <code>⟦xs⟧</code> の 1 回に絞ります</strong>。<code>xs</code> は型に名前が要るだけで、実行時の値は <code>⟦xs⟧</code> が持つ ──「依存は型だけ・消費は帰納仮説経由」という線形依存型の定石です(Idris 2 で index/predecessor が quantity 0 なのと同じ)。</li>
+</ul>
+<p>この「尾を <code>'0</code> にする」扱いは、原理から出た解ではなく iota の double-use を避ける会計上の workaround である、と設計ノートは自覚的に記録しています(→ <a href="#現状と未解決">現状と未解決</a>)。線形 payload の自動 <code>'0</code> 化はまだ未実装です(<code>ρ=ω</code> の純粋データは double-use が起きないので現状でも問題なし)。</p>
+<h2 id="multiplicity-多相"><a class="header" href="#multiplicity-多相">multiplicity 多相</a></h2>
+<p><code>Mult : Type</code> なので multiplicity 多相はただの依存量化です:</p>
+<pre><code>id : [A : '0 Type] (p : Mult, x : 'p A) → A
+</code></pre>
+<p><code>'p</code>(変数 multiplicity)入りの検査は「使用量 ⊑ p」という制約を生みますが、<strong>半環が有限(3 値)なので原理的には全部決定可能</strong> です:<code>f[p₁…pₖ]</code> が valuation <code>v</code> で型付くかは <code>f[v]</code> を具体的に検査するだけなので、<code>3ᵏ</code> を全列挙すれば「通る valuation の集合」が完全に求まります。難しいのは決定可能性ではなく、集合を抽象のまま伝播・表現することと病的に大きい <code>k</code> で、そこは「未実装」として弾く方針です。</p>
+<p>現状の実装は「閉じた multiplicity の完全検査 + postulate された多相プリミティブ」です。postulate は body が無いので使用量検査自体が無く、呼ぶ側は具体値に instantiate するためタダで済みます。ユーザ定義の mult 多相関数(列挙チェック)は将来です。</p>
+<h2 id="closure-は-ω-だけ-capture-する"><a class="header" href="#closure-は-ω-だけ-capture-する">closure は <code>'ω</code> だけ capture する</a></h2>
+<p>関数型を <code>A → B</code> 一種類に保つ要の規則です(→ <a href="#3-型は観測可能な振る舞いを映す--関数型は-a--b-一種類">設計原理</a>):</p>
+<ul>
+<li>closure と部分適用が capture できるのは <code>'ω</code> の値だけ。<code>'1</code> 資源は capture せず、常に引数で渡す。</li>
+<li>これにより関数値はすべて <code>'ω</code>(何度でも呼べる)になり、関数型は一様に <code>A → B</code>。</li>
+<li>帰結として、<code>'1</code> 引数の部分適用(<code>g = f(buffer)</code> でバッファを握った関数を作る)はできません。「状態を抱えた関数値」が本当に欲しければ、組み込みではなく手書きの Σ <code>(Env : Type, env : Env, step : (Env, A) → (Env, B))</code> を値として書きます(<code>Type : Type</code> なので Env は第一級フィールド)。</li>
+</ul>
+<p>この 2 規則(<code>'1</code> capture 不可・<code>'1</code> 部分適用不可)だけから、効果 token の escape 防止が新機構なしで閉じます。→ <a href="#escape-は-2-規則から閉じる">効果系</a></p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="効果系--借りて返す"><a class="header" href="#効果系--借りて返す">効果系 ── 借りて返す</a></h1>
+<p>Oven は純粋言語ですが、IO・可変状態・GPU への書き込みを書けます。核となる考え方は一つだけです:</p>
+<blockquote>
+<p><strong>副作用も借用も「線形に借りて返す」(<code>&amp;</code>)で表す。</strong></p>
+</blockquote>
+<p>モナドはありません。<code>print</code> や <code>store</code> のような効果は、その世界の <strong>token</strong>(<code>World</code>・<code>GPU</code> などの不透明な型)を <strong>借りて(消費して)・返す</strong> 関数として型が付きます。token は線形(<code>'1</code>)なので「一度使ったら次の token に進む」── 効果の順序がデータ依存として型で強制されます。そして token は暗黙に供給されるため、ユーザは書きません。</p>
+<p>2026-06-14 に設計確定し、Phase 1〜6 前半まで実装済みです(→ <a href="#現状と未解決">現状</a>)。</p>
+<h2 id="-の核consume-and-return"><a class="header" href="#-の核consume-and-return"><code>&amp;</code> の核:consume-and-return</a></h2>
+<p><code>&amp;</code> は型の頭に付く borrow 注釈です。意味は「線形に消費し、結果で返す」:</p>
+<pre><code>// あなたが書く型:
+set : [A : Type] [n : '0 U32] (&amp;Array(n, A), i : U32, x : A) -&gt; Unit
+
+// 脱糖後(借りた Array を結果タプルで返す):
+set : … ('1 Array(n, A), i : U32, x : A) -&gt; (Array(n, A), Unit)
+</code></pre>
+<p>呼び出し側 <code>set(&amp;arr, i, v)</code> は <code>arr</code> を消費し、更新後の配列を <strong>同じ名前に再束縛</strong> します(パーサが <code>let (arr, _) = set(arr, i, v)</code> へ脱糖)。呼び出し以降の <code>arr</code> は更新後を指します。</p>
+<p>Rust の <code>&amp;mut</code> に相当しますが、<strong>lifetime は要りません</strong>。「消費して返す」threading 符号化なので、借用の有効範囲はデータの流れそのもので決まります。安全性を担保するのは linearity です ── token や資源を明示的に名前で書いても構いませんが、二度使えば QTT の線形検査が弾きます。「名前で書けないから安全」ではなく「<code>'1</code> だから安全」が正しい筋、と設計は明言しています。</p>
+<h2 id="22-は括弧と直交する"><a class="header" href="#22-は括弧と直交する">2×2:<code>&amp;</code> は括弧と直交する</a></h2>
+<p>borrow は「implicit(<code>[]</code>)か explicit(<code>()</code>)か」と独立の装飾です:</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th></th><th>非 borrow</th><th>borrow(<code>&amp;</code>)</th></tr>
+</thead>
+<tbody>
+<tr><td>explicit <code>()</code></td><td>普通の引数 <code>(x : A)</code></td><td><strong><code>a : &amp;X</code> = 明示借用</strong>(可変資源)</td></tr>
+<tr><td>implicit <code>[]</code></td><td>辞書/型 <code>[d : C]</code></td><td><strong><code>[&amp;X]</code> = 効果</strong>(暗黙借用 token)</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li><strong>明示借用 <code>a : &amp;X</code></strong>:資源を名前で渡す(<code>set(&amp;arr, …)</code>)。host の可変 <code>Array</code> がこれ。</li>
+<li><strong>暗黙借用 <code>[&amp;X]</code></strong>:資源を型で暗黙解決する(ambient から拾う)。効果 token がこれ。</li>
+</ul>
+<p>脱糖の核(<code>'1</code> 引数 + 結果へ資源を返す)は両者で同一で、違うのは解決方法(名前で引くか型で引くか)だけです。既存の implicit/explicit の二択を、そのまま borrow に流用した形になっています。</p>
+<h2 id="効果-former-x"><a class="header" href="#効果-former-x">効果 former <code>[&amp;X]</code></a></h2>
+<p>効果は capability 型 <code>X : Type</code> で表します。<code>World</code>(host IO)・<code>GPU</code>(カーネル)・将来の <code>Log</code>・<code>State S</code> など。token は零幅でも(World/GPU)、データ持ちでも(State S)構いません ── 単なる線形値です。</p>
+<pre><code>[&amp;X] A        ≝  '1 X → (X, A)
+[&amp;X, &amp;Y] A    ≝  '1 X → '1 Y → (X, Y, A)    // 相異型なので独立に threading
+</code></pre>
+<p>prelude の効果プリミティブ:</p>
+<pre><code>postulate assert : (b : '1 Bool) -&gt; [&amp;World] Unit
+postulate print  : [A : Type] (x : '1 A) -&gt; [&amp;World] Unit
+postulate store  : [A : Type] [n : '0 U32] (buf : Buffer(n, A), i : U32, x : A) -&gt; [&amp;GPU] Unit
+postulate load   : [A : Type] [n : '0 U32] (buf : Buffer(n, A), i : U32) -&gt; [&amp;GPU] A
+</code></pre>
+<p><code>World</code> と <code>GPU</code> が <strong>別の型</strong> であることが安全性を担います:host で <code>store</code> を呼ぼうとしても、host の ambient には <code>GPU</code> token が無いので型不一致で弾かれます。かつてこの安全性を担っていた <code>'GPU</code> modality(型に付く world 印)は全廃されました(→ <a href="#gpu-modality">経緯</a>)。</p>
+<p><code>assert</code>/<code>print</code> の引数が <code>'1</code> なのは細かいが実際的な設計です:<code>assert(eqArray(readback(a), readback(b)))</code> のように線形 buffer 由来の値を渡すとき、引数が <code>'ω</code> だと引数式の使用量が ω 倍にスケールされて線形性違反になってしまうためです。</p>
+<h2 id="ambient-と-threading-規則"><a class="header" href="#ambient-と-threading-規則">ambient と threading 規則</a></h2>
+<p>elaboration の文脈は「いま使用可能な <code>'1</code> 効果束縛」(ambient)を持ちます。同型の ambient は常に一意です(同型二重取りは禁止 ── 解決の曖昧性を断つため)。</p>
+<ul>
+<li><strong>entry</strong>:<code>[&amp;X] _</code> ブロックに入ると fresh な <code>w₀ : '1 X</code> を据える(<code>main</code> は <code>World</code>、<code>dispatch</code> body は <code>GPU</code>)。</li>
+<li><strong>consume + rebind</strong>:効果呼び出し <code>c : [&amp;X] A</code> は token を即時供給 → 返る <code>(X, A)</code> を分解し、新しい token を ambient に、値を文の値とする。</li>
+<li><strong>exit</strong>:ブロック値 <code>r</code> と最終 ambient <code>wₙ</code> を組にして返す。</li>
+<li><strong>case</strong>:各枝を同じ入り ambient で elaborate し、同型の出 token を合流(「同じ world を各排他枝へ」)。</li>
+</ul>
+<p>つまりユーザが</p>
+<pre><code>main : [&amp;World] Unit
+main = { print("hello"); print("world") }
+</code></pre>
+<p>と書くと、elaboration が <code>λ(w0) let (w1, _) = print("hello", w0); print("world", w1)</code> 相当の core 項(実際は implicit 供給形)へ縫い上げます。効果の順序は「字面の順」= token のデータ依存の順です。core に出る形は素の Π と Σ の分解束縛の連鎖なので、実行系は効果を知りません。</p>
+<p><strong>≤1 効果/文</strong> の規則があります:<code>load</code> を関数引数に直接ネストせず、<code>let v = load(…)</code> で束縛してから使います(1 つの式に効果ある部分式は 1 つまで。順序は <code>;</code>/<code>let</code> だけが作る)。</p>
+<h3 id="多-capability"><a class="header" href="#多-capability">多 capability</a></h3>
+<p><code>[&amp;X, &amp;Y]</code> ブロックでは、各効果呼び出しの capability 列を ambient から <strong>型(structural equality)で対応づけ</strong>、該当する token だけを消費・再束縛します。それぞれの効果が独立の線形チェーンを成すため、<code>[&amp;World, &amp;Log] Unit</code> のようにビルトイン効果とユーザ効果を同じブロックで合成できます。零幅(World)か実値(Log)かは threading に無関係です ── token は単なる線形値なので。</p>
+<h2 id="resolution-の統一--ω-辞書と-linear-token-は同じ規則"><a class="header" href="#resolution-の統一--ω-辞書と-linear-token-は同じ規則">resolution の統一 ── ω 辞書と linear token は同じ規則</a></h2>
+<p>typeclass の辞書(implicit)と効果 token(implicit borrow)を別機構にしません。一つの規則:</p>
+<blockquote>
+<p>implicit/borrow 引数の解決 = wanted 型の「使用可能な束縛/プール項」を文脈から見つけ、usage を消費する。</p>
+</blockquote>
+<ul>
+<li><strong>ω 辞書</strong>(<code>Mul(A)</code> 等):使用が尽きない=再利用可。型が ground でないことがあるため <strong>遅延</strong> 解決(メタ変数 + pending)。</li>
+<li><strong>linear token</strong>(<code>'1 X</code>):一度で消費。型は ground(<code>World</code>/<code>GPU</code>)なので <strong>即時</strong> 解決。</li>
+</ul>
+<p>ω/linear の差は multiplicity から、遅延/即時の差は「型が ground か」から落ちる ── どちらも別扱いではありません。実際に「<code>implicit w0 : X = init</code> を置けば既存の instance 解決が <code>[&amp;X]</code> の token を型で自動供給する」ことが実装で確認されています(discharge が新機構ゼロで書ける、ということ)。</p>
+<h2 id="escape-は-2-規則から閉じる"><a class="header" href="#escape-は-2-規則から閉じる">escape は 2 規則から閉じる</a></h2>
+<p>threading された token(io 等)がスコープ外へ漏れないことは、closure 設計の 2 規則(<a href="#closure-は-ω-だけ-capture-する">QTT の章</a>)だけから出ます:</p>
+<ol>
+<li>closure は <code>'1</code> を capture できない → token を閉包に持ち出せない。</li>
+<li><code>'1</code> 引数の部分適用ができない → <code>let k = print(io0)</code> で token を握れない。</li>
+</ol>
+<p>加えて <code>'1</code> は複製不可(2 回使用は違反)、token は drop 不可(返り型 <code>(X, …)</code> を満たせず握り潰せない)。よって token は 1 本の線形スレッドに閉じ、必ず caller に戻ります。一方 <strong>capability 関数(<code>[&amp;X] A→B</code>)自体は <code>'ω</code> 値で token を抱えない</strong>(呼ぶたび引数で受ける)ので、自由に持ち回れます。escape 防止のための新しい機構はゼロです。</p>
+<h2 id="効果つきの分岐と反復"><a class="header" href="#効果つきの分岐と反復">効果つきの分岐と反復</a></h2>
+<p>分岐も反復も <code>case</code> 一本です(専用の <code>if</code> はありません)。branch は <code>'1</code> を capture できないので、threaded 資源は branch の <strong>引数</strong> で受けます = motive を <code>[&amp;R]</code> 付きの関数型にするだけ:</p>
+<pre><code>case[λ(_) [&amp;World] () → ()](b) {
+  true  =&gt; λ[&amp;World]() print("yes"),
+  false =&gt; λ[&amp;World]() (),          // token を使わない枝も、[&amp;R] 糖衣が末尾で token を自動で返す
+}
+</code></pre>
+<p>「使わない枝で token を素通しする(padding)」は独立の機構ではなく、<code>[&amp;R]</code> の「宣言した capability を末尾で必ず返す」性質に吸収されます。線形性も既存規則のまま:両枝が token を 1 回ずつ使うので <code>⊔(1,1)=1</code> で生存します。</p>
+<p>反復は motive に threaded 型を載せ、<code>⟦⟧</code>(帰納仮説)に資源を通します(<code>iterateEff</code>。→ <a href="#case-の使用量規則">QTT</a>)。<code>succ</code> 枝は <code>'ω</code> なので <code>'1</code> を capture できず、資源は <code>⟦⟧</code> を通すしかない ── これも型から自動で強制されます。</p>
+<h2 id="部分借用-rfield--lens"><a class="header" href="#部分借用-rfield--lens">部分借用 <code>&amp;r.field</code> = lens</a></h2>
+<p><code>&amp;r.a</code> とフィールドへ絞って借りられます(設計確定・実装は今後)。これは Rust の(エイリアスと lifetime を気にする)部分借用ではなく、<strong>線形 lens</strong>(getter と putback の対)です:</p>
+<pre><code>Lens(S, A) = (s : '1 S) → ('1 A, ('1 A) → S)   // 焦点 A と「埋め戻し」関数を返す
+</code></pre>
+<p>レコードのフィールドや配列要素には lens が構造的に導出でき、合成もできます(<code>&amp;r.a.b</code> は lens の合成)。呼び出し側の脱糖は「get → 関数で thread → putback で再構成 → 元の名前へ再束縛」。純粋・全域なので線形性と矛盾しません。lens にできる path(フィールド/要素)に限られ、<code>&amp;(任意の式)</code> は書けません。</p>
+<h2 id="dischargehandler"><a class="header" href="#dischargehandler">discharge(handler)</a></h2>
+<p>効果はどこかの境界で discharge されます:</p>
+<ul>
+<li><strong>World</strong>(host IO):プログラムのトップレベルが host ブロック(chain に host 効果がある)だと、コンパイラが自動で <code>runHost(λ[w] …)</code> に包みます。runtime の iota が初期 token を供給して走らせ、<code>assert</code> の失敗は panic 報告、最終 token は捨てられます。built-in。</li>
+<li><strong>GPU</strong>:<code>dispatch</code> が body の GPU 効果を discharge します(スレッドごとに fresh token を供給してカーネル実行)。built-in。</li>
+<li><strong>ユーザ効果(Log / State 等)</strong>:「explicit な値を ambient token として供給する」は既存機構(<code>implicit w0 : X = init</code> + instance 解決)で既に書けます。効果操作はただの <code>[&amp;X]</code> 関数、可変資源版は <code>&amp;T</code> 借用関数 ── 「ユーザ handler」の大半は既存機能の組み合わせで済むことが分かっています。残っているのはトップレベルで合成ブロック(<code>[&amp;World, &amp;Log]</code>)を discharge する runner の配線です(<code>runHost</code> は <code>[&amp;World] Unit</code> 専用)。</li>
+</ul>
+<h2 id="buffer-は効果の外"><a class="header" href="#buffer-は効果の外">buffer は効果の外</a></h2>
+<p>GPU の <code>Buffer</code> は <code>[&amp;Buffer]</code> にも <code>&amp;Buffer</code> にもしません。カーネル内の buffer は <strong><code>'ω</code>(並列読み書き自由・race は型で追わない)</strong> で、命令の順序づけは <code>GPU</code> token が一手に担います。host→kernel の移動は <code>dispatch</code> の borrow-lift(明示借用の built-in 特例)が処理します。<code>&amp;Array</code> の明示借用が活きるのは host 側の <strong>逐次</strong> 可変配列(<code>set</code>/<code>get</code>)です。</p>
+<pre><code>// examples/setget.ov の要素:host の可変配列を借用で更新する
+let '1 a : Array(4[U32], U32) = newArray(4[U32], 0[U32]);
+set(&amp;a, 2[U32], 7[U32]);        // a を消費し、更新後の a を同名に再束縛
+let v = get(&amp;a, 2[U32]);        // 読み出しも借用
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="gpu-実行--dispatch-と-lowering"><a class="header" href="#gpu-実行--dispatch-と-lowering">GPU 実行 ── dispatch と lowering</a></h1>
+<p>言語の二枚看板の片方です(もう片方は<a href="#効果系--借りて返す">効果系</a>)。GPU 上で明示的に並列計算を走らせます。</p>
+<h2 id="データ所在array-と-buffer"><a class="header" href="#データ所在array-と-buffer">データ所在:<code>Array</code> と <code>Buffer</code></a></h2>
+<p>データが host(CPU)側か device(GPU)側かを型で区別します:</p>
+<pre><code>Array  : (n : U32, A : Type) -&gt; Type    // host 常駐・materialized。in-place 可変(&amp;Array 借用の set/get)
+Buffer : (n : U32, A : Type) -&gt; Type    // device 常駐。線形資源('1)── 勝手にコピー/破棄できない
+
+newBuffer : [A : Type] (n : U32) -&gt; Buffer(n, A)                    // 出力バッファ確保('1 資源)
+readback  : [A : Type] (n : U32, buf : '1 Buffer(n, A)) -&gt; Array(n, A)  // device → host(buffer を消費)
+</code></pre>
+<p>長さ・添字はともに <strong>機械整数 <code>U32</code></strong> です(unary な Nat の O(n) コストを排除し、GPU の現実に合わせる)。添字は生の U32 で境界証明を持ちません ── 将来、値 <code>i : U32</code> に消去証明 <code>'0 Lt(i, n)</code> を添える形で境界安全を復活させる構想があります(→ <a href="#現状と未解決">現状</a>)。</p>
+<p>遅延した pull 配列が欲しければ素の関数 <code>Fin(n) → A</code> を書きます。かつて存在した lazy generator(<code>FinArray</code>/<code>build</code>/<code>index</code>)は「<code>build f = f</code>・<code>index xs i = xs i</code> で済む偽装」だったため撤去されました。</p>
+<h2 id="dispatch--関数ではなく構文"><a class="header" href="#dispatch--関数ではなく構文">dispatch ── 関数ではなく構文</a></h2>
+<p>GPU の並列カーネルは専用構文です:</p>
+<pre><code>dispatch(i in size) { body };  cont
+//   size : U32³(グリッド = スレッド数)、i : U32³(スレッド ID。body 内で束縛)
+//   body : GPU の命令的コード([&amp;GPU] 効果)。全スレッドについて並列に走る
+</code></pre>
+<p><code>let</code> と並ぶ束縛文で、core では <code>Tm::Dispatch(size, body, borrows, cont)</code> という専用ノードです。<strong>なぜ関数ではないのか</strong>:</p>
+<ul>
+<li>カーネルは「任意個のリソース(入出力バッファ)」に触りたい。関数にすると closure が <code>'1</code> 資源を capture することになり、「closure は <code>'1</code> を capture できない」原則と衝突する(capture した線形資源が封印されて戻ってこない)。</li>
+<li>明示的にリソースをレコードで渡す形(explicit-R)は動くが冗長。region 機構は過剰。──と回り道した末に、「<strong>capture は書く。でも封印しない。そのために構文にする</strong>」に落ち着きました(→ <a href="#dispatch">経緯</a>)。</li>
+<li>借りる資源の集合が body の中身で決まる = <strong>型が body に依存するので、そもそも関数型を持てない</strong> という事情もあります。</li>
+</ul>
+<h3 id="borrow-lift"><a class="header" href="#borrow-lift">borrow-lift</a></h3>
+<p><code>dispatch</code> の型検査は、body が参照する <strong>自由な host 線形(<code>'1</code>)変数</strong> を走査して集め、host 側で「1 回消費 → 継続へ fresh に返す」borrow(consume-and-return)を行います。これが borrow-lift です。</p>
+<pre><code>let '1 out : Buffer(n, F32) = newBuffer(n);
+dispatch(i in (n, 1[U32], 1[U32])) {
+  store(out, i.0, f(u32ToF32(i.0)))     // out は自由な '1 変数 → 構文が borrow-lift
+};
+readback(n, out)                         // out は dispatch 後も生きている
+</code></pre>
+<ul>
+<li>host の QTT はカーネル内部の使用回数を数えません。借りた資源を境界で各 1 回消費するだけです。</li>
+<li><code>release(out); dispatch { store(out,…) }</code> のような use-after-free は、外側の <code>'1</code> 束縛検査(消費済みの変数を借りに行けない)が弾きます。</li>
+<li><code>'0</code>/<code>'ω</code> の自由変数(サイズ・関数)は単相化・コピーで GPU コードに焼き込まれます。</li>
+<li>構文なので closure 値が存在せず、カーネルは脱出も封印もしません。代償として「カーネルを値として持ち回る」ことはできません。</li>
+</ul>
+<h3 id="カーネル内の効果順序"><a class="header" href="#カーネル内の効果順序">カーネル内の効果順序</a></h3>
+<p>カーネル内の <code>store</code>/<code>load</code> は <code>[&amp;GPU]</code> 効果です。零幅の <code>GPU</code> token を <code>'1</code> で threading して順序をデータ依存として型に載せます(→ <a href="#効果系--借りて返す">効果系</a>)。ユーザは token を書かず <code>store(buf, i, x)</code> とだけ書き、elaboration が縫います。</p>
+<p>buffer 自体は <code>'ω</code>(並列読み書き自由)で、<strong>race は型で追いません</strong>。スレッド間競合の正しさ(atomic・書き込み先の重複回避)は compute-shader と同じくプログラマの責任です。</p>
+<blockquote>
+<p>かつては「カーネル内は QTT オフの命令的コードで、順序は素のプログラム順」という整理でしたが、これは「評価器が字面順を守ることに意味が依存する = 参照透過でない」ため撤回され、host IO と同型の token threading に統一されました(2026-06-12。→ <a href="#順序はプログラム順の撤回">経緯</a>)。</p>
+</blockquote>
+<h2 id="表現可能性"><a class="header" href="#表現可能性">表現可能性</a></h2>
+<p>GPU で走る断片に現れる型は「GPU でデータとして表現可能」でなければなりません。この検査は <code>dispatch</code> の境界(入出力 + borrow-lift される資源)と、kernel 本体の実行時 binder(λ 引数・<code>let</code>・<code>case</code> パターン・split)で課されます。実装上は型検査文脈の <code>in_kernel: bool</code> フラグ(dispatch body の検査中だけ立つ)が駆動します。</p>
+<ul>
+<li><strong>representable</strong>:スカラ(<code>F32</code>/<code>U32</code>/<code>U8</code>)、<code>Buffer(n, A)</code>(要素は storable)、Σ(struct。<code>Unit</code> は空 struct)、同型スカラのタプル(= ベクトル。下記)、有限 enum。</li>
+<li><strong>storable</strong>(buffer の要素にできる plain データ):スカラ・Σ・Unit のみ。<strong><code>Buffer</code> は不可</strong> ── 実 GPU 同様、buffer に buffer ハンドルを格納させません。これは美観ではなく soundness の要件です:カーネル内で <code>'1</code> 資源を別 buffer に store して host へ別名つきで返せば、線形資源が複製できてしまう ── この抜け道は敵対的レビューで実際に発見され、storable 制限で塞がれました(<code>tests/soundness.rs</code>)。</li>
+<li><strong>不可</strong>:<code>Nat</code>・<code>Vec</code>・関数型・<code>Type</code> など。<code>case</code> のパターンフィールドにも representable を課すので、<code>Nat</code>/<code>Vec</code> のような再帰型は <code>succ</code>/<code>vcons</code> のフィールド型で自動的に弾かれます(動的回数の再帰の排除)。</li>
+<li><strong>有限 enum</strong>(全 constructor が引数なし:<code>Bool</code>、<code>data Dir { east, west }</code> 等)は <code>u32</code> タグとして representable かつ storable です。<code>case</code> は WGSL の <code>switch</code>(Bool は <code>if/else</code>)に lower されます。引数つき sum(tag + payload)は未対応。</li>
+<li><code>'0</code> の消去値(サイズ・型)は自由に境界を越えられます。</li>
+</ul>
+<p>将来は binder ごとの検査を <code>Repr(A)</code> witness(「A は GPU-native な担体の retract」という証拠を instance として表明する)に置き換え、representability を「境界 + witness」へ寄せる構想があります。prelude には既に <code>nominal Repr (A : Type) = (Carrier : Type, into : A -&gt; Carrier, out : '0 …, coh : '0 …)</code> が置かれ、witnessed な inductive の fold が GPU の for ループに lower される縦串も実験済みです。</p>
+<h2 id="ベクトル型--同型スカラのタプルがそのまま-vecn"><a class="header" href="#ベクトル型--同型スカラのタプルがそのまま-vecn">ベクトル型 ── 同型スカラのタプルがそのまま vecN</a></h2>
+<p><code>F32²</code>/<code>F32³</code>/<code>F32⁴</code> は <strong>別の型ではありません</strong>。同型スカラの 2〜4 成分タプル <code>(F32, F32, …)</code> が、GPU lowering でそのままネイティブ <code>vecN&lt;f32&gt;</code> になります(U32 も同様)。</p>
+<ul>
+<li>構築はタプル <code>(a, b, c)</code>、成分アクセスは射影 <code>.0/.1/.2</code>(WGSL の <code>.x/.y/.z</code> に対応)。</li>
+<li>型位置の無名タプル <code>(F32, F32, F32)</code> は Σ 型に解釈されるので、<code>(x:F32, y:F32, z:F32)</code> と書かなくてもよい。色 <code>(r,g,b)</code> も自然に vec3 になります。</li>
+<li>演算はネイティブ WGSL に lower されます:<code>+ - *</code>(成分演算・instance 経由)、<code>dotF32xN</code>/<code>lengthF32xN</code>/<code>normalizeF32xN</code> など。これらは <code>src/builtins.rs::vec_builtins()</code> のレジストリに宣言的にまとまっています。</li>
+<li>CPU emulation は成分を分解して計算します(値の表現は普通のタプルのまま)。</li>
+<li><strong>std430 のアラインメント</strong>(vec3 のストライドが 16 バイト等)は「WGSL の都合」なので <code>gpu.rs</code> の buffer I/O だけに閉じ込め、コア型・runtime・言語には漏らしません。</li>
+</ul>
+<h3 id="narrow-型u8-と-u8⁴rgba8"><a class="header" href="#narrow-型u8-と-u8⁴rgba8">narrow 型:U8 と U8⁴(RGBA8)</a></h3>
+<p><code>U8</code> は整数バイト [0,255] の一級スカラです(算術・比較・変換つき。GPU に u8 は無いので u32 表現 + <code>&amp; 255u</code> マスク)。<code>U8⁴</code> = <code>(U8,U8,U8,U8)</code> は RGBA8 として <strong>1 個の u32 に bit パック</strong> されます(vec4&lt;u32&gt; の 16 バイトではなく 4 バイト)。PNG・テクスチャに native な形です。パックは GPU lowering と読み戻しのデコードだけで行い、CPU emulation は U8 タプルのまま扱います ── std430 と同じ「GPU の都合の局所化」です。正規化色 <code>UNorm8</code> は別の型として将来入れます。</p>
+<h2 id="数値-primitive-レジストリ"><a class="header" href="#数値-primitive-レジストリ">数値 primitive レジストリ</a></h2>
+<p>純スカラの数値 builtin(算術 <code>addF32</code>…<code>divU32</code>・変換 <code>u32ToF32</code> 等・比較 <code>ltF32</code> 等・math <code>sinF32</code>/<code>sqrtF32</code>/<code>clampF32</code> 等)は、<strong>単一の表 <code>src/builtins.rs::NUM_BUILTINS</code></strong> に「名前・引数型・戻り型・CPU 計算・WGSL 形」を宣言的に持ちます。prelude の postulate 型はこの表から自動生成され、NbE の畳み込み・CPU emulation・GPU lowering も同じ表を引きます。<strong>新しい数値 primitive の追加は表に 1 行</strong> で済みます(かつては 5 箇所の同期が必要でした)。</p>
+<p>CPU 計算は WGSL のセマンティクスに合わせます(<code>fract</code> = x−floor(x)、<code>log</code> = 自然対数)。超越関数は実 GPU と libm とで ULP 差がありうるため、GPU テストは許容誤差で比較します。</p>
+<h2 id="lowering-パイプライン"><a class="header" href="#lowering-パイプライン">lowering パイプライン</a></h2>
+<pre><code>表面構文 ── parse ──▶ surface AST ── elaborate ──▶ 型付き core Tm
+                                                      │
+                    ┌─────────────────────────────────┤
+                    ▼(CPU 経路)                       ▼(GPU 経路・dispatch body)
+              erasure('0 を消す)                lower(型主導)
+                    ▼                                  ▼
+              Rt(実行時 IR)                      KernelIR(一階・全式に型)
+                    ▼                                  ▼
+              tree-walking 実行                    WGSL テキスト
+             (CPU emulation)                          ▼
+                                                  wgpu(feature `gpu`)で実行
+</code></pre>
+<p>要点:</p>
+<ul>
+<li><strong>GPU lowering は無型の <code>Rt</code> からではなく、型付き elaborated <code>Tm</code> から行います</strong>。GPU は全式に型が要るためです(CPU emulation の <code>Rt</code> は無型・高階・構造的再帰ありで、GPU と性質が真逆)。</li>
+<li>shader になるのは <code>dispatch</code> の body だけで、host 部(<code>newBuffer</code>/<code>dispatch</code>/<code>readback</code> のオーケストレーション)は CPU 側ドライバに残ります。実 GPU 実行時、データは GPU 常駐 ── buffer は storage buffer として確保し、<code>readback</code> のときだけ CPU へ写します。</li>
+<li><strong>CPU emulation がリファレンス・オラクル</strong> です。同じプログラムを CPU 経路(依存ゼロ・既定)と GPU 経路(feature <code>gpu</code>)の両方で走らせ、同じ結果になることをテストが確認します。</li>
+<li>カーネル境界の inliner がヘルパ関数呼び出しを展開し、静的回数の <code>iterate</code> は(共有つきの)静的アンロールに落ちます。第一級関数は GPU に無いため、特殊化で消えます。</li>
+</ul>
+<h3 id="host-特殊化--値--関数gpu-はそれを実行するだけ"><a class="header" href="#host-特殊化--値--関数gpu-はそれを実行するだけ">host 特殊化 ── 「値 = 関数。GPU はそれを実行するだけ」</a></h3>
+<p>カーネルを関数でパラメタ化する汎用パターンが動きます(<code>examples/sound.ov</code>):</p>
+<pre><code>// n サンプルを GPU で並列レンダリング。f はコンパイル時に確定した closure で、
+// lowering 時にカーネルへ展開される(第一級関数は GPU に無い ── 特殊化で消える)
+render : (n : U32, f : F32 -&gt; F32) -&gt; Array(n, F32)
+  = λ(n, f) let '1 out : Buffer(n, F32) = newBuffer(n);
+            dispatch(i in (n, 1[U32], 1[U32])) {
+              store(out, i.0, f(u32ToF32(i.0) / 8.0))
+            };
+            readback(n, out);
+
+render(8[U32], λ(t) sinF32(t))
+</code></pre>
+<p><code>render</code> の関数引数 <code>f</code> は、inliner の host β 簡約(閉じた引数の適用をコンパイル時に展開)によってカーネルへ特殊化されます。「音も画像もアセットも、値 = 関数として書き、GPU はそれを実行するだけ」という言語の狙いの土台です。</p>
+<h3 id="共有を保つ-quote指数爆発の回避"><a class="header" href="#共有を保つ-quote指数爆発の回避">共有を保つ quote(指数爆発の回避)</a></h3>
+<p><code>escape(c) = (iterate(...)).cnt</code> のようにラッパ越しに反復を呼ぶと、GPU lowering の <code>quote(eval(…))</code> が NbE の共有 DAG を木に展開して指数爆発する(反復あたり13倍・30GB 到達)問題がありました。<code>nbe::quote_shared</code> ── eval の Rc-DAG を <code>let</code> 配列に平坦化し、GVN で共有を保ったまま quote する ── で解決済みです。showcase の 16 回反復マンデルブロが CPU/GPU 両経路で完走します。</p>
+<h3 id="caseforwitnessed-fold"><a class="header" href="#caseforwitnessed-fold">case→for(witnessed fold)</a></h3>
+<p><code>fromU32 : (n : U32) -&gt; Nat</code> は機械整数を「回数」に橋渡しします(論理的には <code>succ^n(zero)</code> だが、実行時は担体 u32 のまま)。これにより <code>iterate(fromU32(n), f, init)</code> の <code>case</code>(fold)が <strong>for ループ</strong> に lower されます ── 「functional を for に翻訳する」対象の最初の実例です。どの u32 も Nat なので全域です。</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="表面言語--構文と糖衣"><a class="header" href="#表面言語--構文と糖衣">表面言語 ── 構文と糖衣</a></h1>
+<p>この章は Oven の書き方(文法)と、それが何に展開されるか(desugar)をまとめます。方針は一貫しています:</p>
+<blockquote>
+<p><strong>すべての糖衣は、剥がすと必ず素の Π・Σ・multiplicity になる。糖衣のために新しい意味論を足さない。</strong></p>
+</blockquote>
+<h2 id="字句"><a class="header" href="#字句">字句</a></h2>
+<pre><code>// 行コメント
+/* ブロックコメント */
+</code></pre>
+<p><code>--</code> はコメントに使いません(<code>+--+</code> のような演算子の並びと衝突するため)。Unicode 記法を歓迎します(<code>λ</code>・<code>→</code>・<code>'ω</code>・<code>⟦⟧</code>・<code>Σ</code> など)。ASCII 代替も常にあります(<code>\</code>・<code>-&gt;</code>・<code>[[w]]</code>)。VSCode 拡張は <code>\name</code> + Space での Unicode 入力を提供します(<code>\lam</code>→λ、<code>\to</code>→→、<code>\ih</code>→⟦⟧ など)。</p>
+<p>既知の字句の罠:<code>]]</code> は <code>⟦⟧</code> の ASCII 代替 <code>[[w]]</code> の閉じと、入れ子の <code>[</code> の閉じが衝突します。当面はスペースで回避します。</p>
+<h2 id="テレスコープimplicit--と-explicit-"><a class="header" href="#テレスコープimplicit--と-explicit-">テレスコープ:implicit <code>[...]</code> と explicit <code>(...)</code></a></h2>
+<p>関数の型は「先頭に implicit テレスコープ <code>[...]</code> を 1 つ(省略可)、続いて explicit テレスコープ <code>(...)</code>、`→ 結果」:</p>
+<pre><code>map : [A : '0 Type, B : '0 Type] (n : Nat, f : A → B, xs : Array(n, A)) → Array(n, B)
+</code></pre>
+<p>テレスコープ項目の文法:</p>
+<pre><code>'p A          // 無名・multiplicity p
+x : 'p A      // 名前付き
+x y : '1 A    // 複数の名前を同時宣言
+A → B         // 単一の無名 explicit 引数は括弧を省ける
+</code></pre>
+<ul>
+<li><code>'</code> の有無が曖昧性を解消します:<code>(p x : A)</code> は「p と x の 2 宣言」、<code>('p x : A)</code> は「x を量 p で」。</li>
+<li><strong>implicit 節は先頭に 1 つだけ</strong>。implicit は implicit にしか依存できません。だから証明義務は implicit に隠さず explicit に書きます:<code>safeIndex : [A : '0 Type] (n : Nat, xs : …, i : Nat, p : '0 Lt(i, n)) → A</code>。</li>
+<li>implicit 群もカリー化されています(<code>[A, B]</code> ≡ <code>[A][B]</code>)。各 implicit は独立したメタ変数として 1 つずつ解決されます。</li>
+</ul>
+<h2 id="適用"><a class="header" href="#適用">適用</a></h2>
+<pre><code>f(x, y)          // tight。全面 curried なので = 並置 f x y = (f x) y
+f x y            // 並置でも同じ
+f((x, y))        // タプル (x, y) を 1 個渡す(f が Σ を取るとき)── f(x, y) とは別物
+f (x, y)         // 注意:( の前の空白で loose = タプル適用。tight が curried
+map[A, _](n, …)  // _ で一部の implicit だけ推論
+map[A, ..](…)    // .. で後ろの implicit を一括推論
+</code></pre>
+<p>tight(空白なし)と loose(空白あり)で意味が変わる点は、この言語の構文で最も注意が要る箇所です。</p>
+<p>型位置では:矢印の前の <code>(x:A, y:B)</code> はテレスコープ(= curried 引数列)、単独なら Σ 型。値の <code>(a, b)</code> はタプル。「型構築」と「値構築」が文法上分離しているので <code>Σ</code> キーワードは不要です。</p>
+<h2 id="ラムダ"><a class="header" href="#ラムダ">ラムダ</a></h2>
+<pre><code>λ(i) body               // 括弧必須。\ でも λ でもよい
+λ(x, y) body            // テレスコープを束縛するので複数引数可(curried)
+λ[A : '0 Type](x) body  // implicit テレスコープも書ける
+λ[&amp;World](s) body       // [&amp;X] = threaded capability の宣言(効果系の章)
+</code></pre>
+<h2 id="リテラル--型の指標を持つ"><a class="header" href="#リテラル--型の指標を持つ">リテラル ── 型の指標を持つ</a></h2>
+<p>リテラルは期待型から解決されます:</p>
+<pre><code>0            // 期待型が Nat なら zero、F32 なら 0.0、Mult なら multiplicity 0
+0[Nat]  1.5[F32]  5[U32]   // 型を明示(この [T] は implicit 適用と同じ記法)
+2 : Fin(5)   // Fin リテラル(2 番目の Fin 値に解決)
+</code></pre>
+<p>期待型が無い文脈(注釈なしの <code>let x = 5</code>)では注釈必須です ──「その場で勝手に既定の型を決める ad-hoc な動作は認めない」という方針によります。elaboration は <code>Tm::Lit</code> を期待型から具体形(Mult の <code>0</code>/<code>1</code>、Nat の <code>succ^n zero</code>、機械スカラ)へ解決し、以降の評価は解決済みの core 項を使います。</p>
+<h2 id="ブロック定義構文module"><a class="header" href="#ブロック定義構文module">ブロック・定義構文・module</a></h2>
+<pre><code>{
+  x = f(a);                    // 値束縛(let は省略可)
+  g(y : Nat) : Nat = y * y;    // 局所関数定義(= g = λ(y) y*y)
+  let '1 out = newBuffer(n);   // graded let(mult は名前の前)
+  release(buf);                // 出力のない文。; は「結果を drop して継続」
+  g(x)                         // 末尾の ; 無し式 = ブロックの値
+}
+</code></pre>
+<ul>
+<li><strong>定義構文</strong>:<code>name [params] [: T] = body ;</code> を入れ子 <code>let</code> へ脱糖します。パラメータは LHS に 1 回だけ書き、<code>f[A](x : A) : R = body</code> は <code>f : [A](x : A) → R = λ[A](x) body</code> 相当。<code>: T</code> 省略時は body から推論。explicit パラメータ群は tight <code>(</code> のみ(λ 本体が括弧で始まる場合と区別するため)。</li>
+<li><strong><code>;</code> の drop 規則</strong>:<code>()</code> は自明に drop 可。線形値を <code>;</code> なしで放置したり、暗黙に drop するのはエラーです(非 Unit の drop には将来 <code>Consumable</code> 能力が要る設計)。</li>
+<li><strong>名前付きレコード構築</strong>:<code>(f = e, g = e)</code> は値から型を推論し、書かれた名前を Σ 型に乗せます。<code>r.f</code>(名前射影)と <code>r.0</code>(位置射影)は一致します。</li>
+</ul>
+<p><strong>module は「params を取り名前付きレコードを返す関数」への糖衣</strong> です。専用機構はありません:</p>
+<pre><code>module Vec3 (n : U32) {
+  zero : U32 = 0[U32];
+  scale (s : U32, v : U32) : U32 = mulU32(s, v);   // 兄弟 zero も参照できる(内部は nested let)
+}
+Vec3(3[U32]).scale(2[U32], 5[U32])   // = 10
+</code></pre>
+<p>params は省略可能で、その場合は素のレコード値になり <code>M.field</code> で直接アクセスします。<code>open</code>(無修飾取り込み)は未実装です。</p>
+<h2 id="演算子と-instance"><a class="header" href="#演算子と-instance">演算子と instance</a></h2>
+<p>typeclass は「Σ レコードを implicit 引数で渡す」だけで、専用機構はありません。演算子は <strong>mixfix 宣言</strong>(Agda 流に <code>_</code> を引数位置に置く)+ fixity 宣言で、<strong>演算子は一切特別扱いされません</strong>:<code>a op b</code> → <code>_op_(a, b)</code> へ脱糖され、<code>_op_</code> は instance(辞書)で解決されます。</p>
+<pre><code>infixl 6 _+_                // 中置・左結合・優先順位 6
+infixl 7 _*_
+prefix 9 ~_                 // 前置。`~ x` → `~_(x)`
+
+// クラスは nominal(名目的型)。中身は二項演算の型そのもので、値は演算関数そのまま(wrapper なし)
+nominal Mul (A : Type) = (x : A, y : A) → A
+_*_[A : '0 Type, d : Mul(A)](x : A, y : A) : A = d(x, y)
+
+// instance は implicit 宣言したものだけが暗黙解決の対象(グローバル探索ではない)
+implicit mulF32d : Mul(F32) = mulF32
+
+// パラメトリック instance(前提辞書 da/db を使う)── Haskell の instance Eq a =&gt; Eq [a] 相当
+implicit eqPair [A B : Type, da : Eq(A), db : Eq(B)] : Eq((a : A, b : B))
+  = λ(p, q) da(p.0, q.0) &amp;&amp; db(p.1, q.1);
+</code></pre>
+<h3 id="instance-解決の仕組み"><a class="header" href="#instance-解決の仕組み">instance 解決の仕組み</a></h3>
+<p>本質は「<strong>implicit 引数 = メタ変数。それが曖昧性なく埋まりさえすればよい</strong>」です:</p>
+<ul>
+<li>メタの埋め方は 2 つ:(i) 単一化で構造的に決まる(型パラメータ)、(ii) 文脈の <code>implicit</code> 印つき束縛から <strong>型一致で一意に</strong> 拾う(辞書)。複数一致は曖昧エラー(coherence)。</li>
+<li><strong>on-demand 解決</strong>:メタの型が ground になった時点で解決を試みます。連想型の戻り値(<code>d.Out</code>)が辞書 <code>d</code> の解決後に射影簡約で解ける ── 遅延一括では原理的に無理な形です。</li>
+<li><strong>パラメトリック instance</strong>:プール値が Π 型なら fresh メタを当てて結果型を単一化し、前提辞書を再帰的に解決します(自己参照の無限ループは深さガードで防止)。</li>
+<li><strong>制約引数は自動 instance</strong>:nominal 型を持つ束縛(<code>[d : Mul(A)]</code> の仮引数等)は自動的に解決プールに入ります。よって総称関数の中で演算子をそのまま書けます:</li>
+</ul>
+<pre><code>square [A : Type, d : Mul(A)] (x : A) : A = x * x;   // d(x, x) の明示適用は不要
+</code></pre>
+<ul>
+<li><code>implicit foo;</code> は既存の(非 implicit)束縛を以後の instance プールへ追加します(再エクスポート)。ブロック局所でも効きます。</li>
+<li>どう埋めたかは解決トレースで内省できます。</li>
+</ul>
+<h3 id="クラスが-nominal-である理由"><a class="header" href="#クラスが-nominal-である理由">クラスが nominal である理由</a></h3>
+<p>構造的な Σ レコードでクラスを表すと、同形のクラス(<code>Add(F32)</code> と <code>Mul(F32)</code> ── 中身はどちらも <code>(F32,F32)→F32</code>)が structural conversion で同一視され、instance 解決が曖昧になります。<code>nominal</code> は conversion でだけ不透明で、構築・適用・射影には透明(値は素の演算関数)── 解決の一意性のためだけの最小の名目性です。</p>
+<h3 id="結果型を-ahomogeneousにする理由"><a class="header" href="#結果型を-ahomogeneousにする理由">結果型を A(homogeneous)にする理由</a></h3>
+<p><code>_*_</code> の結果を連想型 <code>d.Out</code> にすると、リテラル被演算子(<code>2.0 * 3.0</code>)で型パラメータ A が ground にならず、instance 解決がデッドロックします(被演算子の型が未確定で、結果型も A を固定しない)。結果を <code>A</code> にすれば期待型が A を直接解き、リテラルも辞書も解けます。heterogeneous な連想型版は被演算子の型が確定している場面でのみ使う、という整理です。</p>
+<h3 id="ambient-prelude"><a class="header" href="#ambient-prelude">ambient prelude</a></h3>
+<p>演算子 <code>_+_</code>/<code>_-_</code>/<code>_*_</code>/<code>_/_</code>/<code>_⊔_</code>・クラス <code>Add</code>/<code>Sub</code>/<code>Mul</code>/<code>Div</code>/<code>Lub</code>・Mult の instance は <strong>全プログラムのスコープに常在</strong> します(処理系がユーザソースの前に prepend)。<code>1 + 1</code> が <code>ω</code> に評価されるのも、この ambient instance の解決結果です。</p>
+<h2 id="データ宣言分解の書き方"><a class="header" href="#データ宣言分解の書き方">データ宣言・分解の書き方</a></h2>
+<pre><code>data Name [implicit params] (explicit params) : (indices) → Type {
+  ctor : &lt;GADT スタイルの完全な型&gt;,
+}
+
+case[P](v) { ctor1(xs…) =&gt; body1, ctor2(ys…) =&gt; body2 }
+</code></pre>
+<ul>
+<li>motive <code>[P]</code> は省略可(非依存なら期待型から)。全 constructor をちょうど 1 つずつ書きます(ワイルドカードは未実装)。</li>
+<li>本体では <code>⟦w⟧</code>(帰納仮説)を再帰パターン変数にだけ適用できます。→ <a href="#反復は-case-のみ--帰納仮説の括弧-">コア型理論</a></li>
+</ul>
+<h2 id="借用の書き方"><a class="header" href="#借用の書き方">借用の書き方</a></h2>
+<pre><code>// 型:&amp; は型の頭(multiplicity と同じ位置)
+set : [A : Type] [n : '0 U32] (&amp;Array(n, A), i : U32, x : A) -&gt; Unit
+
+// 呼び出し:値側も &amp; を付ける。以降の a は更新後を指す(同名へ再束縛)
+set(&amp;a, 2[U32], 7[U32]);
+
+// ユーザ定義の借用関数(借用群は最後・名前付き・: R 必須)
+incAt (a : &amp;Array(n, U32), i : U32) : Unit = {
+  let v = get(&amp;a, i);
+  set(&amp;a, i, v + 1[U32]);
+}
+</code></pre>
+<p>脱糖規則(確定分):</p>
+<ul>
+<li>入力は表面の順のまま(<code>&amp;T</code> → <code>'1 T</code> にするだけ)。<strong>出力だけ</strong> threaded を出現順に先頭へ集め、本来の結果を最後に 1 つ:<code>(A, &amp;B) → (C, D)</code> ⟿ <code>(A, '1 B) → ('1 B, (C, D))</code>。</li>
+<li>destructure 側は常に threaded 先頭:<code>f(a, &amp;b)</code> ⟿ <code>let (b, c) = f(a, b)</code>。</li>
+<li><code>&amp;</code> を書けるのは「任意の Π 型の、入力側の直接のテレスコープ」だけ。データのフィールドや <code>Array(n, &amp;B)</code> のような入れ子には書けません(<code>&amp;</code> は「この関数がこの引数を consume-and-return する」という関数の印なので)。</li>
+<li>1 つの文に効果ある部分式は 1 つまで(順序は <code>;</code>/<code>let</code> だけが作る)。</li>
+</ul>
+<p>効果 <code>[&amp;X]</code> の書き方・意味は<a href="#効果系--借りて返す">効果系の章</a>を参照してください。</p>
+<h2 id="未確定の構文"><a class="header" href="#未確定の構文">未確定の構文</a></h2>
+<ul>
+<li>メソッド形 / UFCS <code>x.f(y)</code> ≡ <code>f(x, y)</code> の解決規則(swizzle・フィールド・メソッドの判別、優先順位)。</li>
+<li><code>case[&amp;IO](x){…}</code>(motive へ capability を自動で編む人間向け糖衣)── foundation に触れないので deferred。</li>
+<li>1 要素の <code>(e)</code> を grouping とするか 1-tuple とするか等のパーサ細部。</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="珍しい機能カタログ"><a class="header" href="#珍しい機能カタログ">珍しい機能カタログ</a></h1>
+<p>Oven には、他の言語ではあまり見ない機能や設計判断が多くあります。この章はそのカタログですが、単なる一覧ではなく、<strong>それぞれについて「なぜこういう選択をしたのか」を語る</strong> ことを目的にします。多くの項目は「もっと普通の選択肢」がまずあって、それが何かの理由で採れなかった、という物語を持っています。仕様としての正確な定義は各リンク先の章にあり、ここでは動機と、実装がどうそれを支えているかを書きます。</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>項目</th><th>一言でいうと</th></tr>
+</thead>
+<tbody>
+<tr><td><a href="#w--帰納仮説を書くための括弧"><code>⟦w⟧</code></a></td><td>停止性検査なしで全域性が構文から出る再帰</td></tr>
+<tr><td><a href="#case-の使用量規則--なぜ--一本ではだめだったか"><code>case</code> の 2 群 SUM 規則</a></td><td>線形資源を fold に通すための独自の合流規則</td></tr>
+<tr><td><a href="#第一級-multiplicity--1--1-が-ω-になるのも-instance">第一級 multiplicity</a></td><td><code>1 + 1 = ω</code> すら専用構文でない</td></tr>
+<tr><td><a href="#trustme--消去される公理という脱出ハッチ"><code>trustMe</code></a></td><td>悪用が自然に防がれる証明の脱出ハッチ</td></tr>
+<tr><td><a href="#モナドなしの効果--なぜ-token-threading-なのか">零幅 token の効果系</a></td><td>モナドなしで IO と GPU 命令順を統一</td></tr>
+<tr><td><a href="#辞書と-token-が同じ規則で解決される">resolution の統一</a></td><td>typeclass 辞書と効果 token は同じ機構の 2 つの顔</td></tr>
+<tr><td><a href="#escape-防止に専用機構がない">escape 防止機構がない</a></td><td>lifetime なしで資源が漏れない</td></tr>
+<tr><td><a href="#部分借用は-rust-の-borrow-ではなく-lens">lens としての部分借用</a></td><td>エイリアス解析なしの <code>&amp;r.field</code></td></tr>
+<tr><td><a href="#dispatch-はなぜ関数ではないのか"><code>dispatch</code> = 構文</a></td><td>関数型を持てないから構文、という必然</td></tr>
+<tr><td><a href="#ベクトル型が無い-タプルがそのまま-vecn">ベクトル型が「無い」</a></td><td><code>(F32,F32,F32)</code> がそのまま <code>vec3&lt;f32&gt;</code></td></tr>
+<tr><td><a href="#u8⁴--rgba8-を-u32-1-個にパックする">U8⁴ = u32 パック</a></td><td>RGBA8 を専用型なしで 4 バイトに</td></tr>
+<tr><td><a href="#buffer-に-buffer-を格納できない--soundness-の穴を塞いだ話">buffer-in-buffer 禁止</a></td><td>敵対的レビューで見つけた線形性の抜け道</td></tr>
+<tr><td><a href="#表現不能はその場でローカルにエラー">表現不能はローカルエラー</a></td><td>2LTT の亡霊が診断品質として生き残った</td></tr>
+<tr><td><a href="#cpu-emulation-が-gpu-のオラクル">CPU emulation = オラクル</a></td><td>依存ゼロの実行経路が GPU の正しさの基準</td></tr>
+<tr><td><a href="#演算子が全部ただの-instance">演算子が全部 instance</a></td><td><code>*</code> に組み込みの意味がない</td></tr>
+<tr><td><a href="#nominal--名目性だけを足した最小の-newtype">nominal</a></td><td>conversion でだけ不透明な newtype</td></tr>
+<tr><td><a href="#module--レコードを返すただの関数">module = 関数</a></td><td>functor 相当が機構ゼロで出る</td></tr>
+<tr><td><a href="#tightloose--空白が意味を持つ適用">tight/loose 適用</a></td><td>空白の有無で curried とタプルを両立</td></tr>
+<tr><td><a href="#リテラルは型の指標--既定型を持たない">リテラルの型指標</a></td><td><code>0</code> に既定の型がない</td></tr>
+<tr><td><a href="#assert-の引数が-1-である理由"><code>'1</code> を取る <code>assert</code></a></td><td>QTT ならではの API 設計</td></tr>
+<tr><td><a href="#bool-も-nat-も処理系にハードコードされていない">prelude が Oven ソース</a></td><td><code>Bool</code> すら処理系に焼き込まれていない</td></tr>
+<tr><td><a href="#quote_shared--30gb-のメモリ爆発から生まれた-quote"><code>quote_shared</code></a></td><td>30GB のメモリ爆発から生まれた共有保持 quote</td></tr>
+<tr><td><a href="#fromu32--機械整数から回数への全域な橋"><code>fromU32</code></a></td><td>機械整数から「回数」への全域な橋</td></tr>
+</tbody>
+</table>
+</div>
+<hr>
+<h2 id="型理論まわり"><a class="header" href="#型理論まわり">型理論まわり</a></h2>
+<h3 id="w--帰納仮説を書くための括弧"><a class="header" href="#w--帰納仮説を書くための括弧"><code>⟦w⟧</code> ── 帰納仮説を書くための括弧</a></h3>
+<p>Oven の再帰は、<code>case</code> の branch 内で <code>⟦w⟧</code>(ASCII では <code>[[w]]</code>)と書きます。「部分構造 <code>w</code> に対するこの <code>case</code> 自身の結果」── 数学の帰納法でいう帰納仮説です。</p>
+<pre><code>case[λ(k) Nat](n) { zero =&gt; m,  succ(k) =&gt; succ(⟦k⟧) }   // n + m
+</code></pre>
+<p><strong>なぜこの形か。</strong> 全域言語で再帰を書く方法は、大きく 2 つ知られています。ひとつは生の eliminator(<code>Nat-elim</code> のような畳み込み関数)で、安全性は自明ですが、実際に書くと motive やメソッドの受け渡しが煩雑で、人間が日常的に書く形ではありません。もうひとつは Idris や Agda のように一般再帰を許して <strong>停止性検査器</strong> を後付けする方法で、書き味は自然ですが、検査器そのものが複雑な機構になり、「なぜこのプログラムは全域なのか」の根拠が構文から見えなくなります。</p>
+<p><code>⟦⟧</code> はその中間を狙った選択です。<code>⟦w⟧</code> は <strong>その branch の再帰パターン変数にしか適用できない</strong> ── この構文制約ひとつで、書けるのは構造的再帰だけになり、<strong>全域性が構文的に自明</strong> になります。停止性検査器は存在しません。意味論としては生の eliminator と等価(安全性はそのまま)でありながら、見た目は「branch の中で再帰結果を参照する」という直観的な形です。denotation bracket(意味論の <code>⟦⟧</code>)を借りた記法で、「これは項ではなく『意味』を参照している」というニュアンスも込められています。</p>
+<p><strong>実装に踏み込むと</strong>、core の項は <code>Tm::Ih(idx, w)</code> で、<code>idx</code> は「どの recursor に属する帰納仮説か」を指す recursor スタックへの index です。この index は当初存在せず、「<code>⟦⟧</code> は最内の <code>case</code> のもの」と暗黙に決めていたのですが、それでは壊れるケースが見つかりました:再帰関数の <strong>値</strong> を quote(正規形へ書き戻し)すると、別の再帰が入れ子に展開されることがあります。たとえば <code>mult</code>(乗算)が本体で <code>plus</code>(加算)を呼ぶと、quote の途中で <code>plus</code> の recursor が <code>mult</code> の recursor の内側に現れ、「最内」の指す先がずれて <code>quote∘eval</code> が恒等でなくなる(実際に無限展開しました)。<code>⟦⟧</code> を正しい recursor に固定する index を持たせることで解決しています。「束縛の参照は名前でも『最内』でもなく、de Bruijn 的に数えろ」という教訓が、変数だけでなく帰納仮説にも当てはまった、という話です。</p>
+<p>→ 定義は<a href="#反復は-case-のみ--帰納仮説の括弧-">コア型理論</a></p>
+<h3 id="case-の使用量規則--なぜ--一本ではだめだったか"><a class="header" href="#case-の使用量規則--なぜ--一本ではだめだったか"><code>case</code> の使用量規則 ── なぜ <code>⊔</code> 一本ではだめだったか</a></h3>
+<p>QTT の言語で分岐の使用量を合流させる標準的な方法は「各枝の使用量の上限 <code>⊔</code> を取る」です。実行時に通る枝は一つなので、これで健全です。Oven も最初、<code>case</code> の全 branch をこの一つの <code>⊔</code> プールで測っていました。</p>
+<p>これには <strong>穴ではなく、逆向きの問題</strong> がありました:正しいプログラムを弾いてしまうのです。線形資源 <code>s0 : '1 S</code> を fold の初期値に入れ、帰納仮説で threading するループ(<code>iterateEff</code>)を考えると、<code>zero</code> 枝は <code>s0</code> を 1 回使い、<code>succ</code> 枝は 0 回使います。これを <code>⊔</code> すると <code>⊔(1,0) = ω</code> ── 線形資源が ω に化けて、完全に正当な線形ループが型検査を通りません。</p>
+<p>原因を突き詰めると、「分岐」と「fold」では枝の関係が違うことに行き着きます。<strong>分岐の枝は排他的ですが、fold の基底と step は両方走ります</strong>。両方走るものの使用量は <code>⊔</code>(どちらか)ではなく SUM(合計)で測るべきです。そこで branch を <code>⟦⟧</code> を使うか否かで 2 群に分け:</p>
+<pre><code>Δ(case) = π_scrut·Δ_scrut + ⊔(⟦⟧ 無しの branch) + ω·⊔(⟦⟧ ありの branch)
+</code></pre>
+<p>再帰群に <code>ω</code> を掛けるのは、step が動的な回数走るためです。これで「線形資源は帰納仮説を通せば fold を生き延び、closure に capture したら弾かれる」という、望んだ通りの挙動が規則から出ます。</p>
+<p>面白いのは Idris 2 との対比です。Idris 2 は一般再帰 + 停止性検査の言語なので、再帰呼び出しはただの関数適用 1 回と数えられ、この問題自体が発生しません(線形 fold が素直に書けます)。Oven は「反復を <code>case</code> の構造的再帰に限定する」選択をした <strong>代償として</strong> この群分け規則を持ちますが、SUM 規則によって表現力は Idris の線形 fold と等価になっています。設計の選択が別の場所に請求書を回してくる、その請求書をきちんと払った例です。</p>
+<p><strong>実装では</strong> <code>typecheck.rs</code> の <code>combine_case</code> がこの式そのものです。実装上の注意がひとつコメントに残っています:<code>⊔</code> には単位元がありません(<code>⊔(0,1) = ω</code> なので、ゼロから <code>⊔</code> を始めると壊れる)。だから各群は「最初の branch の使用量で初期化し、2 個目以降を <code>⊔</code>」します。また <code>⟦⟧</code> の有無の判定(<code>uses_ih</code>)は入れ子の <code>case</code> の branch には降りません ── そこの <code>⟦⟧</code> は内側の <code>case</code> に属するからです。</p>
+<p>→ 規則の全体は <a href="#case-の使用量規則">QTT</a></p>
+<h3 id="第一級-multiplicity--1--1-が-ω-になるのも-instance"><a class="header" href="#第一級-multiplicity--1--1-が-ω-になるのも-instance">第一級 multiplicity ── <code>1 + 1</code> が <code>ω</code> になるのも instance</a></h3>
+<p>多くの QTT 実装で multiplicity は型の注釈に住む特別な存在です。Oven では <code>Mult : Type</code> ── multiplicity は普通の値であり、<code>'p</code> の p に変数も式も書けます。</p>
+<p><strong>なぜ第一級にしたか。</strong> 直接の動機は multiplicity 多相です。たとえば <code>map</code> は、純粋なデータ(<code>'ω</code>)にも線形な資源の列(<code>'1</code>)にも使いたい。multiplicity が言語の外の注釈だと、この多相のために別の量化機構が要ります。<code>Mult</code> がただの型なら、mult 多相はただの依存量化 <code>(p : Mult, x : 'p A) → A</code> になり、<strong>新しい機構がゼロ</strong> で済みます。半環が 3 値で有限なので、多相関数の検査も原理的には全 valuation の列挙で決定可能 ── 「特別な solver が要るのでは」という当初の心配は、有限性を活かせば杞憂だと分かりました。</p>
+<p>そして第一級にした以上、半環演算 <code>+</code>/<code>·</code>/<code>⊔</code> も言語の中の演算です。ここで Oven らしい徹底が入ります:<code>1 + 1</code> と書いたときの <code>+</code> は、<strong>パーサにも型検査器にも特別扱いされていません</strong>。ambient prelude の <code>Add(Mult)</code> instance(中身は組み込みの <code>addMult</code>)が、F32 の加算と全く同じ経路 ── mixfix 脱糖 → instance 解決 ── で選ばれ、NbE が半環を畳んで <code>ω</code> になります。「乗法 <code>*</code> を特別扱いせず、multiplicity の半環すら instance で賄う」は明示的な設計方針でした。動機は一貫性です:<code>*</code> が文脈によって「言語の一部」だったり「ライブラリ」だったりする言語は、ユーザに 2 つのルールを覚えさせます。Oven はルールを 1 つにしました。</p>
+<p><strong>実装では</strong> core に <code>MultT</code>/<code>M0</code>/<code>M1</code>/<code>MW</code> と演算ノード <code>MAdd</code>/<code>MMul</code>/<code>MJoin</code> があり、NbE の iota が畳みます。multiplicity は <strong>型構造の一部として conversion で比較される</strong> ため、<code>'(1+1) A ≡ 'ω A</code> が定義の等しさとして成立します。一方、使用量(どの変数を何回使ったか)は conversion に一切効きません ── 「量は型の形には出るが、計算には出ない」という分離が保たれています。</p>
+<p>→ <a href="#半環と順序">QTT</a>・<a href="#演算子と-instance">表面言語</a></p>
+<h3 id="trustme--消去される公理という脱出ハッチ"><a class="header" href="#trustme--消去される公理という脱出ハッチ"><code>trustMe</code> ── 消去される公理という脱出ハッチ</a></h3>
+<pre><code>postulate trustMe : [A : '0 Type] (u : Unit) -&gt; A
+</code></pre>
+<p>任意の型 A の値を出す公理です。当然、論理としてはこれ一つで崩壊します。それでも置いてあるのは、<strong>証明義務を「あとで」にできる言語のほうが実用で生き残る</strong> からです。たとえば並列 <code>reduce</code> は演算の結合性に正しさが依存するので、結合性の証明 <code>'0 Assoc(op)</code> を引数に取る設計です。しかし「reduce を使うたびに結合性を証明せよ」では誰も使いません。<code>trustMe()</code> で埋めて先へ進み、必要になったら本物の証明に差し替える ── 証明の負債を型に見える形で残しながら、開発は止めない、という運用です。</p>
+<p>この公理が壊れにくいのには理由があります。使ってよい場所が <strong><code>'0</code>(消去)位置</strong> ── 実行時に値が要らない証明の位置 ── である限り、<code>trustMe</code> の値は erasure で消え、実行時コストも実行時の嘘もゼロです。逆に値が本当に要る位置で使うと、<code>trustMe</code> には計算規則がないので評価が stuck して(GPU なら lowering エラーとして)すぐ露見します。「証明位置では安全に嘘をつけて、値位置では嘘がつけない」という性質が、機構なしで公理の悪用を防いでいます。<code>Type : Type</code> の不健全性を承知で採用した言語なので、「証明の健全性は絶対」ではなく「証明は実用上の不変条件チェック」という割り切りとも整合しています。</p>
+<p>→ <a href="#inductive-でないものpostulate">コア型理論</a></p>
+<hr>
+<h2 id="効果まわり"><a class="header" href="#効果まわり">効果まわり</a></h2>
+<h3 id="モナドなしの効果--なぜ-token-threading-なのか"><a class="header" href="#モナドなしの効果--なぜ-token-threading-なのか">モナドなしの効果 ── なぜ token threading なのか</a></h3>
+<p>Haskell 系の純粋言語で効果といえばモナドです。Oven はモナドを持たず、効果を「零幅の token を線形に借りて返す」で表します:</p>
+<pre><code>[&amp;X] A  ≝  '1 X → (X, A)
+</code></pre>
+<p><strong>なぜモナドでないか。</strong> 第一に、Oven には QTT が <strong>すでに</strong> あります。線形性は「資源を一度だけ正しく使う」ことを型で言える機構で、これは効果の順序づけそのものです。モナドを足すと、順序づけの機構が 2 つ(bind の入れ子と線形性)になり、しかも GPU カーネルへ lowering する際に高階の bind 構造を解体する仕事が増えます。<code>[&amp;X] A</code> の実体はただの Π と Σ なので、<strong>効果のための意味論は core にゼロ</strong> ── 実行系も lowering も効果を知りません。</p>
+<p>第二に、この形は <strong>host と GPU を同型に扱えます</strong>。<code>print</code> は <code>World</code> token を、<code>store</code> は <code>GPU</code> token を借りて返す ── 同じ形です。実は GPU 側には一度「カーネル内は 1 スレッドが上から順に実行する命令的コードなのだから、順序は素のプログラム順でよい(linearity 不要)」という整理が存在しました。これは撤回されます。「評価器が字面の順序を守ること」に意味が依存するなら、eval・inline・正規化で順序が動き得る ── つまり <strong>関数の純粋性(参照透過性)を売り渡している</strong>。純粋性のために <code>[&amp;X]</code> を導入したのに、GPU だけ例外にしては本末転倒だ、という理屈です(→ <a href="#順序はプログラム順の撤回">経緯</a>)。結果として「効果の順序はすべて token のデータ依存で表す。零幅 token なら実行時コストはゼロ」に統一されました。</p>
+<p>第三に、モナドが得意とする「効果の抽象化・合成」の大部分が、この設計ではただの機能の組み合わせで出ます。State も Writer も IO も「<code>[&amp;X]</code> の X が違うだけ」。効果多相は <code>[&amp;E]</code>(E は型変数)というただの依存量化。複数効果は <code>[&amp;X, &amp;Y]</code>。monad transformer に相当する階層は最初から存在しません。</p>
+<p><strong>実装では</strong> core に <code>Tm::Eff(caps, A)</code> という former があり、eval で <code>'1 X → (X, A)</code> に unfold されます。おもしろいのは、シグネチャの宣言型では <strong>Eff のまま保たれる</strong>(eval されない)ことです。elaboration は「この呼び出しは効果か」を、callee の宣言型の codomain が構文的に <code>Eff</code> かどうかで検出します ── unfold してしまうと素の Π と区別が付かなくなるからです。効果と判定された文は、token を implicit で注入し、返る <code>(X, A)</code> を <code>Split</code>(Σ の分解束縛)で開いて token を差し替える、という形に脱糖されます。ユーザが <code>store(out, i, x); let v = load(in, i)</code> と書くだけで、この配管がすべて暗黙に縫われます。</p>
+<p>→ <a href="#効果系--借りて返す">効果系</a></p>
+<h3 id="辞書と-token-が同じ規則で解決される"><a class="header" href="#辞書と-token-が同じ規則で解決される">辞書と token が同じ規則で解決される</a></h3>
+<p>typeclass の辞書(<code>Mul(F32)</code> の instance)と効果 token(<code>'1 World</code>)は、見た目も役割も全然違いますが、Oven では <strong>同じ一つの解決規則</strong> で埋まります:「implicit/borrow 引数の解決とは、wanted 型に合う『使用可能な束縛』を文脈から見つけて usage を消費すること」。</p>
+<p>これは美観のための統一ではなく、差分がすべて <strong>既存の概念から導出される</strong> ことに気づいた結果です。辞書は <code>'ω</code> なので何度でも引ける、token は <code>'1</code> なので一度で消費される ── これは multiplicity の差にすぎません。辞書は型がまだメタ変数を含むことがあるので遅延解決、token は型が常に ground(<code>World</code>/<code>GPU</code>)なので即時解決 ── これも「型が ground か」という条件から機械的に決まります。つまり「instance 解決」と「効果 token の供給」を別のサブシステムにする理由が、調べてみたら何もなかった。</p>
+<p>この統一の配当は handler の実装時に現れました。ユーザ効果の discharge(handler が効果ブロックに初期状態を供給する)を実装しようとしたら、<strong>新しい機構が何も要らなかった</strong> のです。<code>implicit w0 : X = init</code> と書けば、既存の instance 解決が <code>[&amp;X]</code> ブロックの token を型で拾って供給します。「効果 handler の土台は、typeclass の instance 解決そのものだった」というのは、設計時には意図していなかった収穫です。</p>
+<p>→ <a href="#resolution-の統一--ω-辞書と-linear-token-は同じ規則">効果系</a></p>
+<h3 id="escape-防止に専用機構がない"><a class="header" href="#escape-防止に専用機構がない">escape 防止に専用機構がない</a></h3>
+<p>線形な token や借用した資源が closure に隠れて生き延びる ── 効果系の設計で必ず塞ぐべき穴です。Rust はこれを lifetime で、多くの効果系は handler のスコープ規則で塞ぎます。Oven には <strong>escape を防ぐための規則が存在しません</strong>。それでも漏れないことが、closure の 2 規則から演繹できます:</p>
+<ol>
+<li>closure は <code>'1</code> を capture できない(capture は <code>'ω</code> のみ)</li>
+<li><code>'1</code> 引数の部分適用ができない</li>
+</ol>
+<p>token を閉包に入れる経路が (1) で、<code>let k = print(io)</code> のように部分適用で握る経路が (2) で塞がれ、複製は <code>'1</code> の 2 回使用として、握り潰しは「返り型 <code>(X, …)</code> を満たせない」として、いずれも既存の QTT 検査に引っかかります。よって token は 1 本の線形スレッドに閉じ、必ず caller に返ります。</p>
+<p>重要なのは、この 2 規則が escape のために <strong>導入されたのではない</strong> ことです。これらは「関数型を <code>A → B</code> 一種類にする」ために(FnMut を捨てる過程で)確定した規則で、escape 防止はその副産物でした。逆にいえば、「closure に借用を capture させたい」という要求を一度でも受け入れると、region や effect row のような重い機構が芋づるで必要になる ── 実際に設計はその 2 つを作りかけて捨てています(→ <a href="#effect-row">経緯</a>)。「借用は capture させず引数で渡す」という一つの原則を守り抜くと、escape 問題ごと消滅する、というのがこの言語で最も気持ちのよい定理のひとつです。</p>
+<p>→ <a href="#escape-は-2-規則から閉じる">効果系</a></p>
+<h3 id="部分借用は-rust-の-borrow-ではなく-lens"><a class="header" href="#部分借用は-rust-の-borrow-ではなく-lens">部分借用は Rust の borrow ではなく lens</a></h3>
+<p><code>set(&amp;arr.field, …)</code> のようにレコードの一部だけ借りたい、という要求は自然です。Rust はこれを部分借用(disjoint borrows)で解きますが、その裏には「<code>&amp;mut r.a</code> と <code>&amp;mut r.b</code> は重ならない」を追跡するエイリアス解析と lifetime があります。</p>
+<p>Oven の答えは <strong>Haskell の lens</strong> です。<code>&amp;r.a</code> は「<code>r</code> を消費して、焦点 <code>a</code> と『埋め戻し関数』を返す」に脱糖されます:</p>
+<pre><code>Lens(S, A) = (s : '1 S) → ('1 A, ('1 A) → S)
+</code></pre>
+<p>get で分解し、焦点を関数に通し、putback で再構成して元の名前に再束縛する ── 全過程が純粋な関数適用です。エイリアスという概念自体が現れないので、解析も lifetime も要りません。「Oven の <code>&amp;</code> はそもそも参照ではなく consume-and-return の糖衣である」という一貫した見立てが、部分借用まで素直に延長された形です。lens は合成できるので <code>&amp;r.a.b</code> も 2 つの lens の合成で済みます。制約はひとつ:lens が構造的に導出できる path(フィールド・配列要素)に限られ、<code>&amp;(任意の式)</code> は書けません。</p>
+<p>→ <a href="#部分借用-rfield--lens">効果系</a>(設計確定・脱糖は未実装)</p>
+<hr>
+<h2 id="gpu-まわり"><a class="header" href="#gpu-まわり">GPU まわり</a></h2>
+<h3 id="dispatch-はなぜ関数ではないのか"><a class="header" href="#dispatch-はなぜ関数ではないのか"><code>dispatch</code> はなぜ関数ではないのか</a></h3>
+<p>GPU カーネルの起動 <code>dispatch(i in size){ body }</code> は、Oven で数少ない「本物の構文」です。関数でも eliminator でもありません。ここには長い回り道があります(→ <a href="#dispatch">経緯</a>)。</p>
+<p>カーネルは任意個のバッファ(<code>'1</code> 資源)に触りたい。最初の案は「触る資源を全部レコードに束ねて引数で渡す」(explicit-R)で、これは <strong>正しく動きます</strong>。しかし手で束ねるのは冗長で、「ふつうに closure として <code>out</code> や <code>in</code> を capture して書きたい」という書き味の要求がありました。ところが capture を許すと、<code>'1</code> 資源が closure の環境に取り込まれて <strong>封印</strong> されます ── 使い終わっても返ってこない。これを救うために region システム(バッファを region 所有にして時間 token を threading する)まで検討されましたが、複雑さが過剰で撤回。</p>
+<p>最終的な洞察は「<strong>capture は書く。でも closure 値を作らなければ封印は起きない</strong>」でした。<code>dispatch</code> を構文にすれば、body はその場にインラインで書かれるだけで、関数値として存在しません。値にならないものは脱出も封印もしない。body が参照する自由な <code>'1</code> 変数は、構文が <strong>borrow-lift</strong> ── 消費して継続に返す ── します。外から見れば「借りて、走らせて、返した」だけです。</p>
+<p>もうひとつ、構文であることには消極的でない理由があります。borrow-lift する資源の集合は body の中身(どの自由変数を使うか)で決まります。つまり <strong>dispatch の「型」が body に依存する</strong> ── これはもはや関数型で書けません。関数にできないから構文にした、という必然です。</p>
+<p><strong>実装では</strong> core に <code>Tm::Dispatch(size, body, borrows, elem_tys, cont)</code> という 5 つ組のノードがあります。<code>borrows</code> は elaboration が body を kernel モードで型検査したときに集めた自由 <code>'1</code> 変数のリスト。継続 <code>cont</code> は「借用が返ってきた後」の世界なので、<code>redirect_cont</code> が de Bruijn index の付け替え(借用された変数への参照を fresh な binder へ張り替え、他の外側参照をシフトする)を行います。線形性の帳簿はこの refresh を通して繋がるので、<code>release(out); dispatch { store(out, …) }</code> のような use-after-free は普通の <code>'1</code> 検査として弾かれます。</p>
+<p>→ <a href="#dispatch--関数ではなく構文">GPU 実行</a></p>
+<h3 id="ベクトル型が無い-タプルがそのまま-vecn"><a class="header" href="#ベクトル型が無い-タプルがそのまま-vecn">ベクトル型が「無い」── タプルがそのまま vecN</a></h3>
+<p>GPU 言語には必ず <code>vec3&lt;f32&gt;</code> があります。Oven に「ベクトル型」という新しい型はありません。<code>F32³</code> は <strong>ただのタプル <code>(F32, F32, F32)</code> の表記</strong> で、GPU lowering がこれをネイティブ vec3 にします。</p>
+<p><strong>なぜ型を足さなかったか。</strong> 新しい型を core に足すと、影響は型検査だけでは済みません。conversion の規則、NbE の値表現、runtime の値、pretty-printer、パーサ ── 言語のすべての層に「vec という新概念」が波及します。一方、よく見ると vecN は「同型スカラの 2〜4 成分の組」であり、<strong>Σ 型として既に表現できる構造</strong> です。だったら「同型スカラのタプルは GPU lowering で vecN になる」という <em>解釈</em> を lowering に置くだけでよい ── 言語の意味論には何も足さない。構築はタプル構文、成分アクセスは既存の射影 <code>.0/.1/.2</code>(WGSL の <code>.x/.y/.z</code> に対応)、色 <code>(r,g,b)</code> を作れば自然に vec3 です。CPU emulation は成分を分解して計算するだけで、値表現の変更もありません。</p>
+<p>この設計のもうひとつの柱は <strong>「WGSL の都合を言語に漏らさない」</strong> です。GPU の std430 レイアウトでは vec3 のストライドが 16 バイトになる等、メモリ上の姿には GPU 固有の事情があります。これをコア型や runtime に持ち込むと、「タプル = vec」という綺麗な同一視が壊れます。そこでアラインメントの処理は <code>gpu.rs</code> の buffer I/O(実 GPU との境界)だけに閉じ込めました。言語から見える意味論は常に「ただのタプル」です。</p>
+<p>ベクトル演算(<code>+</code>・dot・length・normalize)は <code>src/builtins.rs::vec_builtins()</code> のレジストリに宣言的に並んでいて、それぞれ CPU の成分計算と WGSL のネイティブ呼び出し(<code>dot()</code>/<code>length()</code>/<code>normalize()</code>)の両方を持ちます。演算の追加はレジストリのループに 1 行です。</p>
+<p>→ <a href="#ベクトル型--同型スカラのタプルがそのまま-vecn">GPU 実行</a></p>
+<h3 id="u8⁴--rgba8-を-u32-1-個にパックする"><a class="header" href="#u8⁴--rgba8-を-u32-1-個にパックする">U8⁴ ── RGBA8 を u32 1 個にパックする</a></h3>
+<p>画像の 1 画素は RGBA 各 8 bit、合計 32 bit というのが標準です。Oven では <code>U8⁴</code> = <code>(U8, U8, U8, U8)</code> がこれに当たり、GPU 上では <strong>1 個の u32 に bit パック</strong> されます。</p>
+<p>背景には 2 つの決定があります。まず <code>U8</code> を一級のスカラ型として立てたこと。「色は F32 を 255 倍すればいい」でも動きますが、PNG やテクスチャの native な形式は整数バイトであり、正規化色(<code>UNorm8</code>)と整数バイト(<code>U8</code>)は <strong>意味の違う別の型</strong> だ、という判断がありました(<code>UNorm8</code> は将来の別型)。GPU には u8 スカラが無いので、実行上は u32 で担いで算術に <code>&amp; 255u</code> のマスクを入れます。</p>
+<p>次にパッキング。ベクトルの一般則に従えば <code>U8⁴</code> は <code>vec4&lt;u32&gt;</code> = 16 バイトになりますが、RGBA8 の意義は 4 バイトに詰まっていることです。そこで lowering に <code>GTy::PackedU8(n)</code> という表現を持たせ、構築は bit シフト、射影は bit 抽出、読み戻しは unpack にしました。ここでも「GPU の都合の局所化」が守られています:パックは GPU lowering と readback のデコードだけで行い、<strong>CPU emulation は U8 のタプルのまま</strong> 計算します。言語の意味論はどちらの経路でも同一で、メモリ上の姿だけが違う、という分離です。</p>
+<p>実装の細部にひとつ教訓が残っています。値が「自分は U8 だ」と知っている必要があったこと(<code>Scalar::U8</code> という担体の区別)。u32 で担いだまま型情報を落とすと、lowering が <code>(U8,U8,U8,U8)</code> を見ても <code>vec4&lt;u32&gt;</code>(16 バイト)と区別できず、誤判定します。消去と単相化の言語でも、リテラルの「幅」は値に自己記述させる必要がありました。</p>
+<p>→ <a href="#narrow-型u8-と-u8⁴rgba8">GPU 実行</a></p>
+<h3 id="buffer-に-buffer-を格納できない--soundness-の穴を塞いだ話"><a class="header" href="#buffer-に-buffer-を格納できない--soundness-の穴を塞いだ話">buffer に buffer を格納できない ── soundness の穴を塞いだ話</a></h3>
+<p>「buffer の要素にできる型(storable)」からは <code>Buffer</code> 自身が除外されています。これは好みの制限ではなく、<strong>線形性の健全性がこの一点に掛かっていた</strong> ことが分かったためです。</p>
+<p>発見の経緯が示唆的です。dispatch の設計(「境界は線形な借用・内部は race 非検査」)が本当に健全か、敵対的にレビューしたときに、具体的な攻撃が見つかりました:カーネル内(当時の整理では線形性の検査が無い)で <code>'1</code> の buffer ハンドルを <strong>別の buffer に store し</strong>、borrow-lift で host へ返すと、host は同じ資源を指す名前を 2 つ持つことになる ── 線形資源の複製です。複製できれば二重解放も use-after-free も型を通ります。</p>
+<p>塞ぎ方は「storable をスカラと Σ に限定し、<code>Buffer</code> を弾く」。これが救いのある解だったのは、<strong>実 GPU の制約と一致していた</strong> からです。実際の GPU でも storage buffer に buffer ハンドルは格納できません(ポインタが無い世界です)。つまりこの制限は表現力を何も失っておらず、「GPU が物理的に許さないことを型でも許さない」だけでした。回帰テストは <code>tests/soundness.rs</code> に残っています。</p>
+<p>「境界の線形規律さえ守れば内部は自由」という dispatch の設計思想は、この修正で「境界を <strong>迂回する経路が無いこと</strong> も検査対象」に補強されました。同種の穴が他にないかは、<a href="#未解決不安疑い続けるところ">未解決</a>として今も監視対象です。</p>
+<p>→ <a href="#表現可能性">GPU 実行</a></p>
+<h3 id="表現不能はその場でローカルにエラー"><a class="header" href="#表現不能はその場でローカルにエラー">表現不能は「その場でローカルにエラー」</a></h3>
+<p>GPU に載らないもの(<code>Nat</code>、関数値、動的サイズのデータ)がカーネルに紛れたとき、Oven は lowering の失敗ではなく <strong>型検査の時点で、違反した binder の場所に</strong> エラーを出します。</p>
+<p>これは当初、<code>'GPU</code> modality(型に付く「GPU で走る」という印)の売りとして導入された性質です。「とりあえずコンパイルしてみて、最後に GPU に載らなかったらエラー」という方式は、エラーが lowering の内部表現の言葉で、しかも問題の根源から遠い場所に出ます。型の印で層を分ければ、「まさに違反した構文の場所」でローカルに報告できる ── 2LTT の「GPU 断片の隔離」という発想の、実用上いちばん嬉しい配当がこの診断品質でした。</p>
+<p>その後 <code>'GPU</code> modality 自体は全廃されます(印の意味が「表現可能性の強制」だけに痩せ、純コードに印を書かせるのは使える場所を減らすだけになったため)。しかし診断のローカル性は残りました。現在の実装は、型検査文脈の <code>in_kernel: bool</code> フラグ(dispatch body の検査中だけ立つ)が、実行時 binder(λ 引数・<code>let</code>・<code>case</code> パターン・split)の型に representable 検査を課す形です。modality という重い機構が bool 1 個に縮約されてなお、ユーザから見える価値(その場でエラー)は変わらない ── 機構と価値が別物であることの好例です。</p>
+<p>再帰型の弾かれ方も綺麗です。<code>Nat</code> を名指しで禁止するルールはなく、<code>case</code> のパターンフィールドに representable を課すと、<code>succ</code> のフィールド型 <code>Nat</code> が再帰的に検査されて自動的に弾かれます。一方、全 constructor が引数なしの有限 enum(<code>Bool</code> や <code>data Dir { east, west }</code>)は同じ検査を通り、u32 タグとして GPU に載ります(<code>sig::is_finite_enum</code>)。当初は「enum も手動で U32 エンコードせよ」でしたが、タグ化は機械的なのでコンパイラが引き受けました。</p>
+<p>→ <a href="#表現可能性">GPU 実行</a></p>
+<h3 id="cpu-emulation-が-gpu-のオラクル"><a class="header" href="#cpu-emulation-が-gpu-のオラクル">CPU emulation が GPU のオラクル</a></h3>
+<p>Oven のプログラムは 2 つの経路で実行できます。既定の CPU emulation(依存ゼロ・tree-walking)と、feature <code>gpu</code> の実 GPU 実行(wgpu)です。両者は独立の実装で、テストは両経路の結果一致を検証します。</p>
+<p><strong>なぜ 2 経路を維持するのか。</strong> GPU 実行は本質的に検証しづらいからです。結果はドライバ・GPU 世代・浮動小数の実装に依存し、失敗はシェーダコンパイルエラーや黙った誤答として現れます。「言語の意味論として正しい答え」を GPU 自身に語らせることはできません。そこで、<strong>言語の全機能が動く、依存ゼロで決定的な実行系を先に作り、それを正とする</strong> 方針が採られました(M0 の目標が「GPU より先に CPU で画像を計算する」だったのはこのためです)。GPU バックエンドを書く仕事は「オラクルと同じ答えを出すこと」という明確なゴールを持つ機械的な作業になります。</p>
+<p>実装上、2 経路は消費する中間表現からして違います。CPU 経路は erasure 後の <strong>無型</strong> の実行時 IR <code>Rt</code>(高階 OK・構造的再帰 OK)を tree-walking し、GPU 経路は <strong>型付き</strong> の core <code>Tm</code> から一階の <code>KernelIR</code> へ lower します(GPU は全式に型が要るため)。性質が真逆の 2 つの消費者を同じ core から派生させていて、共有しているのは数値プリミティブの意味(<code>NUM_BUILTINS</code> の同じ表を両者が引く)だけです。CPU 側の数値計算は意図的に WGSL のセマンティクスに合わせてあり(<code>fract</code> = x−floor(x)、<code>log</code> = 自然対数)、それでも避けられない超越関数の ULP 差だけをテストの許容誤差が吸収します。</p>
+<p>→ <a href="#処理系の内部">処理系の内部</a>・<a href="#lowering-パイプライン">GPU 実行</a></p>
+<hr>
+<h2 id="表面言語まわり"><a class="header" href="#表面言語まわり">表面言語まわり</a></h2>
+<h3 id="演算子が全部ただの-instance"><a class="header" href="#演算子が全部ただの-instance">演算子が全部「ただの instance」</a></h3>
+<p><code>a * b</code> は <code>_*_(a, b)</code> に脱糖され、<code>_*_</code> は「<code>Mul(A)</code> の辞書 <code>d</code> を implicit で取り、<code>d(x, y)</code> を呼ぶだけの普通の関数」です。パーサが知っているのは fixity 宣言(<code>infixl 7 _*_</code>)だけで、<code>*</code> の意味はスコープ内の instance が決めます。</p>
+<p>動機は徹底した一貫性です。演算子に組み込みの意味を持たせると、「組み込みの <code>*</code>」と「ユーザの演算子」の 2 種類のルールができ、さらに「Mult の <code>*</code> は型検査の一部、F32 の <code>*</code> はライブラリ」のような層の混在が生じます。Oven はここを 1 つに潰しました:<strong>乗法 <code>*</code> は Mult でも F32 でも「ただの instance」</strong>。multiplicity の半環演算すら特別な構文を持ちません(→ <a href="#第一級-multiplicity--1--1-が-ω-になるのも-instance">第一級 multiplicity</a>)。</p>
+<p>この一般化を成立させるために解いた実際的な問題が 2 つ記録に残っています。ひとつは <strong>リテラルとのデッドロック</strong>。<code>2.0 * 3.0</code> の型検査では、被演算子はリテラルで型が未確定、instance も未解決 ── クラスの結果型を連想型(<code>d.Out</code>)にすると、型パラメータ A を確定させる手がかりがどこにも無く、推論が膠着します。そこで標準の演算子クラスは結果型を A(homogeneous)にしました。期待型(<code>F32</code> が欲しい文脈)が A を直に解き、リテラルも辞書も連鎖的に解けます。もうひとつは <strong>総称関数内の演算子</strong>。<code>square [A, d : Mul(A)] (x : A) = x * x</code> の本体で <code>*</code> を使うには、仮引数 <code>d</code> が instance プールに入っている必要があります。ここは「nominal 型を持つ束縛は自動的に instance になる」という規則(<code>pool_if_nominal</code>)で解決され、Agda の instance 引数に相当するものが「クラス = nominal 型」から自然に出ました。</p>
+<p>lexer にも一点だけ支えがあります。記号の連なり(<code>+ - * &lt; &gt; …</code>)を 1 つの Op トークンにまとめ、<code>_op_</code>/<code>op_</code> を通常の識別子として組み立てる ── 演算子そのものを定義・参照できるのはこのためです。</p>
+<p>→ <a href="#演算子と-instance">表面言語</a></p>
+<h3 id="nominal--名目性だけを足した最小の-newtype"><a class="header" href="#nominal--名目性だけを足した最小の-newtype">nominal ── 名目性だけを足した最小の newtype</a></h3>
+<p>typeclass のクラス本体は <code>nominal</code> 型です:</p>
+<pre><code>nominal Add (A : Type) = (x : A, y : A) -&gt; A
+nominal Mul (A : Type) = (x : A, y : A) -&gt; A
+</code></pre>
+<p><code>Add(F32)</code> と <code>Mul(F32)</code> の中身はどちらも <code>(F32, F32) → F32</code> で、構造的には同じ型です。Oven の conversion は構造的なので、素の Σ でクラスを表すと <strong>加算の instance が乗算の解決候補になってしまう</strong> ── instance 解決は型一致で辞書を拾うので、同形クラスの共存が即座に曖昧エラーになります。これが nominal を導入した理由の全てです。名前で型を区別する(名目的な)壁を、この一箇所のためだけに立てました。</p>
+<p>面白いのは透明性の設計です。普通の newtype(Haskell の <code>newtype</code>、Rust のタプル構造体)は構築と分解にラッパの出し入れが要ります。Oven の nominal は <strong>conversion でだけ不透明で、それ以外には完全に透明</strong> です:<code>d : Mul(A)</code> はラップなしの素の関数値で、<code>d(x, y)</code> と直接呼べます。実装では <code>typecheck.rs</code> の <code>peel_nominal</code> が「構築・除去(適用・射影)のときだけ body へ展開し、conversion では決して展開しない」という片側だけの unfold を行います。「instance 解決が曖昧にならない」という一点のためにどれだけ小さい機構で済むか、を突き詰めた結果が「conv だけ見えない壁」でした。</p>
+<p>なお、初期実装ではタグ付きレコードで区別する ad-hoc な方法を使っていて、後に nominal 型として原理的に整理し直した経緯があります。「動くけれど原理から出ていない解を、原理のある形に置き直す」という、この開発で繰り返されるパターンのひとつです。</p>
+<p>→ <a href="#クラスが-nominal-である理由">表面言語</a></p>
+<h3 id="module--レコードを返すただの関数"><a class="header" href="#module--レコードを返すただの関数">module ── レコードを返すただの関数</a></h3>
+<pre><code>module Vec3 (n : U32) {
+  zero : U32 = 0[U32];
+  scale (s : U32, v : U32) : U32 = mulU32(s, v);
+}
+Vec3(3[U32]).scale(2[U32], 5[U32])
+</code></pre>
+<p>ML 系言語のパラメータ付きモジュール(functor)に見えますが、専用機構は存在しません。<code>module M (params) { … }</code> は <code>let M = λ(params) let f = …; let g = …; (f = f, g = g)</code> ── <strong>引数を取って名前付きレコードを返す関数</strong> への純粋な糖衣です。</p>
+<p>これが可能なのは、言語の 2 つの基礎的な選択の配当です。第一に <code>Type : Type</code>:型がただの値なので、レコードのフィールドに型を入れられ、モジュールが型を輸出することも(必要なら)普通の依存 Σ で書けます。第二に Σ backbone:「名前付きの束」という概念がレコードとして既にあり、モジュールのために新しい名前空間機構を作る理由がありません。内部が nested let なので後の定義が前の定義を参照できる(共有される)ことも、糖衣の展開形から自明に出ます。</p>
+<p>「モジュールシステム」は言語設計の中でも際立って重くなりがちな部分(ML の functor・シグネチャ・sealing はそれ自体が研究分野です)ですが、依存型があるとその大部分が「関数とレコード」に還元される ── Oven はその教科書的な事実を、実際に専用機構ゼロで実装した形です。<code>open</code>(無修飾の取り込み)だけは構文の仕事なので、将来の課題として残っています。</p>
+<p>→ <a href="#ブロック定義構文module">表面言語</a></p>
+<h3 id="tightloose--空白が意味を持つ適用"><a class="header" href="#tightloose--空白が意味を持つ適用">tight/loose ── 空白が意味を持つ適用</a></h3>
+<p><code>f(x, y)</code> と <code>f (x, y)</code> は違う意味です。前者(tight:<code>f</code> と <code>(</code> が密着)は curried 適用 <code>(f x) y</code>、後者(loose:空白あり)はタプル <code>(x, y)</code> を 1 個渡す適用です。</p>
+<p>空白に意味を持たせるのはリスクのある選択で、それでも採ったのには経緯があります。Oven の適用は当初、引数テレスコープを Σ として一括で渡す方式(Σ-domain)でした。Σ backbone の思想には合うのですが、implicit 推論と衝突します:型パラメータ <code>A</code> と辞書 <code>d</code> を 1 つの Σ に束ねると、単一化が「テレスコープの Σ」と「辞書そのものの Σ 型」を構造的に区別できず、instance 解決が壊れました。それで適用は全面 curried へ移行(このとき実装が 146 行減っています)。しかし「関数がタプルを受け取る」形は依然として正当な型なので、curried 適用とタプル適用の <strong>両方を書き分ける記法</strong> が必要になり、tight/loose の区別に落ち着きました。</p>
+<p>つまりこれは美観の選択ではなく、「curried(推論に必要)とタプル(Σ backbone に必要)の両立」という制約の解です。<code>f(a, b)</code> = <code>f a b</code> = 並置、と教われば規則自体は単純ですが、<code>f (x, y)</code> の空白 1 個が意味を変えることには慣れが要ります。設計もそれは自覚していて、パーサ詳細の未確定項目として記録されています。</p>
+<p>→ <a href="#適用">表面言語</a></p>
+<h3 id="リテラルは型の指標--既定型を持たない"><a class="header" href="#リテラルは型の指標--既定型を持たない">リテラルは型の指標 ── 既定型を持たない</a></h3>
+<p><code>0</code> は文脈によって <code>Nat</code> の <code>zero</code>、<code>F32</code> の <code>0.0</code>、<code>Mult</code> の <code>'0</code> になります。期待型がリテラルを解決し、期待型が無い場所(注釈なしの <code>let x = 5</code>)では <strong>エラー</strong> です(<code>5[Nat]</code> のように注釈します)。</p>
+<p>多くの言語はここで既定型を持ちます(Haskell の defaulting、Rust の <code>i32</code> フォールバック)。Oven がそれを拒否したのは、「その場で勝手に既定の型を決める」のが ad-hoc だから、という明確な方針によります。defaulting は「なぜ i32 なのか」に原理的な答えがなく、しかも推論の他の部分と相互作用して驚きを生みます(Haskell の defaulting 規則の複雑さは有名です)。書き手に 1 つ注釈を要求するほうが、暗黙の規則を 1 つ覚えさせるより安い、という判断です。</p>
+<p>実装として面白いのは、<code>Tm::Lit</code> が <strong>「elaboration で消える契約」の項</strong> であることです。パーサは <code>0</code> を <code>Lit</code> のまま core に入れ、型検査が期待型を見て <code>M0</code> や <code>succ^n zero</code> や機械スカラ <code>Scalar</code> へ置き換えます。解決後の木に <code>Lit</code> は残らず、万一 eval や erasure に届いたら panic で契約違反が顕在化します。名前付き射影 <code>ProjN</code>(<code>r.field</code> ── 型を見ないと位置に解決できない)も同じ「型検査で消える surface 項」で、「parse の時点では決められないものは、専用ノードで型検査まで運ぶ」という一貫したパターンになっています。</p>
+<p>→ <a href="#リテラル--型の指標を持つ">表面言語</a></p>
+<h3 id="assert-の引数が-1-である理由"><a class="header" href="#assert-の引数が-1-である理由"><code>assert</code> の引数が <code>'1</code> である理由</a></h3>
+<pre><code>postulate assert : (b : '1 Bool) -&gt; [&amp;World] Unit
+</code></pre>
+<p><code>Bool</code> を「1 回だけ使う」と宣言する意味はあるのか、と一見不思議な型です。これは QTT の適用規則から来る、実際的な設計です。</p>
+<p>適用 <code>f(a)</code> の使用量は「引数式 <code>a</code> の使用量 × binder の multiplicity」で計算されます。もし <code>assert</code> の引数が <code>'ω</code> だと、引数式の中で使われた資源の使用量が <strong>ω 倍</strong> されます。テストの典型形 <code>assert(eqArray(readback(a), readback(b)))</code> では、引数式が線形 buffer <code>a</code>, <code>b</code> を消費(readback)しています。ω 倍されると「線形資源を ω 回使った」ことになり、完全に正当なこのコードが線形性違反で弾かれてしまう。引数を <code>'1</code> にすれば使用量は 1 倍のまま通ります。</p>
+<p>この型が入る前、自己検証テストは複数の条件を <code>and</code> で束ねた 1 つの式にしていて、まさにこのスケーリング問題に踏んでいました(<code>and : (Bool, Bool) → Bool</code> の引数が <code>'ω</code> で、線形 readback が弾かれる)。<code>assert</code> を効果つき・<code>'1</code> 引数の文として導入したことで解消しています。「引数の multiplicity は『callee が何回使うか』だけでなく『引数式に何を書けるか』を決める」という、QTT の言語に固有の API 設計の一面です。</p>
+<p>→ <a href="#効果-former-x">効果系</a></p>
+<hr>
+<h2 id="実装まわり"><a class="header" href="#実装まわり">実装まわり</a></h2>
+<h3 id="bool-も-nat-も処理系にハードコードされていない"><a class="header" href="#bool-も-nat-も処理系にハードコードされていない"><code>Bool</code> も <code>Nat</code> も処理系にハードコードされていない</a></h3>
+<p><code>Bool</code>/<code>Nat</code>/<code>Fin</code>/<code>Vec</code>/<code>Id</code> は、処理系の Rust コードに焼き込まれた特別な型ではなく、<code>std/prelude.ov</code> に <strong>Oven の <code>data</code> 宣言として</strong> 書かれています。処理系は起動時にこのファイル(<code>include_str!</code> で埋め込み)をパースしてシグネチャを作ります。<code>Buffer</code> や <code>store</code> のような真のプリミティブも同様に <code>postulate</code> 宣言としてこのファイルにあります。</p>
+<p>こうなったのは初めからではありません。M0 の当初方針は逆で、「inductive の一般機構は作らない。組み込み型と eliminator をプリミティブ表に焼き込む」でした。転換の直接の理由は QTT です:型ごとの eliminator は、型ごとに使用量の合流規則(どの引数が <code>'0</code>/<code>'ρ</code>/<code>'π</code> か)を手で持つことを意味し、これが誤りの温床になりました(実際に旧規則には線形 fold を弾く穴があった)。<code>data</code> 宣言から constructor・<code>case</code>・iota・QTT 合流を <strong>一般規則で導出</strong> するほうが、規則が 1 つで済み、しかも検証も 1 回で済みます。</p>
+<p>一般機構ができれば、組み込み型を特別扱いする理由は消えます。prelude を Oven ソースにしたのはその帰結で、副産物として言語の dogfooding(<code>data</code>/<code>postulate</code>/<code>nominal</code> 宣言・借用記法・効果 former が、処理系の起動のたびに実データでパースされる)にもなっています。数値プリミティブはさらに一段自動化されていて、<code>postulate addF32 : …</code> のような宣言は prelude にすら書かれず、<code>src/builtins.rs::NUM_BUILTINS</code> の表(名前・型・CPU 計算・WGSL 形)から自動生成されます。数値関数の追加は表 1 行です。</p>
+<p>→ <a href="#処理系の内部">処理系の内部</a></p>
+<h3 id="quote_shared--30gb-のメモリ爆発から生まれた-quote"><a class="header" href="#quote_shared--30gb-のメモリ爆発から生まれた-quote"><code>quote_shared</code> ── 30GB のメモリ爆発から生まれた quote</a></h3>
+<p>NbE の quote(値を項に書き戻す操作)は、素朴には値の木構造を辿ります。しかし eval が作る値は <code>Rc</code> で共有された <strong>DAG</strong> です。共有を無視して辿ると、DAG は木に展開されます ── 指数爆発の古典的な形です。</p>
+<p>これが実際に火を噴いたのが showcase(マンデルブロ)でした。<code>escape(c) = (iterate(16, …)).cnt</code> のように反復をラッパ関数越しに呼ぶと、GPU lowering のインライン展開が <code>quote(eval(…))</code> を通り、共有されていた反復の中間状態が反復ごとに複製されます。計測では 1 反復あたり項サイズ 13 倍、16 反復でメモリ 30GB に達して完走しませんでした。普通のプログラムがコンパイルできないのは言語として致命的です。</p>
+<p>解決が <code>nbe::quote_shared</code> です。通常の quote と違い、eval の Rc-DAG を辿りながら <strong>同一ノード(ポインタ等価)を検出して <code>let</code> 束縛の列に平坦化</strong> し、2 回目以降の出現を変数参照にします(GVN:同じ計算に同じ名前を与える)。出力は「<code>let</code> の連鎖 + 本体」という形の項で、共有が構文上の共有(<code>let</code>)として保存されます。健全性の注意点として、分岐の下で評価された値をどこまで持ち上げてよいかがあり、branch 評価のキャッシュで扱っています。この修正で showcase は CPU/GPU 両経路とも完走し、回帰テスト(反復カーネルの項サイズが爆発しないこと)が置かれました。</p>
+<p>「正規化は正しいがサイズが爆発する」は依存型処理系の定番の罠で、Oven の場合は GPU lowering(全展開が避けられない)がそれを増幅しました。「意味論の正しさ(quote∘eval = id)と計算量の正しさ(共有の保存)は別の要件」という教訓の実物です。</p>
+<p>→ <a href="#共有を保つ-quote指数爆発の回避">GPU 実行</a></p>
+<h3 id="fromu32--機械整数から回数への全域な橋"><a class="header" href="#fromu32--機械整数から回数への全域な橋"><code>fromU32</code> ── 機械整数から「回数」への全域な橋</a></h3>
+<pre><code>postulate fromU32 : (n : U32) -&gt; Nat
+</code></pre>
+<p>型理論の <code>Nat</code> は <code>succ(succ(…zero))</code> という unary 表現で、「n 回繰り返す」という <strong>概念</strong> の担い手です。しかし実行時に unary の数を持つのは O(n) の無駄で、GPU では論外です。一方、実行時の数は機械整数 <code>U32</code> で持ちたいが、<code>U32</code> は不透明なスカラで帰納構造(= <code>case</code> で回す能力)を持ちません。この 2 つを繋ぐのが <code>fromU32</code> です。</p>
+<p>注目すべきは <strong>全域である</strong> ことです。逆方向(<code>Nat → U32</code>)は 2³² を超える Nat で破綻するため有界性の証明が要りますが、こちらの方向は「どの u32 も Nat である」── 論理的には <code>fromU32(n) = succ^n(zero)</code> と定義でき、部分性がありません。証明義務ゼロで機械整数を「回数」として使えます。</p>
+<p>実装では <code>fromU32(n)</code> の結果は unary に展開されず、<strong>担体の u32 をそのまま持ちます</strong>。そして <code>iterate(fromU32(n), f, init)</code> のような fold(<code>case</code>)を、runtime と GPU lowering が <strong>for ループ</strong> として実行します。つまり「論理的な意味は unary Nat の構造的再帰、実行時の姿は機械整数のカウンタループ」という二重写しです。これは将来構想(<a href="#表現可能性">表現可能性</a>の <code>Repr</code> witness ──「帰納型に GPU-native な担体への埋め込みを与えると、その fold が for に翻訳される」)の最初の具体例でもあり、「functional なプログラムを imperative なループに翻訳する」という言語全体の野心の縮図になっています。</p>
+<p>→ <a href="#caseforwitnessed-fold">GPU 実行</a></p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="他言語との比較--現代の言語の中での立ち位置"><a class="header" href="#他言語との比較--現代の言語の中での立ち位置">他言語との比較 ── 現代の言語の中での立ち位置</a></h1>
+<p>Oven は 3 つの伝統の交差点に立っています:<strong>依存型・証明支援系の伝統</strong>(MLTT・Agda・Idris)、<strong>資源を型で数える伝統</strong>(線形論理・Rust・Clean)、そして <strong>GPU で配列を計算する伝統</strong>(Futhark・Dex・シェーダ言語)。それぞれの伝統には成熟した言語がいますが、この 3 つを同時に踏んでいる言語はほとんどありません。この章は、各伝統の代表と Oven を突き合わせて、「何が同じで、どこで袂を分かったか」を記録します。</p>
+<p>先に一覧で見取り図を出します:</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th></th><th>依存型</th><th>線形性/資源</th><th>全域性</th><th>効果の扱い</th><th>GPU</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>Oven</strong></td><td>○(<code>Type:Type</code>)</td><td>○ QTT(<code>'0/'1/'ω</code>)</td><td>○(構文で強制)</td><td>線形 token threading</td><td>○ 明示 dispatch</td></tr>
+<tr><td>Agda / Lean</td><td>○(宇宙階層)</td><td>△(Agda に線形性なし)</td><td>○(停止性検査)</td><td>モナド等</td><td>×</td></tr>
+<tr><td>Idris 2</td><td>○</td><td>○ QTT</td><td>△(既定は partial)</td><td>モナド + 線形資源</td><td>×</td></tr>
+<tr><td>Haskell</td><td>×(拡張で擬似)</td><td>△(Linear Haskell)</td><td>×</td><td>モナド</td><td>×(Accelerate 等)</td></tr>
+<tr><td>Clean</td><td>×</td><td>○ 一意性型</td><td>×</td><td>世界の明示受け渡し</td><td>×</td></tr>
+<tr><td>Rust</td><td>×</td><td>○ 所有権 + 借用</td><td>×</td><td>効果系なし(unsafe 境界)</td><td>×(CUDA 連携等)</td></tr>
+<tr><td>Futhark</td><td>△(サイズ型)</td><td>○ 一意性型(in-place)</td><td>△(再帰に制限)</td><td>純粋(効果なし)</td><td>◎ 自動並列</td></tr>
+<tr><td>Dex</td><td>△(型付き添字)</td><td>×</td><td>△</td><td>代数的効果風</td><td>○</td></tr>
+<tr><td>CUDA / WGSL</td><td>×</td><td>×</td><td>×</td><td>命令的(生の副作用)</td><td>◎ 手動</td></tr>
+</tbody>
+</table>
+</div>
+<p>以下、伝統ごとに掘り下げます。</p>
+<h2 id="依存型言語agdaidris-2leanと比べて"><a class="header" href="#依存型言語agdaidris-2leanと比べて">依存型言語(Agda・Idris 2・Lean)と比べて</a></h2>
+<p><strong>共有しているもの</strong> は多い:MLTT ベースの依存 Π/Σ、帰納型、definitional equality を NbE で判定する処理系の骨格(elaboration-zoo 系の設計)まで、コアの作りは現代の依存型言語の標準そのものです。Agda 使いが Oven のコードを見れば、telescope・implicit 引数・instance 引数(<code>nominal</code> の自動プールは Agda の instance argument にかなり近い)にすぐ見覚えを感じるはずです。</p>
+<p><strong>決定的に違うのは目的です。</strong> Agda・Lean は証明支援系であり、健全性(「証明されたことは本当に正しい」)が存在意義です。Oven は <code>Type : Type</code> を承知で採り、Girard のパラドックスで <code>False</code> が証明できることを受け入れました。この一点で Oven は証明支援系のリーグから <strong>意図的に降りています</strong>。依存型は Oven にとって証明の道具ではなく、<strong>コンパイルの道具</strong> です ── 配列長を型に載せて単相化でサイズを静的化する、添字の範囲を消去された証明で保証する、GPU に載るかを型で判定する。「証明支援系の道具立てを、証明のためでなくコード生成のために使う」というのが依存型に対する Oven の姿勢です。</p>
+<p><strong>全域性の実現方法も対照的です。</strong> Agda は一般再帰を書かせて停止性検査器(構造的減少の解析)が後から検証します。Lean も同様で、well-founded recursion への elaboration が裏で走ります。これらの検査器は強力ですが、それ自体が複雑な機構であり、「なぜ通ったのか/通らないのか」が構文から見えないことがあります。Oven は逆に、<strong>再帰を書ける場所を構文で制限しました</strong>(<code>⟦w⟧</code> は再帰パターン変数にしか適用できない)。書けるものは全部全域、検査器は存在しない。表現力は落ちますが(相互再帰や複雑な減少測度は書けない)、GPU に載せる言語では「回数の決まらない計算」はどのみち存在できないため、この制限は GPU 制約と同じ方向を向いています。失うものが最初から失われている、という設計です。</p>
+<p><strong>Idris 2 とは QTT の兄弟です。</strong> <code>'0/'1/'ω</code> の 3 値 multiplicity、消去と線形性の統合は Idris 2(とその基盤の Atkey の QTT)から直接来ています。違いは 2 つ。第一に、Idris 2 は一般再帰の言語なので再帰呼び出しをただの関数適用(1 回)と数えますが、Oven は <code>case</code> 展開の再帰なので「再帰 branch は動的回数走る」を使用量規則(2 群 SUM)として自前で持つ必要がありました(→ <a href="#case-の使用量規則">QTT</a>)。第二に、Oven は multiplicity を第一級の値(<code>Mult : Type</code>)にし、半環演算まで instance に落としました。Idris 2 の量は注釈の世界の住人で、量の多相はありません。なお研究言語まで含めれば、量を型で数える発想は Granule(graded modal types)がより一般的な形(任意の半環でのグレーディング)を追求しており、Oven の 3 値固定はその実用特化版と見ることもできます。</p>
+<h2 id="純粋関数型の効果haskellcleankokaと比べて"><a class="header" href="#純粋関数型の効果haskellcleankokaと比べて">純粋関数型の効果(Haskell・Clean・Koka)と比べて</a></h2>
+<p><strong>Haskell との対比が Oven の効果系を一番よく説明します。</strong> Haskell の <code>IO</code> は表面上はモナドですが、GHC の内部では <code>IO a = State# RealWorld -&gt; (# State# RealWorld, a #)</code> ── <strong>世界 token の受け渡し</strong> です。ただしこの表現はユーザから隠され、token の一回性はコンパイラだけが知る不変条件です。Oven がやったのは、<strong>この内部表現をそのまま表面の意味論にする</strong> ことです。<code>[&amp;World] A ≝ '1 World → (World, A)</code> は GHC の内部形とほぼ同じ形をしていて、違いは token の一回性を QTT がユーザレベルの型として強制すること。モナド・do 記法・transformer の階層は全部不要になり、効果の合成は「token が 2 本になる」だけです(→ <a href="#効果系--借りて返す">効果系</a>)。</p>
+<p>この系譜でいちばん近い祖先は <strong>Clean</strong> です。Clean は一意性型(uniqueness types)で <code>*World</code> を明示的に受け渡しし、モナドなしで IO を実現した言語で、Oven の効果系は「Clean の世界受け渡しを、一意性型でなく QTT の線形性の上に載せ、受け渡しの配管を elaboration で暗黙化したもの」と要約できます。Clean ではユーザが世界を手で持ち回りますが、Oven では token は implicit で、ユーザは <code>print("hello"); print("world")</code> と書くだけです。</p>
+<p><strong>代数的効果の系譜(Koka・Effekt)とは、明確に違う道を選びました。</strong> Koka は効果を row 多相で型に載せ、handler で自由に解釈を差し替えます。Oven は effect row を <strong>検討した上で却下</strong> しています(→ <a href="#effect-row">経緯</a>)。理由は、row・存在量化・資源計算の機構が芋づるで膨らみ、「糖衣のために意味論を足さない」に反したこと。代わりに「capability は宣言・推論なし・単一抽象 <code>[&amp;E]</code> までは書ける」という保守的な線を引きました。効果の抽象化の柔軟さでは Koka に遠く及びませんが、効果の意味論が core にゼロ(ただの Π と Σ)である、という対価を得ています。handler に相当するものが「instance 解決で token を供給するだけ」で書けたのは、この設計の配当です。</p>
+<h2 id="rust-と比べて--線形性借用lifetime"><a class="header" href="#rust-と比べて--線形性借用lifetime">Rust と比べて ── 線形性・借用・lifetime</a></h2>
+<p>Rust は「資源を型で管理する言語」の現在の代表で、Oven の <code>&amp;</code> が Rust の <code>&amp;mut</code> を意識しているのは名前からも明らかです。しかし中身はかなり違います。</p>
+<p><strong>Rust の借用は「参照」です。</strong> 値はその場に留まり、参照が貸し出され、エイリアスの安全は lifetime と borrow checker(エイリアス解析)が守ります。<strong>Oven の <code>&amp;</code> は参照ではありません。</strong> <code>set(&amp;arr, i, v)</code> は「arr を消費して、更新後の arr を返してもらい、同じ名前に再束縛する」の糖衣 ── 値そのものが移動する consume-and-return です。参照が存在しないので、エイリアスという概念自体が型システムに現れず、<strong>lifetime が要りません</strong>。部分借用も Rust の disjoint borrows(<code>&amp;mut r.a</code> と <code>&amp;mut r.b</code> の非重複をコンパイラが追跡)ではなく、lens(get と putback の純粋な対)です。Oven が純粋・全域だからこそ成立する単純化で、Rust のように任意の命令的コードと共存する必要があれば、この手は使えません。</p>
+<p><strong>線形性の厳密さも違います。</strong> Rust の所有権は affine(高々 1 回 ── 黙って drop できる)ですが、Oven の <code>'1</code> は strict linear(ちょうど 1 回 ── drop にも <code>Consumable</code> の宣言が要る)です。IO token を「握り潰せない」ことが効果の完了保証になるので、この差は飾りではありません。逆に Rust が普通にできて Oven にできないのが <strong>共有読み取り借用</strong>(<code>&amp;T</code> を複数箇所へ同時に貸す)です。QTT の threading は「一本の糸を順に持つ」ことしか表せず、コピー不可資源の同時読み取りは fractional permission か region を将来足さない限り書けません(→ <a href="#現状と未解決">現状</a>)。Rust との比較で最も分が悪いのはここです。</p>
+<p>もうひとつの対照は <strong>escape 解析</strong> です。Rust は closure が参照を捕捉して逃げることを lifetime で防ぎます。Oven には対応する機構がなく、「closure は <code>'1</code> を capture できない」「<code>'1</code> の部分適用はできない」という 2 つの規則から escape 不可能性が定理として出ます(→ <a href="#escape-防止に専用機構がない">カタログ</a>)。機構の少なさをどこまで規則の帰結で賄えるか、という点で両言語は好対照です。</p>
+<h2 id="gpu-配列言語futharkdexと比べて"><a class="header" href="#gpu-配列言語futharkdexと比べて">GPU 配列言語(Futhark・Dex)と比べて</a></h2>
+<p>目的が一番近いのはこの系譜です。<strong>Futhark</strong> は純粋関数型のコードを GPU に落とす言語の現在の到達点で、「どんな断片なら GPU に乗るか」の設計は Oven が教科書として参照したものです。しかし並列性の扱いが正反対です。</p>
+<p><strong>Futhark は暗黙並列です。</strong> ユーザは <code>map</code>・<code>reduce</code>・<code>scan</code> などの SOAC(second-order array combinator)で書き、コンパイラが flattening・fusion を駆使して並列コードを合成します。races は言語モデル上存在せず、結果は決定的です。<strong>Oven は明示並列です。</strong> <code>dispatch(i in size){ … }</code> でスレッドグリッドを直接切り、スレッド ID から添字を計算し、atomic も競合も(compute shader と同様に)ユーザの責任です。これは compute shader のメンタルモデルを保ったまま型を強くしたい、という選択で、「コンパイラが並列化してくれる」安心と「このスレッド配置で走ると分かっている」制御のトレードオフです。creative coding・procedural generation という用途(Shadertoy 的な「ピクセルごとの関数」を書く世界)では、後者のほうが素直だという判断があります。</p>
+<p>型の強さでは Oven 側に分があります。Futhark のサイズ型は配列長の整合を追う専用機構ですが、Oven では長さはただの依存型の値です(単相化で静的化)。一方、成熟度・最適化(fusion・タイリング・マルチバックエンド)では比較になりません ── Futhark は 10 年選手の研究プロジェクトで、Oven の lowering は「inline して WGSL を吐く」段階です。</p>
+<p><strong>Dex</strong>(Google の研究言語)とは「添字を型にする」発想を共有しています。Dex の型付き index set は、Oven の <code>Fin(n)</code> と pull 配列(<code>Fin(n) → A</code> はただの関数)に対応します。Dex は effect system や自動微分まで積んだ野心的な設計でしたが、研究プロジェクトとして休眠しました。依存型 × 配列 × GPU という組み合わせが「誰も安定に届いていない空白地帯」であることの証左でもあります。</p>
+<p><strong>シェーダ言語そのもの(GLSL・WGSL・CUDA)</strong> と比べると、Oven が足そうとしているものが見えます。これらは高階関数も多相もほぼ持たず、カーネル間のコード共有は文字列インクルードやマクロの世界です。Oven は「普通の関数型言語の抽象(高階関数・typeclass・レコード・依存型)で書き、カーネル境界の特殊化とインライン展開で全部消して、素の WGSL に落とす」ことを狙います(→ <a href="#host-特殊化--値--関数gpu-はそれを実行するだけ">host 特殊化</a>)。「抽象は書けるが、実行時には存在しない」── ゼロコスト抽象の GPU 版です。</p>
+<h2 id="ステージング言語metaocamlterrazig-comptimeと比べて"><a class="header" href="#ステージング言語metaocamlterrazig-comptimeと比べて">ステージング言語(MetaOCaml・Terra・Zig comptime)と比べて</a></h2>
+<p>「ホストの言語でコード生成し、制限された言語で実行する」という構図だけ見れば、Oven は 2 段階の言語(two-stage language)にも見えます。実際、最初の設計案は 2LTT(Two-Level Type Theory)による明示的なステージ分けでした。MetaOCaml のクォート <code>⟨e⟩</code>・Terra の Lua/Terra 分離・Zig の comptime は、みなこの「層を構文で見せる」系譜です。</p>
+<p>Oven はこれを <strong>却下した</strong> 側です(→ <a href="#2ltt">経緯</a>)。理由は一貫して「host 用と kernel 用を構文で書き分けたくない。一つの言語で書きたい」。同じ関数 <code>stepC</code> が host でも GPU でも呼べて、印は付かない。層の分離はユーザの構文からは消え、コンパイラの中(消去・単相化・特殊化・表現可能性検査)に沈められました。ステージングの明示性は「何がいつ計算されるか」を確実にする長所がありますが、Oven はそれを「全域 + 単相化で、コンパイル時に決まるものは必ず決まる」という言語側の性質で代替しています。Zig の comptime が「普通のコードがそのままコンパイル時にも走る」で人気を得たのと、目指す書き味は案外近いところにあります。</p>
+<h2 id="creative-coding-の環境processingshadertoyと比べて"><a class="header" href="#creative-coding-の環境processingshadertoyと比べて">creative coding の環境(Processing・Shadertoy)と比べて</a></h2>
+<p>最後に、用途側の比較です。creative coding の現在の主流 ── Processing/p5.js、Shadertoy、TouchDesigner、Houdini VEX ── は、ほぼ例外なく <strong>動的か、C 系の弱い型</strong> の世界です。この分野で支配的な価値は「即時のフィードバック」と「書き始めの軽さ」で、強い静的型はむしろ邪魔だと考えられてきました。</p>
+<p>Oven はここに真っ向から逆張りしています:<strong>依存型と線形性を持つ全域言語で、画像と音とメッシュを作る</strong>。賭けているのは、生成的なプログラム(procedural generation・アセット生成)は書き捨てに見えて実は「壊れずに変形し続けたいプログラム」であり、型の強さが効く、という読みです。バッファサイズの不整合や解放忘れが実行時でなく型検査で落ちる Shadertoy、と言えば狙いの雰囲気が伝わるでしょうか。この立ち位置を狙った言語は、知られている範囲でほぼ存在しません(この niche 自体が Oven の最も珍しい点かもしれません)。</p>
+<p>ただし現状は正直に:即時フィードバックの点ではまだ <code>cargo run</code> + PNG 出力の段階で、ライブコーディング環境やホットリロードはありません。勝負はこれからです。</p>
+<h2 id="まとめ--どのマスにも先客がいない"><a class="header" href="#まとめ--どのマスにも先客がいない">まとめ ── どのマスにも先客がいない</a></h2>
+<p>各伝統の代表と比べたとき、Oven の立ち位置は消去法的に浮かび上がります:</p>
+<ul>
+<li><strong>証明支援系</strong>(Agda・Lean)は健全だが、GPU では走らない。Oven は健全性を捨てて実行を取った。</li>
+<li><strong>シェーダ言語</strong>(WGSL・CUDA)は走るが、抽象がない。Oven は抽象を書かせて、コンパイル時に消す。</li>
+<li><strong>GPU 配列言語</strong>(Futhark)は自動並列で安全だが、明示的な制御と依存型がない。Oven は compute shader のモデルを保ったまま型を強くした。</li>
+<li><strong>Rust</strong> は資源管理の王者だが、依存型も純粋性もない。Oven は参照そのものを捨てて、lifetime ごと問題を消した。</li>
+<li><strong>Haskell/Clean</strong> は純粋だが、GPU は他人事。Oven は効果系の設計自体を GPU と host で共有できる形(token threading)にした。</li>
+</ul>
+<p>つまり「依存型 + strict linear + 全域 + 明示 GPU + モナドなし効果」という組み合わせのマスには、現在ほぼ誰も座っていません。ただしこれは自慢であると同時に警告でもあります ── そのマスが空いているのは、需要がないからか、難しすぎるからか、まだ誰も試していないからか、Oven 自身が実験で確かめている最中です。設計ノートの流儀に従えば:このマスが本当に住める場所かどうかは、まだ分かっていません。</p>
+<h3 id="なぜ統合が綺麗でありうるのか--制約の合流"><a class="header" href="#なぜ統合が綺麗でありうるのか--制約の合流">なぜ統合が「綺麗」でありうるのか ── 制約の合流</a></h3>
+<p>このマスに誰もいないことには、コミュニティの分断という社会的な理由もあります。証明支援系の人は GPU を見ず、シェーダの人は型理論を見ず、Houdini のアーティストは自分たちが参照透過な関数型環境(recook = 再評価)を使っているとは思っていない。それぞれの世界の中では、他の世界の道具は「関係のないもの」に見えます。</p>
+<p>しかし各世界の芯だけを取り出して並べると、要求は衝突するどころか、<strong>多くの場所で同じ一点を指しています</strong>。Oven の設計を貫くのはこの合流です:</p>
+<ul>
+<li><strong>全域性</strong>:Agda の世界では型理論の衛生(論理として無矛盾であるための条件)、GPU の世界では物理的制約(一般再帰が存在しない)。「自由再帰を入れない」という一つの決断が、両方の要求を同時に満たす。</li>
+<li><strong><code>'0</code>(消去)</strong>:型理論側から見れば proof irrelevance(証明は実行に関与しない)、GPU 側から見れば erasure と単相化の根拠(サイズと型はコンパイル時に確定する)。一つの multiplicity が両方の顔を持つ。</li>
+<li><strong>線形性</strong>:Rust 側から見れば資源管理、Haskell/Clean 側から見れば効果の順序づけ。<code>'1</code> という一つの量が、バッファの二重解放防止と IO の逐次性を同じ規則で守る。</li>
+<li><strong>「値 = 関数」</strong>:Shadertoy の「画像は uv の純粋関数」、Houdini の「ジオメトリは手続きの評価結果」、関数型言語の第一級関数。<code>render(n, f)</code> に λ を渡してカーネルへ特殊化する機構は、この 3 つの言い換えを 1 つの実装で受け止めている。</li>
+<li><strong>per-element 並列</strong>:Houdini の wrangle(全ポイントに同じコード)、compute shader のスレッドグリッド、配列言語の map。<code>dispatch(i in size)</code> はこの共通の芯の直接の写しで、だからどの世界の住人にも「知っている形」に見える。</li>
+</ul>
+<p>統合が力づくの接合(どれかの世界に他を従わせる)にならずに済んでいるのは、この偶然とは思えない一致のおかげです。逆に言えば、Oven の設計判断で迷ったときの判定基準は「その選択は 4 つの世界のどの芯を写しているか。どれか一つの世界の都合に他を従わせていないか」でした。</p>
+<h3 id="その先--もっと多くのものが綺麗に表現できるはずだ"><a class="header" href="#その先--もっと多くのものが綺麗に表現できるはずだ">その先 ── もっと多くのものが綺麗に表現できるはずだ</a></h3>
+<p>この統合実験の仮説は「これで終わり」ではありません。同じ土台の上に、まだ言語として綺麗に表現されたことのないものが載るはずだ、という見立てがあります。いくつか、現在地から自然に延びている方向を記録しておきます:</p>
+<ul>
+<li><strong>メッシュ・ジオメトリ</strong>:Houdini の geometry は「要素数 + attribute の束」であり、依存レコード <code>(n : Nat, pos : Array(n, F32³), …)</code> がまさに欲しがっている形です。トポロジの不変条件(接続の整合性)を <code>'0</code> の証明として持てれば、VEX には原理的に書けない保証が得られます。Unity アセット生成という当初目標の延長線上です。</li>
+<li><strong>時間・シミュレーション</strong>:音は既に「時間の関数」として書けます(<code>sound.ov</code>)。アニメーションや時間発展を、線形な状態 threading(<code>iterateEff</code>)と純粋な「時刻の関数」の両方で書けて相互に行き来できるなら、FRP が目指した場所に別の道から届くかもしれません。</li>
+<li><strong>微分可能性</strong>:全域・純粋・一階に落ちる言語は、自動微分にとってほぼ理想の基質です(Dex が挑んだ場所)。procedural generation と最適化(目標に向けてパラメータを寄せる)が繋がると、生成の書き方自体が変わります。</li>
+</ul>
+<p>これらがこの土台に本当に綺麗に載るのかは、例によってまだ分かりません。ただ、「離れて見える世界たちの芯が実は同じ形をしている」という観察が一度成立した以上、同じことが他でも起きると期待するのは不自然ではない ── それがこの実験を続ける理由です。</p>
+<p>なお、この章の比較対象の選定と性格づけは執筆時点(2026 年)の状況認識です。各言語は動く標的であり、記述が古びる可能性があります。</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="処理系の内部"><a class="header" href="#処理系の内部">処理系の内部</a></h1>
+<p>Rust 実装の構造をまとめます。ソースの一次情報は各モジュール冒頭の doc comment(<code>//!</code>)にあります。</p>
+<h2 id="クレート構成"><a class="header" href="#クレート構成">クレート構成</a></h2>
+<pre><code>oven(ルート)          コア処理系。既定ビルドは外部依存ゼロ
+├─ feature "gpu"       実 GPU 実行(wgpu + pollster)── これだけが依存を持つ
+├─ lsp/(oven-lsp)     Language Server。別クレートに隔離(コアの依存ゼロを守るため)
+├─ editor/vscode       VSCode 拡張(TypeScript)
+├─ std/prelude.ov      組み込み宣言(data / postulate / nominal)。include_str! で取り込み
+├─ examples/*.ov       言語のサンプル(+ render.rs / mandel.rs / bench.rs = Rust 側ハーネス)
+└─ tests/              統合テスト(約 30 ファイル)
+</code></pre>
+<ul>
+<li>画像出力ハーネス(<code>examples/render.rs</code> 等)だけが dev-dependency の <code>image</code> クレートを使います。</li>
+<li>コアが依存ゼロなのは意図的な設計です:型検査 + CPU emulation は <code>cargo run</code> だけで動きます。</li>
+</ul>
+<h2 id="パイプラインとモジュール地図"><a class="header" href="#パイプラインとモジュール地図">パイプラインとモジュール地図</a></h2>
+<pre><code>ソース(.ov)
+  │  parser.rs(+ lexer)        表面構文 → surface AST。span は surface 段に閉じる
+  ▼
+surface AST
+  │  typecheck.rs               双方向型検査 + QTT 使用量 + elaboration(リテラル解決・
+  │   ├ meta.rs                 implicit 挿入・効果 threading・借用脱糖の残り)
+  │   ├ sig.rs                  シグネチャ(prelude の取り込み・postulate 表)
+  │   └ nbe.rs                  eval / quote / conv(値は value.rs)
+  ▼
+型付き core Tm(syntax.rs ── de Bruijn index、二項 Π/Σ + 名前ラベル)
+  │
+  ├─ runtime.rs                 erasure('0 を消す)→ 実行時 IR Rt → tree-walking 実行
+  │                             = CPU emulation(dispatch は grid をループして逐次実行)
+  │
+  └─ kernel.rs                  dispatch body を型主導で lower → KernelIR(一階・全式に型)
+       │                        → WGSL テキスト生成
+       ▼
+     gpu.rs(feature "gpu")     wgpu ドライバ。host 部のオーケストレーション +
+                                storage buffer 管理 + readback
+
+pretty.rs                       round-trip 可能な pretty-printer
+builtins.rs                     数値 primitive の単一レジストリ(NUM_BUILTINS / vec_builtins)
+</code></pre>
+<h3 id="型検査コアと実行時-ir-の分離"><a class="header" href="#型検査コアと実行時-ir-の分離">型検査コアと実行時 IR の分離</a></h3>
+<p>型検査・NbE の値表現(<code>value.rs</code> ── Rc 共有のクロージャ/環境)と、実行のための IR(<code>runtime.rs</code> の <code>Rt</code>)は別物です。erasure は <strong>型を見ない純構造の変換</strong> で、elaborator が適用ノードに消去情報(<code>'0</code> ビット)を載せておき、erasure はそれを読むだけです。この分離により実行が O(画素) になり、分離前と比べて 42 倍の高速化が計測されています。</p>
+<h3 id="nbe-の実装メモ"><a class="header" href="#nbe-の実装メモ">NbE の実装メモ</a></h3>
+<ul>
+<li>骨格は András Kovács の elaboration-zoo の Rust 移植。GC がないので値とクロージャは <code>Rc</code> のグラフで持ちます。</li>
+<li><code>⟦⟧</code>(帰納仮説)は quote 時の recursor スタックで正しく復元されます(<code>Tm::Ih(idx, w)</code>)。再帰関数値を辞書として quote する経路(<code>mult</code> が <code>plus</code> を呼ぶ等)で quote∘eval が壊れる問題を、この recursor index で修正した経緯があります。</li>
+<li><code>quote_shared</code>:eval の Rc-DAG を <code>let</code> 配列に平坦化し、GVN で共有を保って quote する変種。GPU lowering がラッパ越しの反復で指数爆発するのを防ぎます(→ <a href="#共有を保つ-quote指数爆発の回避">GPU 実行</a>)。</li>
+<li>メタ変数の文脈はスレッドローカルに持ちます(<code>Env</code> を改変せずに済み、テストがスレッドごとに独立)。</li>
+<li>深い let チェーン・深い構造体の Drop は反復処理化されており、巨大配列でもスタックオーバーフローしません。</li>
+</ul>
+<h3 id="診断"><a class="header" href="#診断">診断</a></h3>
+<p>ユーザ・エディタに出るエラー文字列は <strong>英語</strong> です(コード内コメントは日本語)。multiplicity は <code>Display</code> で <code>'0</code>/<code>'1</code>/<code>'ω</code> と表示されます。型エラーは 1 宣言につき複数収集されます。</p>
+<h2 id="cli"><a class="header" href="#cli">CLI</a></h2>
+<pre><code>cargo run -- examples/showcase.ov       # parse → elaborate → normalize(CPU emulation 込み)を表示
+echo "(λ(x) x) Type" | cargo run        # stdin も可
+cargo run --features gpu -- --gpu FILE  # 加えて実 GPU 実行の結果も表示
+</code></pre>
+<p>プログラムの形は「先頭の宣言群(<code>data</code>/<code>postulate</code>/<code>nominal</code>/fixity/定義)+ 末尾の項 1 つ」です。トップレベルの chain に host 効果(<code>assert</code>/<code>print</code>)があれば、コンパイラが自動で <code>runHost</code> に包んで discharge します。</p>
+<h2 id="テスト"><a class="header" href="#テスト">テスト</a></h2>
+<p><code>tests/</code> に約 30 ファイル・190 本超。命名がそのまま領域の地図になっています:</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>領域</th><th>ファイル</th></tr>
+</thead>
+<tbody>
+<tr><td>コア理論</td><td><code>nbe.rs</code> <code>typecheck.rs</code> <code>eval.rs</code> <code>sigma.rs</code> <code>data.rs</code></td></tr>
+<tr><td>QTT</td><td><code>qtt.rs</code> <code>qtt_case.rs</code> <code>graded_let.rs</code> <code>soundness.rs</code></td></tr>
+<tr><td>推論・instance</td><td><code>implicit.rs</code> <code>instance.rs</code> <code>mixfix.rs</code> <code>literal.rs</code> <code>module.rs</code></td></tr>
+<tr><td>効果・借用</td><td><code>effect.rs</code> <code>effects.rs</code> <code>borrow.rs</code></td></tr>
+<tr><td>GPU</td><td><code>dispatch.rs</code> <code>kernel.rs</code>(WGSL golden)<code>cpu_emu.rs</code> <code>gpu.rs</code>(実 GPU)<code>repr.rs</code> <code>numeric.rs</code> <code>prims.rs</code></td></tr>
+<tr><td>その他</td><td><code>errors.rs</code> <code>recover.rs</code> <code>spans.rs</code> <code>stress.rs</code> <code>examples.rs</code></td></tr>
+</tbody>
+</table>
+</div>
+<p>方針:<strong>CPU emulation がオラクル</strong>。GPU テストは同じプログラムの CPU 結果と一致するか(超越関数は許容誤差つき)を見ます。WGSL は golden テキストで固定し、lowering の回帰を検出します。<code>examples.rs</code> は <code>examples/*.ov</code> が全部通ることを保証します。</p>
+<h2 id="lsp-と-vscode-拡張"><a class="header" href="#lsp-と-vscode-拡張">LSP と VSCode 拡張</a></h2>
+<p><code>lsp/</code>(<code>oven-lsp</code>)+ <code>editor/vscode</code>:</p>
+<ul>
+<li><strong>診断</strong>:パース/scope エラーはトークン正確、型エラーは宣言単位。複数エラーを一括表示。</li>
+<li><strong>hover</strong>(識別子の型)・<strong>定義ジャンプ</strong>・<strong>補完</strong>(トップレベル + prelude + constructor)。</li>
+<li><strong>Unicode 入力</strong>:<code>\name</code> + Space で記号へ展開(<code>\lam</code>→λ、<code>\to</code>→→、<code>\ih</code>→⟦⟧、<code>\Sg</code>→Σ、<code>\om</code>→ω など。表は <code>abbreviations.json</code>)。</li>
+</ul>
+<p>実装上の要点:<strong>span(位置情報)は surface 段(lexer/parser)に閉じ込め、core を汚しません</strong>。<code>parse_program_with_info</code> が宣言・出現情報(<code>ParseInfo</code>)を副産物として返し、LSP はそれを使います。QTT・線形性の検査を LSP の宣言単位 elaboration でも回復するパスがあり、エディタ上でも線形性違反が見えます。</p>
+<p>ビルドとパッケージ:</p>
+<pre><code>cargo build -p oven-lsp        # dev はこれだけ(拡張がフォールバック探索で拾う)
+cd editor/vscode
+npm run package                # サーバ同梱の .vsix を生成
+</code></pre>
+<h2 id="この記録サイト自体"><a class="header" href="#この記録サイト自体">この記録サイト自体</a></h2>
+<p><code>site/</code> が mdBook のソースです:</p>
+<pre><code>mdbook serve site      # ローカルで閲覧(ライブリロード)
+mdbook build site      # site/book/ に静的 HTML を生成
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="経緯--捨てた案の記録"><a class="header" href="#経緯--捨てた案の記録">経緯 ── 捨てた案の記録</a></h1>
+<p>Oven の設計は「これで綺麗にまとまった」と思っては穴が見つかる、の繰り返しで進んできました。捨てた案を消さずに残すのは、同じ穴に二度落ちないためです。この章は主要な撤回・転換を、当時の理由とともに記録します(一次資料は <code>DESIGN.md</code>)。</p>
+<h2 id="2ltt"><a class="header" href="#2ltt">2LTT ── 層を構文で分ける案</a></h2>
+<p><strong>案</strong>:Two-Level Type Theory。メタレベル(コンパイル時・フルパワーの依存型)とオブジェクトレベル(実行時 = GPU・制限された世界)を構文として分け、<code>⟨A⟩</code> のような印で繋ぐ。理論的には綺麗な解。</p>
+<p><strong>却下の理由</strong>:「host 用と kernel 用のコードを構文的に書き分けたくない。一つの言語で、区別なく書きたい」。</p>
+<p><strong>その後</strong>:2LTT の発想そのもの(GPU で走る部分の隔離)は、<code>'GPU</code> modality として一度復活し(下記)、最終的には「<code>dispatch</code> 境界 + 表現可能性検査」だけに落ち着きました。「捨てたはずの案が形を変えて戻り、また消えた」二段の変遷です。</p>
+<h2 id="gpu-modality"><a class="header" href="#gpu-modality"><code>'GPU</code> modality ── 誕生と全廃</a></h2>
+<p><strong>案</strong>:<code>'GPU T</code> という型の印(modality)で「GPU で走る層」を隔離する。2LTT のオブジェクトレベルを、構文の層ではなく型の印として復活させたもの。「エラーが違反した場所にローカルに出る」という利点もあった。当初は「<code>'GPU</code> の内部は QTT オフ(線形性なし・命令的)」という整理も伴っていた。</p>
+<p><strong>全廃の理由</strong>(効果系 Phase 5、2026-06-14):</p>
+<ol>
+<li>「GPU 内は QTT オフ・順序はプログラム順」という整理が撤回された(下記)。効果順序は host IO と同型の token threading で付けることになり、「QTT オフ」という modality の意味が消えた。</li>
+<li>残った意味は「表現可能性を強制する phase」だけになり、純コードに <code>'GPU</code> を書かせるのは「使える場所を減らすだけ」で利点が無くなった。</li>
+</ol>
+<p><strong>現在</strong>:純コードは world 多相(印なし)。GPU カーネル断片はただの純粋関数 <code>A → B</code> です。host/GPU の区別は <code>dispatch</code> 境界 + 表現可能性検査(実装上は <code>in_kernel</code> フラグ 1 個)だけが担い、<code>store</code> を host で誤って呼べない安全性は token の型(<code>World</code> ≠ <code>GPU</code>)が担います。</p>
+<h2 id="順序はプログラム順の撤回"><a class="header" href="#順序はプログラム順の撤回">「カーネル内の順序はプログラム順」の撤回</a></h2>
+<p><strong>案</strong>:カーネルの中身は 1 スレッドが上から順に実行する命令的コードなので、<code>store</code>/<code>load</code> の順序は素のプログラム順で保証すればよい(linearity 不要)。</p>
+<p><strong>撤回の理由</strong>(2026-06-12):これは <strong>関数の純粋性を売っている</strong>。評価器が字面順を守ることに意味が依存する = eval/quote/inline/conversion で順序が動きうる = 参照透過でない。<code>[&amp;IO]</code> を導入した動機そのものに反する。</p>
+<p><strong>現在</strong>:GPU の効果順序も host IO と同型の <strong>零幅 token threading</strong> で付けます。buffer は <code>'ω</code>(race・atomic は自由)のまま、順序だけを token の <code>'1</code> チェーンが担います。</p>
+<h2 id="fnmut"><a class="header" href="#fnmut">FnMut / apply ── 別建ての関数型</a></h2>
+<p><strong>案</strong>:効果のある λ のために <code>FnMut(A, B) = (Env : Type, env : Env, code : (Env, A) → (Env, B))</code> を、純粋な <code>A → B</code> と並ぶもう一つの組み込み関数型として立てる。呼び出しは <code>apply</code>、closure 値自体を <code>'1</code> で threading する。</p>
+<p><strong>廃止の理由</strong>:</p>
+<ul>
+<li>「効果のある関数」は素の <code>A → B</code> で表せる(<code>('1 S, A) → ('1 S, B)</code> はただの Π)。</li>
+<li>「closure は <code>'ω</code> だけ capture・<code>'1</code> は引数で渡す」を徹底すると関数値は全部 <code>'ω</code> になり、関数と状態を束ねる FnMut の存在理由が消える。</li>
+<li>creative coding の流儀(state-as-data:状態は <code>Array(Particle)</code> として持ち純粋関数で map)に、state-as-closure は合わない。</li>
+</ul>
+<p><strong>現在</strong>:関数型は <code>A → B</code> 一種類(確定)。状態を抱えた値が本当に要るなら手書きの Σ で書く ── foundation ではなくライブラリのパターン。</p>
+<blockquote>
+<p>設計ノートの言葉:「以前『すべての closure は言語レベルの Σ 型』『env を ∃ で隠す必要がある』と何度も書いたが、全部誤りだった。純粋 closure は capture していてもただの <code>A → B</code>。」</p>
+</blockquote>
+<h2 id="writeset"><a class="header" href="#writeset">WriteSet / disjoint merge</a></h2>
+<p><strong>案</strong>:GPU カーネルの書き込みを「各スレッドが書き込み集合(WriteSet)を返す純粋関数」とモデル化し、dispatch がそれらを disjoint(重複なし)に merge する。書き込みが純粋な「結果の組み立て」になり、副作用が消える。</p>
+<p><strong>撤回の理由</strong>:GPU には atomic 演算があり、<strong>複数スレッドが同じ場所に正しく書き込むパターンが実在する</strong>。disjointness の要求は強すぎるし、検査も高コスト。</p>
+<p><strong>現在</strong>:カーネルは本当に effectful だと認め、race は型で追わない(compute-shader と同じ割り切り)。</p>
+<h2 id="effect-row"><a class="header" href="#effect-row">effect row / <code>Row</code> kind / Res(ρ)</a></h2>
+<p><strong>案</strong>:dispatch のカーネルが任意個のバッファを捕捉するのを型で表すため、「捕捉する借用の行(row)」を第一級の kind にし、closure を存在量化・dispatch を全称量化で多相にし、<code>Res(ρ)</code> で返すべき資源を計算する。</p>
+<p><strong>撤回の理由</strong>:「糖衣構文のために変なものを足すくらいなら、糖衣構文の方を捨てろ」に真っ向から反する重い機構だった。捨てた後に「任意個 = レコード 1 個に束ねる(既にある Σ で済む)」という解が見つかった。</p>
+<p><strong>教訓</strong>:closure に借用を捕捉させ、それを高階関数経由で取り戻そうとすると機構が爆発する。<strong>借用は closure に捕捉させず、引数として渡す。</strong> ── これがその後の設計全体(dispatch の borrow-lift・ループの step・escape 防止)を貫く原則になりました。</p>
+<p>なお effect row 自体(capability の個数の多相)は現在も却下のままです。単一・抽象の capability <code>[&amp;E]</code>(E は型変数)は今の依存量化で書けるため、「effect 多相は無いが単一抽象 <code>[&amp;E]</code> はある」が正確な現状です。</p>
+<h2 id="region"><a class="header" href="#region">region / lifetime</a></h2>
+<p><strong>案</strong>(dispatch の capture 問題の試み 3):バッファを region 所有の <code>'ω</code> ハンドルにし、「現在の瞬間」を表す線形トークンを threading して順序を作る。「効果 = 時間トークンの threading、linearity = 時間は分岐しない、dispatch = 時間の fork-join」という世界観。</p>
+<p><strong>撤回の理由</strong>:<code>withRegion</code> を λ で書くとその λ がまた永続バッファを capture して封印が再発する。region を新規ブロック構文にせざるを得ず、ネスト・region 多相の複雑さを抱え込む。過剰。</p>
+<p><strong>現在</strong>:dispatch を構文にして borrow-lift する、で解決(→ <a href="#dispatch--関数ではなく構文">GPU 実行</a>)。なお「コピー不可資源の同時読み取り共有」だけは QTT の threading で原理的に表せないため、region か fractional permission が将来必要になる可能性は残っています。</p>
+<h2 id="dispatch"><a class="header" href="#dispatch">dispatch の形の変遷</a></h2>
+<ol>
+<li><strong>explicit-R(関数)</strong>:触る全バッファをレコード <code>R</code> に束ねて引数で渡す。正しく動くが冗長 ──「ふつうに capture して書きたい」。</li>
+<li><strong>capture(closure)</strong>:<code>'1</code> 資源が closure に封印されて戻ってこない。「closure は <code>'1</code> を capture できない」原則と衝突し破綻。</li>
+<li><strong>region</strong>:上記の通り過剰で撤回。</li>
+<li><strong>構文 + borrow-lift(確定)</strong>:capture のように書けるが closure 値を作らないので封印しない。借りる資源の集合が body 依存 = 関数型を持てない、という点でも構文であることが本質的。</li>
+</ol>
+<p>綴りも <code>dispatch(size) λ(i){}</code>(関数形)は「そこに任意の関数を置けるかのような嘘の見た目」として退けられ、<code>dispatch(i in size){ body }</code>(並列 for 形)で確定しました。</p>
+<h2 id="eliminator-から-case-へ"><a class="header" href="#eliminator-から-case-へ">eliminator 焼き込みから <code>data</code> + <code>case</code> へ</a></h2>
+<p><strong>当初</strong>:帰納型はプリミティブとして固定し、型ごとの eliminator(<code>Nat-elim</code>/<code>Bool-elim</code>/<code>Vec-case</code> …)を処理系に焼き込む。「定義の一般機構は作らない」が M0 の方針だった。</p>
+<p><strong>転換の理由</strong>:QTT の合流規則(どの引数が <code>'0</code>/<code>'ρ</code>/<code>'π</code> か、<code>⊔</code> と SUM の群分け)を型ごとに手で持つ羽目になった。一般の <code>data</code> 宣言から constructor・<code>case</code>・iota・QTT 合流を導出する方が、規則が一つで済む。</p>
+<p><strong>現在</strong>:帰納型はユーザ(と prelude)が <code>data</code> で宣言し、分解・再帰は <code>case</code> + <code>⟦⟧</code> 一本。専用 eliminator は全廃(<code>J</code> も <code>case</code> で導出)。strict positivity を「inductive であることの定義」として要求します。</p>
+<p>同時期に「効果ありの分岐を自動で elaborate する分岐 padding」も撤回されました ── 全 branch に同じ <code>[&amp;R]</code> を付ければ、使わない枝の素通しは <code>[&amp;R]</code> 糖衣の末尾自動 return に吸収され、独立の機構が要らないためです。</p>
+<h2 id="σ-domain-適用から全面-curried-へ"><a class="header" href="#σ-domain-適用から全面-curried-へ">Σ-domain 適用から全面 curried へ</a></h2>
+<p><strong>当初</strong>:関数の引数テレスコープを Σ として一括で渡す(<code>f(a, b)</code> は組 <code>(a, b)</code> の適用)。</p>
+<p><strong>転換</strong>(2026-06-11):全面 curried へ移行(<code>f(a, b)</code> = <code>(f a) b</code>)。タプルを渡したいときだけ <code>f((a, b))</code>。全 190 テスト green のまま実装が 146 行減り、implicit のカリー化(各 implicit が独立のメタ変数)とも整合しました。型パラメータと辞書が別々に解決できることは instance 解決の前提です(Σ にまとめると「テレスコープの Σ」と「辞書そのものの Σ」が構造的に区別できず破綻する)。</p>
+<h2 id="finarray--build--index-の撤去"><a class="header" href="#finarray--build--index-の撤去">FinArray / build / index の撤去</a></h2>
+<p><strong>当初</strong>:遅延 pull 配列のためのプリミティブとして <code>FinArray</code>/<code>build</code>/<code>index</code> を持っていた。</p>
+<p><strong>撤去の理由</strong>(効果系 Phase 6):<code>build f = f</code>・<code>index xs i = xs i</code> ── つまり <strong>素の関数 <code>Fin(n) → A</code> の偽装</strong> で、実体がゼロだった。必要なら関数を直接書けばよい。materialized な可変配列は <code>Array</code> + <code>newArray</code>/<code>set</code>/<code>get</code> が別に担います。</p>
+<h2 id="まとめ繰り返し現れた教訓"><a class="header" href="#まとめ繰り返し現れた教訓">まとめ:繰り返し現れた教訓</a></h2>
+<ul>
+<li><strong>借用は capture させず、引数で渡す</strong>(FnMut・effect row・region・dispatch、すべてに共通の核)。</li>
+<li><strong>糖衣のために意味論を足さない</strong>。重い機構を作りかけたら、まず「既にある Σ / QTT で書けないか」を疑う。</li>
+<li><strong>「順序」や「安全性」を評価器の挙動(字面順・名前の不可視性)に頼らない</strong>。型(<code>'1</code>・token の型)に載せる。</li>
+<li><strong>紙の上で「綺麗にまとまった」は信用しない</strong>。core を oracle にして実装で確かめる。</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="現状と未解決"><a class="header" href="#現状と未解決">現状と未解決</a></h1>
+<p>このスナップショットは <strong>2026-07 時点</strong> です。Oven は設計途中の言語であり、この章が「どこまで出来ていて、何が怪しいか」の正直な台帳です。</p>
+<h2 id="実装済み"><a class="header" href="#実装済み">実装済み</a></h2>
+<h3 id="コア"><a class="header" href="#コア">コア</a></h3>
+<ul>
+<li>双方向型検査 + NbE(eval/quote/conv、η は Π/Σ/Unit、iota は <code>case</code> + 組み込み簡約 + Mult 半環)</li>
+<li>QTT 使用量検査(使用ベクトル・demand-0・graded let・<code>case</code> の 2 群 SUM 合流・dispatch の borrow-lift)</li>
+<li><code>data</code> 宣言(strict positivity)+ <code>case</code>/<code>⟦⟧</code>(専用 eliminator 全廃・<code>J</code> も導出)</li>
+<li>メタ変数 + 単一化による implicit 推論(<code>_</code>/<code>..</code> の部分明示も)</li>
+<li>instance 解決(on-demand・coherence・パラメトリック instance・nominal の自動プール・<code>implicit foo;</code> 再エクスポート)</li>
+<li>mixfix 演算子 + fixity 宣言 + ambient prelude(<code>+ - * / ⊔</code> とそのクラス・Mult instance が常在)</li>
+<li>型主導リテラル(Nat/F32/U32/U8/Mult/Fin)</li>
+<li>定義構文・graded let・名前付きレコード構築・<code>module</code></li>
+<li>診断の英語化・宣言単位の複数エラー収集</li>
+</ul>
+<h3 id="効果借用docseffectsmd-の-phase-16-前半"><a class="header" href="#効果借用docseffectsmd-の-phase-16-前半">効果・借用(<code>docs/effects.md</code> の Phase 1〜6 前半)</a></h3>
+<ul>
+<li><code>[&amp;X]</code> former(多 capability <code>[&amp;X, &amp;Y]</code> 含む)+ 型主導の自動 threading(ユーザは token を書かない)</li>
+<li>host 効果 <code>assert</code>/<code>print</code>・<code>main : [&amp;World] Unit</code>・<code>runHost</code> による自動 discharge</li>
+<li>GPU 効果 <code>store</code>/<code>load</code>(<code>[&amp;GPU]</code>)── <code>'GPU</code> modality は全廃済み</li>
+<li>明示借用 <code>&amp;T</code>:host 可変 <code>Array</code> の <code>set</code>/<code>get</code>・ユーザ定義の借用関数</li>
+<li>ユーザ効果の直接 discharge(<code>implicit w0 : X = init</code> で token を型解決供給)と効果の合成(World × user 効果)</li>
+</ul>
+<h3 id="gpu"><a class="header" href="#gpu">GPU</a></h3>
+<ul>
+<li><code>dispatch(i in size){}</code> 構文(1〜3 次元グリッド)+ borrow-lift</li>
+<li>表現可能性検査(representable/storable・有限 enum の u32 タグ化・soundness 検査)</li>
+<li>CPU emulation(erasure → <code>Rt</code> → tree-walking。依存ゼロ)── GPU のオラクル</li>
+<li>GPU lowering(型付き <code>Tm</code> → <code>KernelIR</code> → WGSL)+ wgpu ドライバ(feature <code>gpu</code>)</li>
+<li>ベクトル型 = 同型スカラのタプル(ネイティブ vecN 演算・std430 は gpu.rs に局所化)</li>
+<li>narrow 型 <code>U8</code> / <code>U8⁴</code>(RGBA8 の u32 パック)</li>
+<li>数値 primitive の単一レジストリ(追加は表に 1 行)</li>
+<li>host 特殊化(関数引数のカーネルへのコンパイル時展開)・<code>quote_shared</code>(指数爆発回避)</li>
+<li><code>fromU32</code> + case→for(機械整数で回す fold が for ループに)</li>
+<li><code>Repr</code> witness の土台(witnessed fold の縦串は実験済み)</li>
+</ul>
+<h3 id="ツール"><a class="header" href="#ツール">ツール</a></h3>
+<ul>
+<li>Language Server(診断・hover・定義ジャンプ・補完)+ VSCode 拡張(ハイライト・Unicode 入力)</li>
+<li>テストスイート 190 本超・実 GPU parity テスト・WGSL golden・clippy クリーン</li>
+</ul>
+<h2 id="未実装設計はあるもの"><a class="header" href="#未実装設計はあるもの">未実装(設計はあるもの)</a></h2>
+<ul>
+<li><strong>標準コンビネータ</strong>:<code>map</code>/<code>zipWith</code>/<code>reduce</code>/<code>scan</code>/<code>gather</code>/<code>scatter</code>。reduce の結合性証明(<code>'0 Assoc(op)</code>)を取る設計まではあり、並列実装(tree reduction・shared memory・barrier をどう型に出すか)が未設計。</li>
+<li><strong><code>Repr</code> witness の全面化</strong>:kernel binder の表現可能性検査を witness に置き換え、「境界 + witness」に寄せる。</li>
+<li><strong>ユーザ定義 handler の書き味</strong>:効果操作・discharge は既存機構で書けるが、トップレベルで合成ブロック(<code>[&amp;World, &amp;Log]</code>)を discharge する runner が未配線。</li>
+<li><strong>部分借用 <code>&amp;r.field</code>(lens)</strong>:設計確定・脱糖未実装。</li>
+<li><strong>mult 多相のユーザ定義関数</strong>:<code>3ᵏ</code> 列挙チェックの実装。</li>
+<li><strong>U32 添字の境界証明</strong>:値 <code>i : U32</code> + 消去証明 <code>'0 Lt(i, n)</code> で境界安全を復活させる(dispatch が証明を供給・host は implicit/Dec で自動構築)。naga 段で本腰の予定。</li>
+<li><strong>入力アップロード(host→device)</strong>・フィルタ用 for ループ・<code>UNorm8⁴</code>/<code>F16⁴</code>(HDR)。</li>
+<li>メソッド形 / UFCS <code>x.f(y)</code>・swizzle の named 版(<code>.x</code>)・<code>open</code>(module の無修飾取り込み)・ワイルドカードパターン。</li>
+<li>音(cpal)・画像入力・Unity アセット生成のランタイム境界。String・乱数・時間。</li>
+<li>宇宙階層(必要になったら)。</li>
+</ul>
+<h2 id="既知の割り切り意図的"><a class="header" href="#既知の割り切り意図的">既知の割り切り(意図的)</a></h2>
+<ul>
+<li><strong><code>Type : Type</code></strong>:論理的不健全 + 型検査器の発散可能性を受容(timeout/fuel は任意の保険)。</li>
+<li><strong>race は型で追わない</strong>:スレッド間競合の正しさはプログラマの責任(compute-shader と同じ)。</li>
+<li><strong>カーネルは値にならない</strong>:<code>dispatch</code> は構文。カーネルのライブラリ化はできない。</li>
+<li><strong>effect row はない</strong>:capability の個数の多相は却下。単一抽象 <code>[&amp;E]</code> で書ける範囲まで。</li>
+<li><strong>同型 ambient の二重取り禁止</strong>:解決の曖昧性を断つため。</li>
+</ul>
+<h2 id="未解決不安疑い続けるところ"><a class="header" href="#未解決不安疑い続けるところ">未解決・不安(疑い続けるところ)</a></h2>
+<p>設計ノートが「まだ考え切れていない」と明示しているものです:</p>
+<ol>
+<li><strong><code>&amp;</code>/ブロック threading の desugar の全体像</strong>。個別規則(入力は表面順・返りは thread-first、<code>&amp;</code> は Π の直接テレスコープのみ、≤1 効果/文、lens、<code>case</code> は <code>[&amp;R]</code> motive)は確定したが、parse 時の借用脱糖と typecheck 時の効果 threading が別実装のままで、一本化が残っている。再束縛のスコープ(shadowing)の厳密な扱いも。</li>
+<li><strong><code>case</code> 使用量規則の一般化</strong>:非再帰 constructor が動的回数走る型(二分木の葉)では「<code>⟦⟧</code> 無し = 高々 1 回」の前提が崩れる。組み込み型は健全だが、ユーザ定義の分岐木に穴。群の決め方を「高々 1 回か動的回数か」へ一般化する必要。</li>
+<li><strong>線形 payload × 帰納 family</strong>:「再帰時に尾を <code>'0</code> にする」は既知の patch の再現であって原理から出た解ではない、と自覚されている。case(尾 <code>'ρ</code>)と再帰(尾 <code>'0</code>)の 2 系統割れ・Vec の「Nat で回す」が一般 inductive に一般化しない、など。一般 inductive の eliminator 生成を形式化する段で設計し直す可能性が高い。文献的にも(Idris 2 含め)未解決寄りの領域。</li>
+<li><strong>dispatch の特権性の健全性</strong>:「境界は線形な借用・内部は race 非検査」が host の純粋性を壊していないことの完全な論証。具体的な抜け道(buffer 経由の線形資源複製)は 1 件発見・修正済み ── 敵対的レビューは今後も必要。</li>
+<li><strong><code>'1</code> 読み取り壁</strong>:実値の状態 token(State S)を ω 的な算術で読む問題。Idris 2 の QTT 設計を参照予定。</li>
+<li><strong>world 境界をまたぐ量の精密化</strong>:<code>'0</code> 消去値の越境などの端。</li>
+<li><strong>NbE の発散</strong>:<code>Type : Type</code> の帰結として受容済みだが、timeout/fuel をいつ入れるか。</li>
+</ol>
+<h2 id="直近のロードマップメモリ設計ノートから"><a class="header" href="#直近のロードマップメモリ設計ノートから">直近のロードマップ(メモリ・設計ノートから)</a></h2>
+<ol>
+<li>効果系 Phase 6 後半:ユーザ handler(<code>[&amp;Log]</code>)の書き味と top-level discharge</li>
+<li><code>Repr</code> witness / case→for の一般化(<code>types-as-universal-property.md</code> の構想)</li>
+<li>U32 境界証明(naga 本腰と同時期)</li>
+<li>標準コンビネータ(map/reduce)と入力アップロード</li>
+<li>音・画像・アセット生成のランタイム境界</li>
+</ol>
+<blockquote>
+<p>設計ノートの戒めを最後に:「常に『まだ考えが足りないのではないか』と疑い続けるのが正しい状態です。」</p>
+</blockquote>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+
+            </nav>
+
+        </div>
+
+        <template id=fa-eye><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM432 256c0 79.5-64.5 144-144 144s-144-64.5-144-144s64.5-144 144-144s144 64.5 144 144zM288 192c0 35.3-28.7 64-64 64c-11.5 0-22.3-3-31.6-8.4c-.2 2.8-.4 5.5-.4 8.4c0 53 43 96 96 96s96-43 96-96s-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6z"/></svg></span></template>
+        <template id=fa-eye-slash><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zM223.1 149.5C248.6 126.2 282.7 112 320 112c79.5 0 144 64.5 144 144c0 24.9-6.3 48.3-17.4 68.7L408 294.5c5.2-11.8 8-24.8 8-38.5c0-53-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6c0 10.2-2.4 19.8-6.6 28.3l-90.3-70.8zm223.1 298L373 389.9c-16.4 6.5-34.3 10.1-53 10.1c-79.5 0-144-64.5-144-144c0-6.9 .5-13.6 1.4-20.2L83.1 161.5C60.3 191.2 44 220.8 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5z"/></svg></span></template>
+        <template id=fa-copy><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M502.6 70.63l-61.25-61.25C435.4 3.371 427.2 0 418.7 0H255.1c-35.35 0-64 28.66-64 64l.0195 256C192 355.4 220.7 384 256 384h192c35.2 0 64-28.8 64-64V93.25C512 84.77 508.6 76.63 502.6 70.63zM464 320c0 8.836-7.164 16-16 16H255.1c-8.838 0-16-7.164-16-16L239.1 64.13c0-8.836 7.164-16 16-16h128L384 96c0 17.67 14.33 32 32 32h47.1V320zM272 448c0 8.836-7.164 16-16 16H63.1c-8.838 0-16-7.164-16-16L47.98 192.1c0-8.836 7.164-16 16-16H160V128H63.99c-35.35 0-64 28.65-64 64l.0098 256C.002 483.3 28.66 512 64 512h192c35.2 0 64-28.8 64-64v-32h-47.1L272 448z"/></svg></span></template>
+        <template id=fa-play><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M73 39c-14.8-9.1-33.4-9.4-48.5-.9S0 62.6 0 80V432c0 17.4 9.4 33.4 24.5 41.9s33.7 8.1 48.5-.9L361 297c14.3-8.7 23-24.2 23-41s-8.7-32.2-23-41L73 39z"/></svg></span></template>
+        <template id=fa-clock-rotate-left><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M75 75L41 41C25.9 25.9 0 36.6 0 57.9V168c0 13.3 10.7 24 24 24H134.1c21.4 0 32.1-25.9 17-41l-30.8-30.8C155 85.5 203 64 256 64c106 0 192 86 192 192s-86 192-192 192c-40.8 0-78.6-12.7-109.7-34.4c-14.5-10.1-34.4-6.6-44.6 7.9s-6.6 34.4 7.9 44.6C151.2 495 201.7 512 256 512c141.4 0 256-114.6 256-256S397.4 0 256 0C185.3 0 121.3 28.7 75 75zm181 53c-13.3 0-24 10.7-24 24V256c0 6.4 2.5 12.5 7 17l72 72c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-65-65V152c0-13.3-10.7-24-24-24z"/></svg></span></template>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr-ef4e11c1.min.js"></script>
+        <script src="mark-09e88c2c.min.js"></script>
+        <script src="searcher-c2a407aa.js"></script>
+
+        <script src="clipboard-1626706a.min.js"></script>
+        <script src="highlight-abc7f01d.js"></script>
+        <script src="book-a0b12cfe.js"></script>
+
+        <!-- Custom JS scripts -->
+
+        <script>
+        window.addEventListener('load', function() {
+            window.setTimeout(window.print, 100);
+        });
+        </script>
+
+
+    </div>
+    </body>
+</html>

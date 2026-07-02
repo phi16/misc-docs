@@ -1,0 +1,303 @@
+<!DOCTYPE HTML>
+<html lang="ja" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>経緯 ── 捨てた案の記録 - Oven ── 言語の記録</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="依存型 + QTT + GPU 並列の実験的言語 Oven の設計と実装の記録">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon-de23e50b.svg">
+        <link rel="shortcut icon" href="favicon-8114d1fc.png">
+        <link rel="stylesheet" href="css/variables-8adf115d.css">
+        <link rel="stylesheet" href="css/general-2459343d.css">
+        <link rel="stylesheet" href="css/chrome-ae938929.css">
+        <link rel="stylesheet" href="css/print-9e4910d8.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="fonts/fonts-9644e21d.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="mdbook-highlight-css" href="highlight-493f70e1.css">
+        <link rel="stylesheet" id="mdbook-tomorrow-night-css" href="tomorrow-night-4c0ae647.css">
+        <link rel="stylesheet" id="mdbook-ayu-highlight-css" href="ayu-highlight-3fdfc3ac.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "searchindex-3d1a964c.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc-45cb7b16.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="mdbook-body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="mdbook-sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("mdbook-sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="mdbook-sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="mdbook-sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="mdbook-page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="mdbook-menu-bar-hover-placeholder"></div>
+                <div id="mdbook-menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="mdbook-sidebar-toggle" class="icon-button" for="mdbook-sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="mdbook-sidebar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M0 96C0 78.3 14.3 64 32 64H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32H32c-17.7 0-32-14.3-32-32s14.3-32 32-32H416c17.7 0 32 14.3 32 32z"/></svg></span>
+                        </label>
+                        <button id="mdbook-theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="mdbook-theme-list">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M371.3 367.1c27.3-3.9 51.9-19.4 67.2-42.9L600.2 74.1c12.6-19.5 9.4-45.3-7.6-61.2S549.7-4.4 531.1 9.6L294.4 187.2c-24 18-38.2 46.1-38.4 76.1L371.3 367.1zm-19.6 25.4l-116-104.4C175.9 290.3 128 339.6 128 400c0 3.9 .2 7.8 .6 11.6c1.8 17.5-10.2 36.4-27.8 36.4H96c-17.7 0-32 14.3-32 32s14.3 32 32 32H240c61.9 0 112-50.1 112-112c0-2.5-.1-5-.2-7.5z"/></svg></span>
+                        </button>
+                        <ul id="mdbook-theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-ayu">Ayu</button></li>
+                        </ul>
+                        <button id="mdbook-search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="mdbook-searchbar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352c79.5 0 144-64.5 144-144s-64.5-144-144-144S64 128.5 64 208s64.5 144 144 144z"/></svg></span>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Oven ── 言語の記録</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <span class=fa-svg id="print-button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M128 0C92.7 0 64 28.7 64 64v96h64V64H354.7L384 93.3V160h64V93.3c0-17-6.7-33.3-18.7-45.3L400 18.7C388 6.7 371.7 0 354.7 0H128zM384 352v32 64H128V384 368 352H384zm64 32h32c17.7 0 32-14.3 32-32V256c0-35.3-28.7-64-64-64H64c-35.3 0-64 28.7-64 64v96c0 17.7 14.3 32 32 32H64v64c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V384zm-16-88c-13.3 0-24-10.7-24-24s10.7-24 24-24s24 10.7 24 24s-10.7 24-24 24z"/></svg></span>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="mdbook-search-wrapper" class="hidden">
+                    <form id="mdbook-searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="mdbook-searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="mdbook-searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <span class=fa-svg id="fa-spin"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M304 48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zm0 416c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM48 304c26.5 0 48-21.5 48-48s-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48zm464-48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM142.9 437c18.7-18.7 18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zm0-294.2c18.7-18.7 18.7-49.1 0-67.9S93.7 56.2 75 75s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zM369.1 437c18.7 18.7 49.1 18.7 67.9 0s18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9z"/></svg></span>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="mdbook-searchresults-outer" class="searchresults-outer hidden">
+                        <div id="mdbook-searchresults-header" class="searchresults-header"></div>
+                        <ul id="mdbook-searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('mdbook-sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('mdbook-sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#mdbook-sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="mdbook-content" class="content">
+                    <main>
+                        <h1 id="経緯--捨てた案の記録"><a class="header" href="#経緯--捨てた案の記録">経緯 ── 捨てた案の記録</a></h1>
+<p>Oven の設計は「これで綺麗にまとまった」と思っては穴が見つかる、の繰り返しで進んできました。捨てた案を消さずに残すのは、同じ穴に二度落ちないためです。この章は主要な撤回・転換を、当時の理由とともに記録します(一次資料は <code>DESIGN.md</code>)。</p>
+<h2 id="2ltt"><a class="header" href="#2ltt">2LTT ── 層を構文で分ける案</a></h2>
+<p><strong>案</strong>:Two-Level Type Theory。メタレベル(コンパイル時・フルパワーの依存型)とオブジェクトレベル(実行時 = GPU・制限された世界)を構文として分け、<code>⟨A⟩</code> のような印で繋ぐ。理論的には綺麗な解。</p>
+<p><strong>却下の理由</strong>:「host 用と kernel 用のコードを構文的に書き分けたくない。一つの言語で、区別なく書きたい」。</p>
+<p><strong>その後</strong>:2LTT の発想そのもの(GPU で走る部分の隔離)は、<code>'GPU</code> modality として一度復活し(下記)、最終的には「<code>dispatch</code> 境界 + 表現可能性検査」だけに落ち着きました。「捨てたはずの案が形を変えて戻り、また消えた」二段の変遷です。</p>
+<h2 id="gpu-modality"><a class="header" href="#gpu-modality"><code>'GPU</code> modality ── 誕生と全廃</a></h2>
+<p><strong>案</strong>:<code>'GPU T</code> という型の印(modality)で「GPU で走る層」を隔離する。2LTT のオブジェクトレベルを、構文の層ではなく型の印として復活させたもの。「エラーが違反した場所にローカルに出る」という利点もあった。当初は「<code>'GPU</code> の内部は QTT オフ(線形性なし・命令的)」という整理も伴っていた。</p>
+<p><strong>全廃の理由</strong>(効果系 Phase 5、2026-06-14):</p>
+<ol>
+<li>「GPU 内は QTT オフ・順序はプログラム順」という整理が撤回された(下記)。効果順序は host IO と同型の token threading で付けることになり、「QTT オフ」という modality の意味が消えた。</li>
+<li>残った意味は「表現可能性を強制する phase」だけになり、純コードに <code>'GPU</code> を書かせるのは「使える場所を減らすだけ」で利点が無くなった。</li>
+</ol>
+<p><strong>現在</strong>:純コードは world 多相(印なし)。GPU カーネル断片はただの純粋関数 <code>A → B</code> です。host/GPU の区別は <code>dispatch</code> 境界 + 表現可能性検査(実装上は <code>in_kernel</code> フラグ 1 個)だけが担い、<code>store</code> を host で誤って呼べない安全性は token の型(<code>World</code> ≠ <code>GPU</code>)が担います。</p>
+<h2 id="順序はプログラム順の撤回"><a class="header" href="#順序はプログラム順の撤回">「カーネル内の順序はプログラム順」の撤回</a></h2>
+<p><strong>案</strong>:カーネルの中身は 1 スレッドが上から順に実行する命令的コードなので、<code>store</code>/<code>load</code> の順序は素のプログラム順で保証すればよい(linearity 不要)。</p>
+<p><strong>撤回の理由</strong>(2026-06-12):これは <strong>関数の純粋性を売っている</strong>。評価器が字面順を守ることに意味が依存する = eval/quote/inline/conversion で順序が動きうる = 参照透過でない。<code>[&amp;IO]</code> を導入した動機そのものに反する。</p>
+<p><strong>現在</strong>:GPU の効果順序も host IO と同型の <strong>零幅 token threading</strong> で付けます。buffer は <code>'ω</code>(race・atomic は自由)のまま、順序だけを token の <code>'1</code> チェーンが担います。</p>
+<h2 id="fnmut"><a class="header" href="#fnmut">FnMut / apply ── 別建ての関数型</a></h2>
+<p><strong>案</strong>:効果のある λ のために <code>FnMut(A, B) = (Env : Type, env : Env, code : (Env, A) → (Env, B))</code> を、純粋な <code>A → B</code> と並ぶもう一つの組み込み関数型として立てる。呼び出しは <code>apply</code>、closure 値自体を <code>'1</code> で threading する。</p>
+<p><strong>廃止の理由</strong>:</p>
+<ul>
+<li>「効果のある関数」は素の <code>A → B</code> で表せる(<code>('1 S, A) → ('1 S, B)</code> はただの Π)。</li>
+<li>「closure は <code>'ω</code> だけ capture・<code>'1</code> は引数で渡す」を徹底すると関数値は全部 <code>'ω</code> になり、関数と状態を束ねる FnMut の存在理由が消える。</li>
+<li>creative coding の流儀(state-as-data:状態は <code>Array(Particle)</code> として持ち純粋関数で map)に、state-as-closure は合わない。</li>
+</ul>
+<p><strong>現在</strong>:関数型は <code>A → B</code> 一種類(確定)。状態を抱えた値が本当に要るなら手書きの Σ で書く ── foundation ではなくライブラリのパターン。</p>
+<blockquote>
+<p>設計ノートの言葉:「以前『すべての closure は言語レベルの Σ 型』『env を ∃ で隠す必要がある』と何度も書いたが、全部誤りだった。純粋 closure は capture していてもただの <code>A → B</code>。」</p>
+</blockquote>
+<h2 id="writeset"><a class="header" href="#writeset">WriteSet / disjoint merge</a></h2>
+<p><strong>案</strong>:GPU カーネルの書き込みを「各スレッドが書き込み集合(WriteSet)を返す純粋関数」とモデル化し、dispatch がそれらを disjoint(重複なし)に merge する。書き込みが純粋な「結果の組み立て」になり、副作用が消える。</p>
+<p><strong>撤回の理由</strong>:GPU には atomic 演算があり、<strong>複数スレッドが同じ場所に正しく書き込むパターンが実在する</strong>。disjointness の要求は強すぎるし、検査も高コスト。</p>
+<p><strong>現在</strong>:カーネルは本当に effectful だと認め、race は型で追わない(compute-shader と同じ割り切り)。</p>
+<h2 id="effect-row"><a class="header" href="#effect-row">effect row / <code>Row</code> kind / Res(ρ)</a></h2>
+<p><strong>案</strong>:dispatch のカーネルが任意個のバッファを捕捉するのを型で表すため、「捕捉する借用の行(row)」を第一級の kind にし、closure を存在量化・dispatch を全称量化で多相にし、<code>Res(ρ)</code> で返すべき資源を計算する。</p>
+<p><strong>撤回の理由</strong>:「糖衣構文のために変なものを足すくらいなら、糖衣構文の方を捨てろ」に真っ向から反する重い機構だった。捨てた後に「任意個 = レコード 1 個に束ねる(既にある Σ で済む)」という解が見つかった。</p>
+<p><strong>教訓</strong>:closure に借用を捕捉させ、それを高階関数経由で取り戻そうとすると機構が爆発する。<strong>借用は closure に捕捉させず、引数として渡す。</strong> ── これがその後の設計全体(dispatch の borrow-lift・ループの step・escape 防止)を貫く原則になりました。</p>
+<p>なお effect row 自体(capability の個数の多相)は現在も却下のままです。単一・抽象の capability <code>[&amp;E]</code>(E は型変数)は今の依存量化で書けるため、「effect 多相は無いが単一抽象 <code>[&amp;E]</code> はある」が正確な現状です。</p>
+<h2 id="region"><a class="header" href="#region">region / lifetime</a></h2>
+<p><strong>案</strong>(dispatch の capture 問題の試み 3):バッファを region 所有の <code>'ω</code> ハンドルにし、「現在の瞬間」を表す線形トークンを threading して順序を作る。「効果 = 時間トークンの threading、linearity = 時間は分岐しない、dispatch = 時間の fork-join」という世界観。</p>
+<p><strong>撤回の理由</strong>:<code>withRegion</code> を λ で書くとその λ がまた永続バッファを capture して封印が再発する。region を新規ブロック構文にせざるを得ず、ネスト・region 多相の複雑さを抱え込む。過剰。</p>
+<p><strong>現在</strong>:dispatch を構文にして borrow-lift する、で解決(→ <a href="gpu.html#dispatch--関数ではなく構文">GPU 実行</a>)。なお「コピー不可資源の同時読み取り共有」だけは QTT の threading で原理的に表せないため、region か fractional permission が将来必要になる可能性は残っています。</p>
+<h2 id="dispatch"><a class="header" href="#dispatch">dispatch の形の変遷</a></h2>
+<ol>
+<li><strong>explicit-R(関数)</strong>:触る全バッファをレコード <code>R</code> に束ねて引数で渡す。正しく動くが冗長 ──「ふつうに capture して書きたい」。</li>
+<li><strong>capture(closure)</strong>:<code>'1</code> 資源が closure に封印されて戻ってこない。「closure は <code>'1</code> を capture できない」原則と衝突し破綻。</li>
+<li><strong>region</strong>:上記の通り過剰で撤回。</li>
+<li><strong>構文 + borrow-lift(確定)</strong>:capture のように書けるが closure 値を作らないので封印しない。借りる資源の集合が body 依存 = 関数型を持てない、という点でも構文であることが本質的。</li>
+</ol>
+<p>綴りも <code>dispatch(size) λ(i){}</code>(関数形)は「そこに任意の関数を置けるかのような嘘の見た目」として退けられ、<code>dispatch(i in size){ body }</code>(並列 for 形)で確定しました。</p>
+<h2 id="eliminator-から-case-へ"><a class="header" href="#eliminator-から-case-へ">eliminator 焼き込みから <code>data</code> + <code>case</code> へ</a></h2>
+<p><strong>当初</strong>:帰納型はプリミティブとして固定し、型ごとの eliminator(<code>Nat-elim</code>/<code>Bool-elim</code>/<code>Vec-case</code> …)を処理系に焼き込む。「定義の一般機構は作らない」が M0 の方針だった。</p>
+<p><strong>転換の理由</strong>:QTT の合流規則(どの引数が <code>'0</code>/<code>'ρ</code>/<code>'π</code> か、<code>⊔</code> と SUM の群分け)を型ごとに手で持つ羽目になった。一般の <code>data</code> 宣言から constructor・<code>case</code>・iota・QTT 合流を導出する方が、規則が一つで済む。</p>
+<p><strong>現在</strong>:帰納型はユーザ(と prelude)が <code>data</code> で宣言し、分解・再帰は <code>case</code> + <code>⟦⟧</code> 一本。専用 eliminator は全廃(<code>J</code> も <code>case</code> で導出)。strict positivity を「inductive であることの定義」として要求します。</p>
+<p>同時期に「効果ありの分岐を自動で elaborate する分岐 padding」も撤回されました ── 全 branch に同じ <code>[&amp;R]</code> を付ければ、使わない枝の素通しは <code>[&amp;R]</code> 糖衣の末尾自動 return に吸収され、独立の機構が要らないためです。</p>
+<h2 id="σ-domain-適用から全面-curried-へ"><a class="header" href="#σ-domain-適用から全面-curried-へ">Σ-domain 適用から全面 curried へ</a></h2>
+<p><strong>当初</strong>:関数の引数テレスコープを Σ として一括で渡す(<code>f(a, b)</code> は組 <code>(a, b)</code> の適用)。</p>
+<p><strong>転換</strong>(2026-06-11):全面 curried へ移行(<code>f(a, b)</code> = <code>(f a) b</code>)。タプルを渡したいときだけ <code>f((a, b))</code>。全 190 テスト green のまま実装が 146 行減り、implicit のカリー化(各 implicit が独立のメタ変数)とも整合しました。型パラメータと辞書が別々に解決できることは instance 解決の前提です(Σ にまとめると「テレスコープの Σ」と「辞書そのものの Σ」が構造的に区別できず破綻する)。</p>
+<h2 id="finarray--build--index-の撤去"><a class="header" href="#finarray--build--index-の撤去">FinArray / build / index の撤去</a></h2>
+<p><strong>当初</strong>:遅延 pull 配列のためのプリミティブとして <code>FinArray</code>/<code>build</code>/<code>index</code> を持っていた。</p>
+<p><strong>撤去の理由</strong>(効果系 Phase 6):<code>build f = f</code>・<code>index xs i = xs i</code> ── つまり <strong>素の関数 <code>Fin(n) → A</code> の偽装</strong> で、実体がゼロだった。必要なら関数を直接書けばよい。materialized な可変配列は <code>Array</code> + <code>newArray</code>/<code>set</code>/<code>get</code> が別に担います。</p>
+<h2 id="まとめ繰り返し現れた教訓"><a class="header" href="#まとめ繰り返し現れた教訓">まとめ:繰り返し現れた教訓</a></h2>
+<ul>
+<li><strong>借用は capture させず、引数で渡す</strong>(FnMut・effect row・region・dispatch、すべてに共通の核)。</li>
+<li><strong>糖衣のために意味論を足さない</strong>。重い機構を作りかけたら、まず「既にある Σ / QTT で書けないか」を疑う。</li>
+<li><strong>「順序」や「安全性」を評価器の挙動(字面順・名前の不可視性)に頼らない</strong>。型(<code>'1</code>・token の型)に載せる。</li>
+<li><strong>紙の上で「綺麗にまとまった」は信用しない</strong>。core を oracle にして実装で確かめる。</li>
+</ul>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="impl.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
+                            </a>
+
+                            <a rel="next prefetch" href="status.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="impl.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
+                    </a>
+
+                    <a rel="next prefetch" href="status.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                    </a>
+            </nav>
+
+        </div>
+
+        <template id=fa-eye><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM432 256c0 79.5-64.5 144-144 144s-144-64.5-144-144s64.5-144 144-144s144 64.5 144 144zM288 192c0 35.3-28.7 64-64 64c-11.5 0-22.3-3-31.6-8.4c-.2 2.8-.4 5.5-.4 8.4c0 53 43 96 96 96s96-43 96-96s-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6z"/></svg></span></template>
+        <template id=fa-eye-slash><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zM223.1 149.5C248.6 126.2 282.7 112 320 112c79.5 0 144 64.5 144 144c0 24.9-6.3 48.3-17.4 68.7L408 294.5c5.2-11.8 8-24.8 8-38.5c0-53-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6c0 10.2-2.4 19.8-6.6 28.3l-90.3-70.8zm223.1 298L373 389.9c-16.4 6.5-34.3 10.1-53 10.1c-79.5 0-144-64.5-144-144c0-6.9 .5-13.6 1.4-20.2L83.1 161.5C60.3 191.2 44 220.8 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5z"/></svg></span></template>
+        <template id=fa-copy><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M502.6 70.63l-61.25-61.25C435.4 3.371 427.2 0 418.7 0H255.1c-35.35 0-64 28.66-64 64l.0195 256C192 355.4 220.7 384 256 384h192c35.2 0 64-28.8 64-64V93.25C512 84.77 508.6 76.63 502.6 70.63zM464 320c0 8.836-7.164 16-16 16H255.1c-8.838 0-16-7.164-16-16L239.1 64.13c0-8.836 7.164-16 16-16h128L384 96c0 17.67 14.33 32 32 32h47.1V320zM272 448c0 8.836-7.164 16-16 16H63.1c-8.838 0-16-7.164-16-16L47.98 192.1c0-8.836 7.164-16 16-16H160V128H63.99c-35.35 0-64 28.65-64 64l.0098 256C.002 483.3 28.66 512 64 512h192c35.2 0 64-28.8 64-64v-32h-47.1L272 448z"/></svg></span></template>
+        <template id=fa-play><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M73 39c-14.8-9.1-33.4-9.4-48.5-.9S0 62.6 0 80V432c0 17.4 9.4 33.4 24.5 41.9s33.7 8.1 48.5-.9L361 297c14.3-8.7 23-24.2 23-41s-8.7-32.2-23-41L73 39z"/></svg></span></template>
+        <template id=fa-clock-rotate-left><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M75 75L41 41C25.9 25.9 0 36.6 0 57.9V168c0 13.3 10.7 24 24 24H134.1c21.4 0 32.1-25.9 17-41l-30.8-30.8C155 85.5 203 64 256 64c106 0 192 86 192 192s-86 192-192 192c-40.8 0-78.6-12.7-109.7-34.4c-14.5-10.1-34.4-6.6-44.6 7.9s-6.6 34.4 7.9 44.6C151.2 495 201.7 512 256 512c141.4 0 256-114.6 256-256S397.4 0 256 0C185.3 0 121.3 28.7 75 75zm181 53c-13.3 0-24 10.7-24 24V256c0 6.4 2.5 12.5 7 17l72 72c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-65-65V152c0-13.3-10.7-24-24-24z"/></svg></span></template>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr-ef4e11c1.min.js"></script>
+        <script src="mark-09e88c2c.min.js"></script>
+        <script src="searcher-c2a407aa.js"></script>
+
+        <script src="clipboard-1626706a.min.js"></script>
+        <script src="highlight-abc7f01d.js"></script>
+        <script src="book-a0b12cfe.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>

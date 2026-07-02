@@ -1,0 +1,435 @@
+<!DOCTYPE HTML>
+<html lang="ja" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>珍しい機能カタログ - Oven ── 言語の記録</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="依存型 + QTT + GPU 並列の実験的言語 Oven の設計と実装の記録">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon-de23e50b.svg">
+        <link rel="shortcut icon" href="favicon-8114d1fc.png">
+        <link rel="stylesheet" href="css/variables-8adf115d.css">
+        <link rel="stylesheet" href="css/general-2459343d.css">
+        <link rel="stylesheet" href="css/chrome-ae938929.css">
+        <link rel="stylesheet" href="css/print-9e4910d8.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="fonts/fonts-9644e21d.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="mdbook-highlight-css" href="highlight-493f70e1.css">
+        <link rel="stylesheet" id="mdbook-tomorrow-night-css" href="tomorrow-night-4c0ae647.css">
+        <link rel="stylesheet" id="mdbook-ayu-highlight-css" href="ayu-highlight-3fdfc3ac.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "searchindex-3d1a964c.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc-45cb7b16.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="mdbook-body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="mdbook-sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("mdbook-sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="mdbook-sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="mdbook-sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="mdbook-page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="mdbook-menu-bar-hover-placeholder"></div>
+                <div id="mdbook-menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="mdbook-sidebar-toggle" class="icon-button" for="mdbook-sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="mdbook-sidebar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M0 96C0 78.3 14.3 64 32 64H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32H32c-17.7 0-32-14.3-32-32s14.3-32 32-32H416c17.7 0 32 14.3 32 32z"/></svg></span>
+                        </label>
+                        <button id="mdbook-theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="mdbook-theme-list">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M371.3 367.1c27.3-3.9 51.9-19.4 67.2-42.9L600.2 74.1c12.6-19.5 9.4-45.3-7.6-61.2S549.7-4.4 531.1 9.6L294.4 187.2c-24 18-38.2 46.1-38.4 76.1L371.3 367.1zm-19.6 25.4l-116-104.4C175.9 290.3 128 339.6 128 400c0 3.9 .2 7.8 .6 11.6c1.8 17.5-10.2 36.4-27.8 36.4H96c-17.7 0-32 14.3-32 32s14.3 32 32 32H240c61.9 0 112-50.1 112-112c0-2.5-.1-5-.2-7.5z"/></svg></span>
+                        </button>
+                        <ul id="mdbook-theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-ayu">Ayu</button></li>
+                        </ul>
+                        <button id="mdbook-search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="mdbook-searchbar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352c79.5 0 144-64.5 144-144s-64.5-144-144-144S64 128.5 64 208s64.5 144 144 144z"/></svg></span>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Oven ── 言語の記録</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <span class=fa-svg id="print-button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M128 0C92.7 0 64 28.7 64 64v96h64V64H354.7L384 93.3V160h64V93.3c0-17-6.7-33.3-18.7-45.3L400 18.7C388 6.7 371.7 0 354.7 0H128zM384 352v32 64H128V384 368 352H384zm64 32h32c17.7 0 32-14.3 32-32V256c0-35.3-28.7-64-64-64H64c-35.3 0-64 28.7-64 64v96c0 17.7 14.3 32 32 32H64v64c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V384zm-16-88c-13.3 0-24-10.7-24-24s10.7-24 24-24s24 10.7 24 24s-10.7 24-24 24z"/></svg></span>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="mdbook-search-wrapper" class="hidden">
+                    <form id="mdbook-searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="mdbook-searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="mdbook-searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <span class=fa-svg id="fa-spin"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M304 48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zm0 416c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM48 304c26.5 0 48-21.5 48-48s-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48zm464-48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM142.9 437c18.7-18.7 18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zm0-294.2c18.7-18.7 18.7-49.1 0-67.9S93.7 56.2 75 75s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zM369.1 437c18.7 18.7 49.1 18.7 67.9 0s18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9z"/></svg></span>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="mdbook-searchresults-outer" class="searchresults-outer hidden">
+                        <div id="mdbook-searchresults-header" class="searchresults-header"></div>
+                        <ul id="mdbook-searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('mdbook-sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('mdbook-sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#mdbook-sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="mdbook-content" class="content">
+                    <main>
+                        <h1 id="珍しい機能カタログ"><a class="header" href="#珍しい機能カタログ">珍しい機能カタログ</a></h1>
+<p>Oven には、他の言語ではあまり見ない機能や設計判断が多くあります。この章はそのカタログですが、単なる一覧ではなく、<strong>それぞれについて「なぜこういう選択をしたのか」を語る</strong> ことを目的にします。多くの項目は「もっと普通の選択肢」がまずあって、それが何かの理由で採れなかった、という物語を持っています。仕様としての正確な定義は各リンク先の章にあり、ここでは動機と、実装がどうそれを支えているかを書きます。</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>項目</th><th>一言でいうと</th></tr>
+</thead>
+<tbody>
+<tr><td><a href="#w--帰納仮説を書くための括弧"><code>⟦w⟧</code></a></td><td>停止性検査なしで全域性が構文から出る再帰</td></tr>
+<tr><td><a href="#case-の使用量規則--なぜ--一本ではだめだったか"><code>case</code> の 2 群 SUM 規則</a></td><td>線形資源を fold に通すための独自の合流規則</td></tr>
+<tr><td><a href="#第一級-multiplicity--1--1-が-ω-になるのも-instance">第一級 multiplicity</a></td><td><code>1 + 1 = ω</code> すら専用構文でない</td></tr>
+<tr><td><a href="#trustme--消去される公理という脱出ハッチ"><code>trustMe</code></a></td><td>悪用が自然に防がれる証明の脱出ハッチ</td></tr>
+<tr><td><a href="#モナドなしの効果--なぜ-token-threading-なのか">零幅 token の効果系</a></td><td>モナドなしで IO と GPU 命令順を統一</td></tr>
+<tr><td><a href="#辞書と-token-が同じ規則で解決される">resolution の統一</a></td><td>typeclass 辞書と効果 token は同じ機構の 2 つの顔</td></tr>
+<tr><td><a href="#escape-防止に専用機構がない">escape 防止機構がない</a></td><td>lifetime なしで資源が漏れない</td></tr>
+<tr><td><a href="#部分借用は-rust-の-borrow-ではなく-lens">lens としての部分借用</a></td><td>エイリアス解析なしの <code>&amp;r.field</code></td></tr>
+<tr><td><a href="#dispatch-はなぜ関数ではないのか"><code>dispatch</code> = 構文</a></td><td>関数型を持てないから構文、という必然</td></tr>
+<tr><td><a href="#ベクトル型が無い-タプルがそのまま-vecn">ベクトル型が「無い」</a></td><td><code>(F32,F32,F32)</code> がそのまま <code>vec3&lt;f32&gt;</code></td></tr>
+<tr><td><a href="#u8⁴--rgba8-を-u32-1-個にパックする">U8⁴ = u32 パック</a></td><td>RGBA8 を専用型なしで 4 バイトに</td></tr>
+<tr><td><a href="#buffer-に-buffer-を格納できない--soundness-の穴を塞いだ話">buffer-in-buffer 禁止</a></td><td>敵対的レビューで見つけた線形性の抜け道</td></tr>
+<tr><td><a href="#表現不能はその場でローカルにエラー">表現不能はローカルエラー</a></td><td>2LTT の亡霊が診断品質として生き残った</td></tr>
+<tr><td><a href="#cpu-emulation-が-gpu-のオラクル">CPU emulation = オラクル</a></td><td>依存ゼロの実行経路が GPU の正しさの基準</td></tr>
+<tr><td><a href="#演算子が全部ただの-instance">演算子が全部 instance</a></td><td><code>*</code> に組み込みの意味がない</td></tr>
+<tr><td><a href="#nominal--名目性だけを足した最小の-newtype">nominal</a></td><td>conversion でだけ不透明な newtype</td></tr>
+<tr><td><a href="#module--レコードを返すただの関数">module = 関数</a></td><td>functor 相当が機構ゼロで出る</td></tr>
+<tr><td><a href="#tightloose--空白が意味を持つ適用">tight/loose 適用</a></td><td>空白の有無で curried とタプルを両立</td></tr>
+<tr><td><a href="#リテラルは型の指標--既定型を持たない">リテラルの型指標</a></td><td><code>0</code> に既定の型がない</td></tr>
+<tr><td><a href="#assert-の引数が-1-である理由"><code>'1</code> を取る <code>assert</code></a></td><td>QTT ならではの API 設計</td></tr>
+<tr><td><a href="#bool-も-nat-も処理系にハードコードされていない">prelude が Oven ソース</a></td><td><code>Bool</code> すら処理系に焼き込まれていない</td></tr>
+<tr><td><a href="#quote_shared--30gb-のメモリ爆発から生まれた-quote"><code>quote_shared</code></a></td><td>30GB のメモリ爆発から生まれた共有保持 quote</td></tr>
+<tr><td><a href="#fromu32--機械整数から回数への全域な橋"><code>fromU32</code></a></td><td>機械整数から「回数」への全域な橋</td></tr>
+</tbody>
+</table>
+</div>
+<hr>
+<h2 id="型理論まわり"><a class="header" href="#型理論まわり">型理論まわり</a></h2>
+<h3 id="w--帰納仮説を書くための括弧"><a class="header" href="#w--帰納仮説を書くための括弧"><code>⟦w⟧</code> ── 帰納仮説を書くための括弧</a></h3>
+<p>Oven の再帰は、<code>case</code> の branch 内で <code>⟦w⟧</code>(ASCII では <code>[[w]]</code>)と書きます。「部分構造 <code>w</code> に対するこの <code>case</code> 自身の結果」── 数学の帰納法でいう帰納仮説です。</p>
+<pre><code>case[λ(k) Nat](n) { zero =&gt; m,  succ(k) =&gt; succ(⟦k⟧) }   // n + m
+</code></pre>
+<p><strong>なぜこの形か。</strong> 全域言語で再帰を書く方法は、大きく 2 つ知られています。ひとつは生の eliminator(<code>Nat-elim</code> のような畳み込み関数)で、安全性は自明ですが、実際に書くと motive やメソッドの受け渡しが煩雑で、人間が日常的に書く形ではありません。もうひとつは Idris や Agda のように一般再帰を許して <strong>停止性検査器</strong> を後付けする方法で、書き味は自然ですが、検査器そのものが複雑な機構になり、「なぜこのプログラムは全域なのか」の根拠が構文から見えなくなります。</p>
+<p><code>⟦⟧</code> はその中間を狙った選択です。<code>⟦w⟧</code> は <strong>その branch の再帰パターン変数にしか適用できない</strong> ── この構文制約ひとつで、書けるのは構造的再帰だけになり、<strong>全域性が構文的に自明</strong> になります。停止性検査器は存在しません。意味論としては生の eliminator と等価(安全性はそのまま)でありながら、見た目は「branch の中で再帰結果を参照する」という直観的な形です。denotation bracket(意味論の <code>⟦⟧</code>)を借りた記法で、「これは項ではなく『意味』を参照している」というニュアンスも込められています。</p>
+<p><strong>実装に踏み込むと</strong>、core の項は <code>Tm::Ih(idx, w)</code> で、<code>idx</code> は「どの recursor に属する帰納仮説か」を指す recursor スタックへの index です。この index は当初存在せず、「<code>⟦⟧</code> は最内の <code>case</code> のもの」と暗黙に決めていたのですが、それでは壊れるケースが見つかりました:再帰関数の <strong>値</strong> を quote(正規形へ書き戻し)すると、別の再帰が入れ子に展開されることがあります。たとえば <code>mult</code>(乗算)が本体で <code>plus</code>(加算)を呼ぶと、quote の途中で <code>plus</code> の recursor が <code>mult</code> の recursor の内側に現れ、「最内」の指す先がずれて <code>quote∘eval</code> が恒等でなくなる(実際に無限展開しました)。<code>⟦⟧</code> を正しい recursor に固定する index を持たせることで解決しています。「束縛の参照は名前でも『最内』でもなく、de Bruijn 的に数えろ」という教訓が、変数だけでなく帰納仮説にも当てはまった、という話です。</p>
+<p>→ 定義は<a href="types.html#反復は-case-のみ--帰納仮説の括弧-">コア型理論</a></p>
+<h3 id="case-の使用量規則--なぜ--一本ではだめだったか"><a class="header" href="#case-の使用量規則--なぜ--一本ではだめだったか"><code>case</code> の使用量規則 ── なぜ <code>⊔</code> 一本ではだめだったか</a></h3>
+<p>QTT の言語で分岐の使用量を合流させる標準的な方法は「各枝の使用量の上限 <code>⊔</code> を取る」です。実行時に通る枝は一つなので、これで健全です。Oven も最初、<code>case</code> の全 branch をこの一つの <code>⊔</code> プールで測っていました。</p>
+<p>これには <strong>穴ではなく、逆向きの問題</strong> がありました:正しいプログラムを弾いてしまうのです。線形資源 <code>s0 : '1 S</code> を fold の初期値に入れ、帰納仮説で threading するループ(<code>iterateEff</code>)を考えると、<code>zero</code> 枝は <code>s0</code> を 1 回使い、<code>succ</code> 枝は 0 回使います。これを <code>⊔</code> すると <code>⊔(1,0) = ω</code> ── 線形資源が ω に化けて、完全に正当な線形ループが型検査を通りません。</p>
+<p>原因を突き詰めると、「分岐」と「fold」では枝の関係が違うことに行き着きます。<strong>分岐の枝は排他的ですが、fold の基底と step は両方走ります</strong>。両方走るものの使用量は <code>⊔</code>(どちらか)ではなく SUM(合計)で測るべきです。そこで branch を <code>⟦⟧</code> を使うか否かで 2 群に分け:</p>
+<pre><code>Δ(case) = π_scrut·Δ_scrut + ⊔(⟦⟧ 無しの branch) + ω·⊔(⟦⟧ ありの branch)
+</code></pre>
+<p>再帰群に <code>ω</code> を掛けるのは、step が動的な回数走るためです。これで「線形資源は帰納仮説を通せば fold を生き延び、closure に capture したら弾かれる」という、望んだ通りの挙動が規則から出ます。</p>
+<p>面白いのは Idris 2 との対比です。Idris 2 は一般再帰 + 停止性検査の言語なので、再帰呼び出しはただの関数適用 1 回と数えられ、この問題自体が発生しません(線形 fold が素直に書けます)。Oven は「反復を <code>case</code> の構造的再帰に限定する」選択をした <strong>代償として</strong> この群分け規則を持ちますが、SUM 規則によって表現力は Idris の線形 fold と等価になっています。設計の選択が別の場所に請求書を回してくる、その請求書をきちんと払った例です。</p>
+<p><strong>実装では</strong> <code>typecheck.rs</code> の <code>combine_case</code> がこの式そのものです。実装上の注意がひとつコメントに残っています:<code>⊔</code> には単位元がありません(<code>⊔(0,1) = ω</code> なので、ゼロから <code>⊔</code> を始めると壊れる)。だから各群は「最初の branch の使用量で初期化し、2 個目以降を <code>⊔</code>」します。また <code>⟦⟧</code> の有無の判定(<code>uses_ih</code>)は入れ子の <code>case</code> の branch には降りません ── そこの <code>⟦⟧</code> は内側の <code>case</code> に属するからです。</p>
+<p>→ 規則の全体は <a href="qtt.html#case-の使用量規則">QTT</a></p>
+<h3 id="第一級-multiplicity--1--1-が-ω-になるのも-instance"><a class="header" href="#第一級-multiplicity--1--1-が-ω-になるのも-instance">第一級 multiplicity ── <code>1 + 1</code> が <code>ω</code> になるのも instance</a></h3>
+<p>多くの QTT 実装で multiplicity は型の注釈に住む特別な存在です。Oven では <code>Mult : Type</code> ── multiplicity は普通の値であり、<code>'p</code> の p に変数も式も書けます。</p>
+<p><strong>なぜ第一級にしたか。</strong> 直接の動機は multiplicity 多相です。たとえば <code>map</code> は、純粋なデータ(<code>'ω</code>)にも線形な資源の列(<code>'1</code>)にも使いたい。multiplicity が言語の外の注釈だと、この多相のために別の量化機構が要ります。<code>Mult</code> がただの型なら、mult 多相はただの依存量化 <code>(p : Mult, x : 'p A) → A</code> になり、<strong>新しい機構がゼロ</strong> で済みます。半環が 3 値で有限なので、多相関数の検査も原理的には全 valuation の列挙で決定可能 ── 「特別な solver が要るのでは」という当初の心配は、有限性を活かせば杞憂だと分かりました。</p>
+<p>そして第一級にした以上、半環演算 <code>+</code>/<code>·</code>/<code>⊔</code> も言語の中の演算です。ここで Oven らしい徹底が入ります:<code>1 + 1</code> と書いたときの <code>+</code> は、<strong>パーサにも型検査器にも特別扱いされていません</strong>。ambient prelude の <code>Add(Mult)</code> instance(中身は組み込みの <code>addMult</code>)が、F32 の加算と全く同じ経路 ── mixfix 脱糖 → instance 解決 ── で選ばれ、NbE が半環を畳んで <code>ω</code> になります。「乗法 <code>*</code> を特別扱いせず、multiplicity の半環すら instance で賄う」は明示的な設計方針でした。動機は一貫性です:<code>*</code> が文脈によって「言語の一部」だったり「ライブラリ」だったりする言語は、ユーザに 2 つのルールを覚えさせます。Oven はルールを 1 つにしました。</p>
+<p><strong>実装では</strong> core に <code>MultT</code>/<code>M0</code>/<code>M1</code>/<code>MW</code> と演算ノード <code>MAdd</code>/<code>MMul</code>/<code>MJoin</code> があり、NbE の iota が畳みます。multiplicity は <strong>型構造の一部として conversion で比較される</strong> ため、<code>'(1+1) A ≡ 'ω A</code> が定義の等しさとして成立します。一方、使用量(どの変数を何回使ったか)は conversion に一切効きません ── 「量は型の形には出るが、計算には出ない」という分離が保たれています。</p>
+<p>→ <a href="qtt.html#半環と順序">QTT</a>・<a href="surface.html#演算子と-instance">表面言語</a></p>
+<h3 id="trustme--消去される公理という脱出ハッチ"><a class="header" href="#trustme--消去される公理という脱出ハッチ"><code>trustMe</code> ── 消去される公理という脱出ハッチ</a></h3>
+<pre><code>postulate trustMe : [A : '0 Type] (u : Unit) -&gt; A
+</code></pre>
+<p>任意の型 A の値を出す公理です。当然、論理としてはこれ一つで崩壊します。それでも置いてあるのは、<strong>証明義務を「あとで」にできる言語のほうが実用で生き残る</strong> からです。たとえば並列 <code>reduce</code> は演算の結合性に正しさが依存するので、結合性の証明 <code>'0 Assoc(op)</code> を引数に取る設計です。しかし「reduce を使うたびに結合性を証明せよ」では誰も使いません。<code>trustMe()</code> で埋めて先へ進み、必要になったら本物の証明に差し替える ── 証明の負債を型に見える形で残しながら、開発は止めない、という運用です。</p>
+<p>この公理が壊れにくいのには理由があります。使ってよい場所が <strong><code>'0</code>(消去)位置</strong> ── 実行時に値が要らない証明の位置 ── である限り、<code>trustMe</code> の値は erasure で消え、実行時コストも実行時の嘘もゼロです。逆に値が本当に要る位置で使うと、<code>trustMe</code> には計算規則がないので評価が stuck して(GPU なら lowering エラーとして)すぐ露見します。「証明位置では安全に嘘をつけて、値位置では嘘がつけない」という性質が、機構なしで公理の悪用を防いでいます。<code>Type : Type</code> の不健全性を承知で採用した言語なので、「証明の健全性は絶対」ではなく「証明は実用上の不変条件チェック」という割り切りとも整合しています。</p>
+<p>→ <a href="types.html#inductive-でないものpostulate">コア型理論</a></p>
+<hr>
+<h2 id="効果まわり"><a class="header" href="#効果まわり">効果まわり</a></h2>
+<h3 id="モナドなしの効果--なぜ-token-threading-なのか"><a class="header" href="#モナドなしの効果--なぜ-token-threading-なのか">モナドなしの効果 ── なぜ token threading なのか</a></h3>
+<p>Haskell 系の純粋言語で効果といえばモナドです。Oven はモナドを持たず、効果を「零幅の token を線形に借りて返す」で表します:</p>
+<pre><code>[&amp;X] A  ≝  '1 X → (X, A)
+</code></pre>
+<p><strong>なぜモナドでないか。</strong> 第一に、Oven には QTT が <strong>すでに</strong> あります。線形性は「資源を一度だけ正しく使う」ことを型で言える機構で、これは効果の順序づけそのものです。モナドを足すと、順序づけの機構が 2 つ(bind の入れ子と線形性)になり、しかも GPU カーネルへ lowering する際に高階の bind 構造を解体する仕事が増えます。<code>[&amp;X] A</code> の実体はただの Π と Σ なので、<strong>効果のための意味論は core にゼロ</strong> ── 実行系も lowering も効果を知りません。</p>
+<p>第二に、この形は <strong>host と GPU を同型に扱えます</strong>。<code>print</code> は <code>World</code> token を、<code>store</code> は <code>GPU</code> token を借りて返す ── 同じ形です。実は GPU 側には一度「カーネル内は 1 スレッドが上から順に実行する命令的コードなのだから、順序は素のプログラム順でよい(linearity 不要)」という整理が存在しました。これは撤回されます。「評価器が字面の順序を守ること」に意味が依存するなら、eval・inline・正規化で順序が動き得る ── つまり <strong>関数の純粋性(参照透過性)を売り渡している</strong>。純粋性のために <code>[&amp;X]</code> を導入したのに、GPU だけ例外にしては本末転倒だ、という理屈です(→ <a href="history.html#順序はプログラム順の撤回">経緯</a>)。結果として「効果の順序はすべて token のデータ依存で表す。零幅 token なら実行時コストはゼロ」に統一されました。</p>
+<p>第三に、モナドが得意とする「効果の抽象化・合成」の大部分が、この設計ではただの機能の組み合わせで出ます。State も Writer も IO も「<code>[&amp;X]</code> の X が違うだけ」。効果多相は <code>[&amp;E]</code>(E は型変数)というただの依存量化。複数効果は <code>[&amp;X, &amp;Y]</code>。monad transformer に相当する階層は最初から存在しません。</p>
+<p><strong>実装では</strong> core に <code>Tm::Eff(caps, A)</code> という former があり、eval で <code>'1 X → (X, A)</code> に unfold されます。おもしろいのは、シグネチャの宣言型では <strong>Eff のまま保たれる</strong>(eval されない)ことです。elaboration は「この呼び出しは効果か」を、callee の宣言型の codomain が構文的に <code>Eff</code> かどうかで検出します ── unfold してしまうと素の Π と区別が付かなくなるからです。効果と判定された文は、token を implicit で注入し、返る <code>(X, A)</code> を <code>Split</code>(Σ の分解束縛)で開いて token を差し替える、という形に脱糖されます。ユーザが <code>store(out, i, x); let v = load(in, i)</code> と書くだけで、この配管がすべて暗黙に縫われます。</p>
+<p>→ <a href="effects.html">効果系</a></p>
+<h3 id="辞書と-token-が同じ規則で解決される"><a class="header" href="#辞書と-token-が同じ規則で解決される">辞書と token が同じ規則で解決される</a></h3>
+<p>typeclass の辞書(<code>Mul(F32)</code> の instance)と効果 token(<code>'1 World</code>)は、見た目も役割も全然違いますが、Oven では <strong>同じ一つの解決規則</strong> で埋まります:「implicit/borrow 引数の解決とは、wanted 型に合う『使用可能な束縛』を文脈から見つけて usage を消費すること」。</p>
+<p>これは美観のための統一ではなく、差分がすべて <strong>既存の概念から導出される</strong> ことに気づいた結果です。辞書は <code>'ω</code> なので何度でも引ける、token は <code>'1</code> なので一度で消費される ── これは multiplicity の差にすぎません。辞書は型がまだメタ変数を含むことがあるので遅延解決、token は型が常に ground(<code>World</code>/<code>GPU</code>)なので即時解決 ── これも「型が ground か」という条件から機械的に決まります。つまり「instance 解決」と「効果 token の供給」を別のサブシステムにする理由が、調べてみたら何もなかった。</p>
+<p>この統一の配当は handler の実装時に現れました。ユーザ効果の discharge(handler が効果ブロックに初期状態を供給する)を実装しようとしたら、<strong>新しい機構が何も要らなかった</strong> のです。<code>implicit w0 : X = init</code> と書けば、既存の instance 解決が <code>[&amp;X]</code> ブロックの token を型で拾って供給します。「効果 handler の土台は、typeclass の instance 解決そのものだった」というのは、設計時には意図していなかった収穫です。</p>
+<p>→ <a href="effects.html#resolution-の統一--ω-辞書と-linear-token-は同じ規則">効果系</a></p>
+<h3 id="escape-防止に専用機構がない"><a class="header" href="#escape-防止に専用機構がない">escape 防止に専用機構がない</a></h3>
+<p>線形な token や借用した資源が closure に隠れて生き延びる ── 効果系の設計で必ず塞ぐべき穴です。Rust はこれを lifetime で、多くの効果系は handler のスコープ規則で塞ぎます。Oven には <strong>escape を防ぐための規則が存在しません</strong>。それでも漏れないことが、closure の 2 規則から演繹できます:</p>
+<ol>
+<li>closure は <code>'1</code> を capture できない(capture は <code>'ω</code> のみ)</li>
+<li><code>'1</code> 引数の部分適用ができない</li>
+</ol>
+<p>token を閉包に入れる経路が (1) で、<code>let k = print(io)</code> のように部分適用で握る経路が (2) で塞がれ、複製は <code>'1</code> の 2 回使用として、握り潰しは「返り型 <code>(X, …)</code> を満たせない」として、いずれも既存の QTT 検査に引っかかります。よって token は 1 本の線形スレッドに閉じ、必ず caller に返ります。</p>
+<p>重要なのは、この 2 規則が escape のために <strong>導入されたのではない</strong> ことです。これらは「関数型を <code>A → B</code> 一種類にする」ために(FnMut を捨てる過程で)確定した規則で、escape 防止はその副産物でした。逆にいえば、「closure に借用を capture させたい」という要求を一度でも受け入れると、region や effect row のような重い機構が芋づるで必要になる ── 実際に設計はその 2 つを作りかけて捨てています(→ <a href="history.html#effect-row">経緯</a>)。「借用は capture させず引数で渡す」という一つの原則を守り抜くと、escape 問題ごと消滅する、というのがこの言語で最も気持ちのよい定理のひとつです。</p>
+<p>→ <a href="effects.html#escape-は-2-規則から閉じる">効果系</a></p>
+<h3 id="部分借用は-rust-の-borrow-ではなく-lens"><a class="header" href="#部分借用は-rust-の-borrow-ではなく-lens">部分借用は Rust の borrow ではなく lens</a></h3>
+<p><code>set(&amp;arr.field, …)</code> のようにレコードの一部だけ借りたい、という要求は自然です。Rust はこれを部分借用(disjoint borrows)で解きますが、その裏には「<code>&amp;mut r.a</code> と <code>&amp;mut r.b</code> は重ならない」を追跡するエイリアス解析と lifetime があります。</p>
+<p>Oven の答えは <strong>Haskell の lens</strong> です。<code>&amp;r.a</code> は「<code>r</code> を消費して、焦点 <code>a</code> と『埋め戻し関数』を返す」に脱糖されます:</p>
+<pre><code>Lens(S, A) = (s : '1 S) → ('1 A, ('1 A) → S)
+</code></pre>
+<p>get で分解し、焦点を関数に通し、putback で再構成して元の名前に再束縛する ── 全過程が純粋な関数適用です。エイリアスという概念自体が現れないので、解析も lifetime も要りません。「Oven の <code>&amp;</code> はそもそも参照ではなく consume-and-return の糖衣である」という一貫した見立てが、部分借用まで素直に延長された形です。lens は合成できるので <code>&amp;r.a.b</code> も 2 つの lens の合成で済みます。制約はひとつ:lens が構造的に導出できる path(フィールド・配列要素)に限られ、<code>&amp;(任意の式)</code> は書けません。</p>
+<p>→ <a href="effects.html#部分借用-rfield--lens">効果系</a>(設計確定・脱糖は未実装)</p>
+<hr>
+<h2 id="gpu-まわり"><a class="header" href="#gpu-まわり">GPU まわり</a></h2>
+<h3 id="dispatch-はなぜ関数ではないのか"><a class="header" href="#dispatch-はなぜ関数ではないのか"><code>dispatch</code> はなぜ関数ではないのか</a></h3>
+<p>GPU カーネルの起動 <code>dispatch(i in size){ body }</code> は、Oven で数少ない「本物の構文」です。関数でも eliminator でもありません。ここには長い回り道があります(→ <a href="history.html#dispatch">経緯</a>)。</p>
+<p>カーネルは任意個のバッファ(<code>'1</code> 資源)に触りたい。最初の案は「触る資源を全部レコードに束ねて引数で渡す」(explicit-R)で、これは <strong>正しく動きます</strong>。しかし手で束ねるのは冗長で、「ふつうに closure として <code>out</code> や <code>in</code> を capture して書きたい」という書き味の要求がありました。ところが capture を許すと、<code>'1</code> 資源が closure の環境に取り込まれて <strong>封印</strong> されます ── 使い終わっても返ってこない。これを救うために region システム(バッファを region 所有にして時間 token を threading する)まで検討されましたが、複雑さが過剰で撤回。</p>
+<p>最終的な洞察は「<strong>capture は書く。でも closure 値を作らなければ封印は起きない</strong>」でした。<code>dispatch</code> を構文にすれば、body はその場にインラインで書かれるだけで、関数値として存在しません。値にならないものは脱出も封印もしない。body が参照する自由な <code>'1</code> 変数は、構文が <strong>borrow-lift</strong> ── 消費して継続に返す ── します。外から見れば「借りて、走らせて、返した」だけです。</p>
+<p>もうひとつ、構文であることには消極的でない理由があります。borrow-lift する資源の集合は body の中身(どの自由変数を使うか)で決まります。つまり <strong>dispatch の「型」が body に依存する</strong> ── これはもはや関数型で書けません。関数にできないから構文にした、という必然です。</p>
+<p><strong>実装では</strong> core に <code>Tm::Dispatch(size, body, borrows, elem_tys, cont)</code> という 5 つ組のノードがあります。<code>borrows</code> は elaboration が body を kernel モードで型検査したときに集めた自由 <code>'1</code> 変数のリスト。継続 <code>cont</code> は「借用が返ってきた後」の世界なので、<code>redirect_cont</code> が de Bruijn index の付け替え(借用された変数への参照を fresh な binder へ張り替え、他の外側参照をシフトする)を行います。線形性の帳簿はこの refresh を通して繋がるので、<code>release(out); dispatch { store(out, …) }</code> のような use-after-free は普通の <code>'1</code> 検査として弾かれます。</p>
+<p>→ <a href="gpu.html#dispatch--関数ではなく構文">GPU 実行</a></p>
+<h3 id="ベクトル型が無い-タプルがそのまま-vecn"><a class="header" href="#ベクトル型が無い-タプルがそのまま-vecn">ベクトル型が「無い」── タプルがそのまま vecN</a></h3>
+<p>GPU 言語には必ず <code>vec3&lt;f32&gt;</code> があります。Oven に「ベクトル型」という新しい型はありません。<code>F32³</code> は <strong>ただのタプル <code>(F32, F32, F32)</code> の表記</strong> で、GPU lowering がこれをネイティブ vec3 にします。</p>
+<p><strong>なぜ型を足さなかったか。</strong> 新しい型を core に足すと、影響は型検査だけでは済みません。conversion の規則、NbE の値表現、runtime の値、pretty-printer、パーサ ── 言語のすべての層に「vec という新概念」が波及します。一方、よく見ると vecN は「同型スカラの 2〜4 成分の組」であり、<strong>Σ 型として既に表現できる構造</strong> です。だったら「同型スカラのタプルは GPU lowering で vecN になる」という <em>解釈</em> を lowering に置くだけでよい ── 言語の意味論には何も足さない。構築はタプル構文、成分アクセスは既存の射影 <code>.0/.1/.2</code>(WGSL の <code>.x/.y/.z</code> に対応)、色 <code>(r,g,b)</code> を作れば自然に vec3 です。CPU emulation は成分を分解して計算するだけで、値表現の変更もありません。</p>
+<p>この設計のもうひとつの柱は <strong>「WGSL の都合を言語に漏らさない」</strong> です。GPU の std430 レイアウトでは vec3 のストライドが 16 バイトになる等、メモリ上の姿には GPU 固有の事情があります。これをコア型や runtime に持ち込むと、「タプル = vec」という綺麗な同一視が壊れます。そこでアラインメントの処理は <code>gpu.rs</code> の buffer I/O(実 GPU との境界)だけに閉じ込めました。言語から見える意味論は常に「ただのタプル」です。</p>
+<p>ベクトル演算(<code>+</code>・dot・length・normalize)は <code>src/builtins.rs::vec_builtins()</code> のレジストリに宣言的に並んでいて、それぞれ CPU の成分計算と WGSL のネイティブ呼び出し(<code>dot()</code>/<code>length()</code>/<code>normalize()</code>)の両方を持ちます。演算の追加はレジストリのループに 1 行です。</p>
+<p>→ <a href="gpu.html#ベクトル型--同型スカラのタプルがそのまま-vecn">GPU 実行</a></p>
+<h3 id="u8⁴--rgba8-を-u32-1-個にパックする"><a class="header" href="#u8⁴--rgba8-を-u32-1-個にパックする">U8⁴ ── RGBA8 を u32 1 個にパックする</a></h3>
+<p>画像の 1 画素は RGBA 各 8 bit、合計 32 bit というのが標準です。Oven では <code>U8⁴</code> = <code>(U8, U8, U8, U8)</code> がこれに当たり、GPU 上では <strong>1 個の u32 に bit パック</strong> されます。</p>
+<p>背景には 2 つの決定があります。まず <code>U8</code> を一級のスカラ型として立てたこと。「色は F32 を 255 倍すればいい」でも動きますが、PNG やテクスチャの native な形式は整数バイトであり、正規化色(<code>UNorm8</code>)と整数バイト(<code>U8</code>)は <strong>意味の違う別の型</strong> だ、という判断がありました(<code>UNorm8</code> は将来の別型)。GPU には u8 スカラが無いので、実行上は u32 で担いで算術に <code>&amp; 255u</code> のマスクを入れます。</p>
+<p>次にパッキング。ベクトルの一般則に従えば <code>U8⁴</code> は <code>vec4&lt;u32&gt;</code> = 16 バイトになりますが、RGBA8 の意義は 4 バイトに詰まっていることです。そこで lowering に <code>GTy::PackedU8(n)</code> という表現を持たせ、構築は bit シフト、射影は bit 抽出、読み戻しは unpack にしました。ここでも「GPU の都合の局所化」が守られています:パックは GPU lowering と readback のデコードだけで行い、<strong>CPU emulation は U8 のタプルのまま</strong> 計算します。言語の意味論はどちらの経路でも同一で、メモリ上の姿だけが違う、という分離です。</p>
+<p>実装の細部にひとつ教訓が残っています。値が「自分は U8 だ」と知っている必要があったこと(<code>Scalar::U8</code> という担体の区別)。u32 で担いだまま型情報を落とすと、lowering が <code>(U8,U8,U8,U8)</code> を見ても <code>vec4&lt;u32&gt;</code>(16 バイト)と区別できず、誤判定します。消去と単相化の言語でも、リテラルの「幅」は値に自己記述させる必要がありました。</p>
+<p>→ <a href="gpu.html#narrow-型u8-と-u8⁴rgba8">GPU 実行</a></p>
+<h3 id="buffer-に-buffer-を格納できない--soundness-の穴を塞いだ話"><a class="header" href="#buffer-に-buffer-を格納できない--soundness-の穴を塞いだ話">buffer に buffer を格納できない ── soundness の穴を塞いだ話</a></h3>
+<p>「buffer の要素にできる型(storable)」からは <code>Buffer</code> 自身が除外されています。これは好みの制限ではなく、<strong>線形性の健全性がこの一点に掛かっていた</strong> ことが分かったためです。</p>
+<p>発見の経緯が示唆的です。dispatch の設計(「境界は線形な借用・内部は race 非検査」)が本当に健全か、敵対的にレビューしたときに、具体的な攻撃が見つかりました:カーネル内(当時の整理では線形性の検査が無い)で <code>'1</code> の buffer ハンドルを <strong>別の buffer に store し</strong>、borrow-lift で host へ返すと、host は同じ資源を指す名前を 2 つ持つことになる ── 線形資源の複製です。複製できれば二重解放も use-after-free も型を通ります。</p>
+<p>塞ぎ方は「storable をスカラと Σ に限定し、<code>Buffer</code> を弾く」。これが救いのある解だったのは、<strong>実 GPU の制約と一致していた</strong> からです。実際の GPU でも storage buffer に buffer ハンドルは格納できません(ポインタが無い世界です)。つまりこの制限は表現力を何も失っておらず、「GPU が物理的に許さないことを型でも許さない」だけでした。回帰テストは <code>tests/soundness.rs</code> に残っています。</p>
+<p>「境界の線形規律さえ守れば内部は自由」という dispatch の設計思想は、この修正で「境界を <strong>迂回する経路が無いこと</strong> も検査対象」に補強されました。同種の穴が他にないかは、<a href="status.html#未解決不安疑い続けるところ">未解決</a>として今も監視対象です。</p>
+<p>→ <a href="gpu.html#表現可能性">GPU 実行</a></p>
+<h3 id="表現不能はその場でローカルにエラー"><a class="header" href="#表現不能はその場でローカルにエラー">表現不能は「その場でローカルにエラー」</a></h3>
+<p>GPU に載らないもの(<code>Nat</code>、関数値、動的サイズのデータ)がカーネルに紛れたとき、Oven は lowering の失敗ではなく <strong>型検査の時点で、違反した binder の場所に</strong> エラーを出します。</p>
+<p>これは当初、<code>'GPU</code> modality(型に付く「GPU で走る」という印)の売りとして導入された性質です。「とりあえずコンパイルしてみて、最後に GPU に載らなかったらエラー」という方式は、エラーが lowering の内部表現の言葉で、しかも問題の根源から遠い場所に出ます。型の印で層を分ければ、「まさに違反した構文の場所」でローカルに報告できる ── 2LTT の「GPU 断片の隔離」という発想の、実用上いちばん嬉しい配当がこの診断品質でした。</p>
+<p>その後 <code>'GPU</code> modality 自体は全廃されます(印の意味が「表現可能性の強制」だけに痩せ、純コードに印を書かせるのは使える場所を減らすだけになったため)。しかし診断のローカル性は残りました。現在の実装は、型検査文脈の <code>in_kernel: bool</code> フラグ(dispatch body の検査中だけ立つ)が、実行時 binder(λ 引数・<code>let</code>・<code>case</code> パターン・split)の型に representable 検査を課す形です。modality という重い機構が bool 1 個に縮約されてなお、ユーザから見える価値(その場でエラー)は変わらない ── 機構と価値が別物であることの好例です。</p>
+<p>再帰型の弾かれ方も綺麗です。<code>Nat</code> を名指しで禁止するルールはなく、<code>case</code> のパターンフィールドに representable を課すと、<code>succ</code> のフィールド型 <code>Nat</code> が再帰的に検査されて自動的に弾かれます。一方、全 constructor が引数なしの有限 enum(<code>Bool</code> や <code>data Dir { east, west }</code>)は同じ検査を通り、u32 タグとして GPU に載ります(<code>sig::is_finite_enum</code>)。当初は「enum も手動で U32 エンコードせよ」でしたが、タグ化は機械的なのでコンパイラが引き受けました。</p>
+<p>→ <a href="gpu.html#表現可能性">GPU 実行</a></p>
+<h3 id="cpu-emulation-が-gpu-のオラクル"><a class="header" href="#cpu-emulation-が-gpu-のオラクル">CPU emulation が GPU のオラクル</a></h3>
+<p>Oven のプログラムは 2 つの経路で実行できます。既定の CPU emulation(依存ゼロ・tree-walking)と、feature <code>gpu</code> の実 GPU 実行(wgpu)です。両者は独立の実装で、テストは両経路の結果一致を検証します。</p>
+<p><strong>なぜ 2 経路を維持するのか。</strong> GPU 実行は本質的に検証しづらいからです。結果はドライバ・GPU 世代・浮動小数の実装に依存し、失敗はシェーダコンパイルエラーや黙った誤答として現れます。「言語の意味論として正しい答え」を GPU 自身に語らせることはできません。そこで、<strong>言語の全機能が動く、依存ゼロで決定的な実行系を先に作り、それを正とする</strong> 方針が採られました(M0 の目標が「GPU より先に CPU で画像を計算する」だったのはこのためです)。GPU バックエンドを書く仕事は「オラクルと同じ答えを出すこと」という明確なゴールを持つ機械的な作業になります。</p>
+<p>実装上、2 経路は消費する中間表現からして違います。CPU 経路は erasure 後の <strong>無型</strong> の実行時 IR <code>Rt</code>(高階 OK・構造的再帰 OK)を tree-walking し、GPU 経路は <strong>型付き</strong> の core <code>Tm</code> から一階の <code>KernelIR</code> へ lower します(GPU は全式に型が要るため)。性質が真逆の 2 つの消費者を同じ core から派生させていて、共有しているのは数値プリミティブの意味(<code>NUM_BUILTINS</code> の同じ表を両者が引く)だけです。CPU 側の数値計算は意図的に WGSL のセマンティクスに合わせてあり(<code>fract</code> = x−floor(x)、<code>log</code> = 自然対数)、それでも避けられない超越関数の ULP 差だけをテストの許容誤差が吸収します。</p>
+<p>→ <a href="impl.html">処理系の内部</a>・<a href="gpu.html#lowering-パイプライン">GPU 実行</a></p>
+<hr>
+<h2 id="表面言語まわり"><a class="header" href="#表面言語まわり">表面言語まわり</a></h2>
+<h3 id="演算子が全部ただの-instance"><a class="header" href="#演算子が全部ただの-instance">演算子が全部「ただの instance」</a></h3>
+<p><code>a * b</code> は <code>_*_(a, b)</code> に脱糖され、<code>_*_</code> は「<code>Mul(A)</code> の辞書 <code>d</code> を implicit で取り、<code>d(x, y)</code> を呼ぶだけの普通の関数」です。パーサが知っているのは fixity 宣言(<code>infixl 7 _*_</code>)だけで、<code>*</code> の意味はスコープ内の instance が決めます。</p>
+<p>動機は徹底した一貫性です。演算子に組み込みの意味を持たせると、「組み込みの <code>*</code>」と「ユーザの演算子」の 2 種類のルールができ、さらに「Mult の <code>*</code> は型検査の一部、F32 の <code>*</code> はライブラリ」のような層の混在が生じます。Oven はここを 1 つに潰しました:<strong>乗法 <code>*</code> は Mult でも F32 でも「ただの instance」</strong>。multiplicity の半環演算すら特別な構文を持ちません(→ <a href="#第一級-multiplicity--1--1-が-ω-になるのも-instance">第一級 multiplicity</a>)。</p>
+<p>この一般化を成立させるために解いた実際的な問題が 2 つ記録に残っています。ひとつは <strong>リテラルとのデッドロック</strong>。<code>2.0 * 3.0</code> の型検査では、被演算子はリテラルで型が未確定、instance も未解決 ── クラスの結果型を連想型(<code>d.Out</code>)にすると、型パラメータ A を確定させる手がかりがどこにも無く、推論が膠着します。そこで標準の演算子クラスは結果型を A(homogeneous)にしました。期待型(<code>F32</code> が欲しい文脈)が A を直に解き、リテラルも辞書も連鎖的に解けます。もうひとつは <strong>総称関数内の演算子</strong>。<code>square [A, d : Mul(A)] (x : A) = x * x</code> の本体で <code>*</code> を使うには、仮引数 <code>d</code> が instance プールに入っている必要があります。ここは「nominal 型を持つ束縛は自動的に instance になる」という規則(<code>pool_if_nominal</code>)で解決され、Agda の instance 引数に相当するものが「クラス = nominal 型」から自然に出ました。</p>
+<p>lexer にも一点だけ支えがあります。記号の連なり(<code>+ - * &lt; &gt; …</code>)を 1 つの Op トークンにまとめ、<code>_op_</code>/<code>op_</code> を通常の識別子として組み立てる ── 演算子そのものを定義・参照できるのはこのためです。</p>
+<p>→ <a href="surface.html#演算子と-instance">表面言語</a></p>
+<h3 id="nominal--名目性だけを足した最小の-newtype"><a class="header" href="#nominal--名目性だけを足した最小の-newtype">nominal ── 名目性だけを足した最小の newtype</a></h3>
+<p>typeclass のクラス本体は <code>nominal</code> 型です:</p>
+<pre><code>nominal Add (A : Type) = (x : A, y : A) -&gt; A
+nominal Mul (A : Type) = (x : A, y : A) -&gt; A
+</code></pre>
+<p><code>Add(F32)</code> と <code>Mul(F32)</code> の中身はどちらも <code>(F32, F32) → F32</code> で、構造的には同じ型です。Oven の conversion は構造的なので、素の Σ でクラスを表すと <strong>加算の instance が乗算の解決候補になってしまう</strong> ── instance 解決は型一致で辞書を拾うので、同形クラスの共存が即座に曖昧エラーになります。これが nominal を導入した理由の全てです。名前で型を区別する(名目的な)壁を、この一箇所のためだけに立てました。</p>
+<p>面白いのは透明性の設計です。普通の newtype(Haskell の <code>newtype</code>、Rust のタプル構造体)は構築と分解にラッパの出し入れが要ります。Oven の nominal は <strong>conversion でだけ不透明で、それ以外には完全に透明</strong> です:<code>d : Mul(A)</code> はラップなしの素の関数値で、<code>d(x, y)</code> と直接呼べます。実装では <code>typecheck.rs</code> の <code>peel_nominal</code> が「構築・除去(適用・射影)のときだけ body へ展開し、conversion では決して展開しない」という片側だけの unfold を行います。「instance 解決が曖昧にならない」という一点のためにどれだけ小さい機構で済むか、を突き詰めた結果が「conv だけ見えない壁」でした。</p>
+<p>なお、初期実装ではタグ付きレコードで区別する ad-hoc な方法を使っていて、後に nominal 型として原理的に整理し直した経緯があります。「動くけれど原理から出ていない解を、原理のある形に置き直す」という、この開発で繰り返されるパターンのひとつです。</p>
+<p>→ <a href="surface.html#クラスが-nominal-である理由">表面言語</a></p>
+<h3 id="module--レコードを返すただの関数"><a class="header" href="#module--レコードを返すただの関数">module ── レコードを返すただの関数</a></h3>
+<pre><code>module Vec3 (n : U32) {
+  zero : U32 = 0[U32];
+  scale (s : U32, v : U32) : U32 = mulU32(s, v);
+}
+Vec3(3[U32]).scale(2[U32], 5[U32])
+</code></pre>
+<p>ML 系言語のパラメータ付きモジュール(functor)に見えますが、専用機構は存在しません。<code>module M (params) { … }</code> は <code>let M = λ(params) let f = …; let g = …; (f = f, g = g)</code> ── <strong>引数を取って名前付きレコードを返す関数</strong> への純粋な糖衣です。</p>
+<p>これが可能なのは、言語の 2 つの基礎的な選択の配当です。第一に <code>Type : Type</code>:型がただの値なので、レコードのフィールドに型を入れられ、モジュールが型を輸出することも(必要なら)普通の依存 Σ で書けます。第二に Σ backbone:「名前付きの束」という概念がレコードとして既にあり、モジュールのために新しい名前空間機構を作る理由がありません。内部が nested let なので後の定義が前の定義を参照できる(共有される)ことも、糖衣の展開形から自明に出ます。</p>
+<p>「モジュールシステム」は言語設計の中でも際立って重くなりがちな部分(ML の functor・シグネチャ・sealing はそれ自体が研究分野です)ですが、依存型があるとその大部分が「関数とレコード」に還元される ── Oven はその教科書的な事実を、実際に専用機構ゼロで実装した形です。<code>open</code>(無修飾の取り込み)だけは構文の仕事なので、将来の課題として残っています。</p>
+<p>→ <a href="surface.html#ブロック定義構文module">表面言語</a></p>
+<h3 id="tightloose--空白が意味を持つ適用"><a class="header" href="#tightloose--空白が意味を持つ適用">tight/loose ── 空白が意味を持つ適用</a></h3>
+<p><code>f(x, y)</code> と <code>f (x, y)</code> は違う意味です。前者(tight:<code>f</code> と <code>(</code> が密着)は curried 適用 <code>(f x) y</code>、後者(loose:空白あり)はタプル <code>(x, y)</code> を 1 個渡す適用です。</p>
+<p>空白に意味を持たせるのはリスクのある選択で、それでも採ったのには経緯があります。Oven の適用は当初、引数テレスコープを Σ として一括で渡す方式(Σ-domain)でした。Σ backbone の思想には合うのですが、implicit 推論と衝突します:型パラメータ <code>A</code> と辞書 <code>d</code> を 1 つの Σ に束ねると、単一化が「テレスコープの Σ」と「辞書そのものの Σ 型」を構造的に区別できず、instance 解決が壊れました。それで適用は全面 curried へ移行(このとき実装が 146 行減っています)。しかし「関数がタプルを受け取る」形は依然として正当な型なので、curried 適用とタプル適用の <strong>両方を書き分ける記法</strong> が必要になり、tight/loose の区別に落ち着きました。</p>
+<p>つまりこれは美観の選択ではなく、「curried(推論に必要)とタプル(Σ backbone に必要)の両立」という制約の解です。<code>f(a, b)</code> = <code>f a b</code> = 並置、と教われば規則自体は単純ですが、<code>f (x, y)</code> の空白 1 個が意味を変えることには慣れが要ります。設計もそれは自覚していて、パーサ詳細の未確定項目として記録されています。</p>
+<p>→ <a href="surface.html#適用">表面言語</a></p>
+<h3 id="リテラルは型の指標--既定型を持たない"><a class="header" href="#リテラルは型の指標--既定型を持たない">リテラルは型の指標 ── 既定型を持たない</a></h3>
+<p><code>0</code> は文脈によって <code>Nat</code> の <code>zero</code>、<code>F32</code> の <code>0.0</code>、<code>Mult</code> の <code>'0</code> になります。期待型がリテラルを解決し、期待型が無い場所(注釈なしの <code>let x = 5</code>)では <strong>エラー</strong> です(<code>5[Nat]</code> のように注釈します)。</p>
+<p>多くの言語はここで既定型を持ちます(Haskell の defaulting、Rust の <code>i32</code> フォールバック)。Oven がそれを拒否したのは、「その場で勝手に既定の型を決める」のが ad-hoc だから、という明確な方針によります。defaulting は「なぜ i32 なのか」に原理的な答えがなく、しかも推論の他の部分と相互作用して驚きを生みます(Haskell の defaulting 規則の複雑さは有名です)。書き手に 1 つ注釈を要求するほうが、暗黙の規則を 1 つ覚えさせるより安い、という判断です。</p>
+<p>実装として面白いのは、<code>Tm::Lit</code> が <strong>「elaboration で消える契約」の項</strong> であることです。パーサは <code>0</code> を <code>Lit</code> のまま core に入れ、型検査が期待型を見て <code>M0</code> や <code>succ^n zero</code> や機械スカラ <code>Scalar</code> へ置き換えます。解決後の木に <code>Lit</code> は残らず、万一 eval や erasure に届いたら panic で契約違反が顕在化します。名前付き射影 <code>ProjN</code>(<code>r.field</code> ── 型を見ないと位置に解決できない)も同じ「型検査で消える surface 項」で、「parse の時点では決められないものは、専用ノードで型検査まで運ぶ」という一貫したパターンになっています。</p>
+<p>→ <a href="surface.html#リテラル--型の指標を持つ">表面言語</a></p>
+<h3 id="assert-の引数が-1-である理由"><a class="header" href="#assert-の引数が-1-である理由"><code>assert</code> の引数が <code>'1</code> である理由</a></h3>
+<pre><code>postulate assert : (b : '1 Bool) -&gt; [&amp;World] Unit
+</code></pre>
+<p><code>Bool</code> を「1 回だけ使う」と宣言する意味はあるのか、と一見不思議な型です。これは QTT の適用規則から来る、実際的な設計です。</p>
+<p>適用 <code>f(a)</code> の使用量は「引数式 <code>a</code> の使用量 × binder の multiplicity」で計算されます。もし <code>assert</code> の引数が <code>'ω</code> だと、引数式の中で使われた資源の使用量が <strong>ω 倍</strong> されます。テストの典型形 <code>assert(eqArray(readback(a), readback(b)))</code> では、引数式が線形 buffer <code>a</code>, <code>b</code> を消費(readback)しています。ω 倍されると「線形資源を ω 回使った」ことになり、完全に正当なこのコードが線形性違反で弾かれてしまう。引数を <code>'1</code> にすれば使用量は 1 倍のまま通ります。</p>
+<p>この型が入る前、自己検証テストは複数の条件を <code>and</code> で束ねた 1 つの式にしていて、まさにこのスケーリング問題に踏んでいました(<code>and : (Bool, Bool) → Bool</code> の引数が <code>'ω</code> で、線形 readback が弾かれる)。<code>assert</code> を効果つき・<code>'1</code> 引数の文として導入したことで解消しています。「引数の multiplicity は『callee が何回使うか』だけでなく『引数式に何を書けるか』を決める」という、QTT の言語に固有の API 設計の一面です。</p>
+<p>→ <a href="effects.html#効果-former-x">効果系</a></p>
+<hr>
+<h2 id="実装まわり"><a class="header" href="#実装まわり">実装まわり</a></h2>
+<h3 id="bool-も-nat-も処理系にハードコードされていない"><a class="header" href="#bool-も-nat-も処理系にハードコードされていない"><code>Bool</code> も <code>Nat</code> も処理系にハードコードされていない</a></h3>
+<p><code>Bool</code>/<code>Nat</code>/<code>Fin</code>/<code>Vec</code>/<code>Id</code> は、処理系の Rust コードに焼き込まれた特別な型ではなく、<code>std/prelude.ov</code> に <strong>Oven の <code>data</code> 宣言として</strong> 書かれています。処理系は起動時にこのファイル(<code>include_str!</code> で埋め込み)をパースしてシグネチャを作ります。<code>Buffer</code> や <code>store</code> のような真のプリミティブも同様に <code>postulate</code> 宣言としてこのファイルにあります。</p>
+<p>こうなったのは初めからではありません。M0 の当初方針は逆で、「inductive の一般機構は作らない。組み込み型と eliminator をプリミティブ表に焼き込む」でした。転換の直接の理由は QTT です:型ごとの eliminator は、型ごとに使用量の合流規則(どの引数が <code>'0</code>/<code>'ρ</code>/<code>'π</code> か)を手で持つことを意味し、これが誤りの温床になりました(実際に旧規則には線形 fold を弾く穴があった)。<code>data</code> 宣言から constructor・<code>case</code>・iota・QTT 合流を <strong>一般規則で導出</strong> するほうが、規則が 1 つで済み、しかも検証も 1 回で済みます。</p>
+<p>一般機構ができれば、組み込み型を特別扱いする理由は消えます。prelude を Oven ソースにしたのはその帰結で、副産物として言語の dogfooding(<code>data</code>/<code>postulate</code>/<code>nominal</code> 宣言・借用記法・効果 former が、処理系の起動のたびに実データでパースされる)にもなっています。数値プリミティブはさらに一段自動化されていて、<code>postulate addF32 : …</code> のような宣言は prelude にすら書かれず、<code>src/builtins.rs::NUM_BUILTINS</code> の表(名前・型・CPU 計算・WGSL 形)から自動生成されます。数値関数の追加は表 1 行です。</p>
+<p>→ <a href="impl.html">処理系の内部</a></p>
+<h3 id="quote_shared--30gb-のメモリ爆発から生まれた-quote"><a class="header" href="#quote_shared--30gb-のメモリ爆発から生まれた-quote"><code>quote_shared</code> ── 30GB のメモリ爆発から生まれた quote</a></h3>
+<p>NbE の quote(値を項に書き戻す操作)は、素朴には値の木構造を辿ります。しかし eval が作る値は <code>Rc</code> で共有された <strong>DAG</strong> です。共有を無視して辿ると、DAG は木に展開されます ── 指数爆発の古典的な形です。</p>
+<p>これが実際に火を噴いたのが showcase(マンデルブロ)でした。<code>escape(c) = (iterate(16, …)).cnt</code> のように反復をラッパ関数越しに呼ぶと、GPU lowering のインライン展開が <code>quote(eval(…))</code> を通り、共有されていた反復の中間状態が反復ごとに複製されます。計測では 1 反復あたり項サイズ 13 倍、16 反復でメモリ 30GB に達して完走しませんでした。普通のプログラムがコンパイルできないのは言語として致命的です。</p>
+<p>解決が <code>nbe::quote_shared</code> です。通常の quote と違い、eval の Rc-DAG を辿りながら <strong>同一ノード(ポインタ等価)を検出して <code>let</code> 束縛の列に平坦化</strong> し、2 回目以降の出現を変数参照にします(GVN:同じ計算に同じ名前を与える)。出力は「<code>let</code> の連鎖 + 本体」という形の項で、共有が構文上の共有(<code>let</code>)として保存されます。健全性の注意点として、分岐の下で評価された値をどこまで持ち上げてよいかがあり、branch 評価のキャッシュで扱っています。この修正で showcase は CPU/GPU 両経路とも完走し、回帰テスト(反復カーネルの項サイズが爆発しないこと)が置かれました。</p>
+<p>「正規化は正しいがサイズが爆発する」は依存型処理系の定番の罠で、Oven の場合は GPU lowering(全展開が避けられない)がそれを増幅しました。「意味論の正しさ(quote∘eval = id)と計算量の正しさ(共有の保存)は別の要件」という教訓の実物です。</p>
+<p>→ <a href="gpu.html#共有を保つ-quote指数爆発の回避">GPU 実行</a></p>
+<h3 id="fromu32--機械整数から回数への全域な橋"><a class="header" href="#fromu32--機械整数から回数への全域な橋"><code>fromU32</code> ── 機械整数から「回数」への全域な橋</a></h3>
+<pre><code>postulate fromU32 : (n : U32) -&gt; Nat
+</code></pre>
+<p>型理論の <code>Nat</code> は <code>succ(succ(…zero))</code> という unary 表現で、「n 回繰り返す」という <strong>概念</strong> の担い手です。しかし実行時に unary の数を持つのは O(n) の無駄で、GPU では論外です。一方、実行時の数は機械整数 <code>U32</code> で持ちたいが、<code>U32</code> は不透明なスカラで帰納構造(= <code>case</code> で回す能力)を持ちません。この 2 つを繋ぐのが <code>fromU32</code> です。</p>
+<p>注目すべきは <strong>全域である</strong> ことです。逆方向(<code>Nat → U32</code>)は 2³² を超える Nat で破綻するため有界性の証明が要りますが、こちらの方向は「どの u32 も Nat である」── 論理的には <code>fromU32(n) = succ^n(zero)</code> と定義でき、部分性がありません。証明義務ゼロで機械整数を「回数」として使えます。</p>
+<p>実装では <code>fromU32(n)</code> の結果は unary に展開されず、<strong>担体の u32 をそのまま持ちます</strong>。そして <code>iterate(fromU32(n), f, init)</code> のような fold(<code>case</code>)を、runtime と GPU lowering が <strong>for ループ</strong> として実行します。つまり「論理的な意味は unary Nat の構造的再帰、実行時の姿は機械整数のカウンタループ」という二重写しです。これは将来構想(<a href="gpu.html#表現可能性">表現可能性</a>の <code>Repr</code> witness ──「帰納型に GPU-native な担体への埋め込みを与えると、その fold が for に翻訳される」)の最初の具体例でもあり、「functional なプログラムを imperative なループに翻訳する」という言語全体の野心の縮図になっています。</p>
+<p>→ <a href="gpu.html#caseforwitnessed-fold">GPU 実行</a></p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="surface.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
+                            </a>
+
+                            <a rel="next prefetch" href="comparison.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="surface.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
+                    </a>
+
+                    <a rel="next prefetch" href="comparison.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                    </a>
+            </nav>
+
+        </div>
+
+        <template id=fa-eye><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM432 256c0 79.5-64.5 144-144 144s-144-64.5-144-144s64.5-144 144-144s144 64.5 144 144zM288 192c0 35.3-28.7 64-64 64c-11.5 0-22.3-3-31.6-8.4c-.2 2.8-.4 5.5-.4 8.4c0 53 43 96 96 96s96-43 96-96s-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6z"/></svg></span></template>
+        <template id=fa-eye-slash><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zM223.1 149.5C248.6 126.2 282.7 112 320 112c79.5 0 144 64.5 144 144c0 24.9-6.3 48.3-17.4 68.7L408 294.5c5.2-11.8 8-24.8 8-38.5c0-53-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6c0 10.2-2.4 19.8-6.6 28.3l-90.3-70.8zm223.1 298L373 389.9c-16.4 6.5-34.3 10.1-53 10.1c-79.5 0-144-64.5-144-144c0-6.9 .5-13.6 1.4-20.2L83.1 161.5C60.3 191.2 44 220.8 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5z"/></svg></span></template>
+        <template id=fa-copy><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M502.6 70.63l-61.25-61.25C435.4 3.371 427.2 0 418.7 0H255.1c-35.35 0-64 28.66-64 64l.0195 256C192 355.4 220.7 384 256 384h192c35.2 0 64-28.8 64-64V93.25C512 84.77 508.6 76.63 502.6 70.63zM464 320c0 8.836-7.164 16-16 16H255.1c-8.838 0-16-7.164-16-16L239.1 64.13c0-8.836 7.164-16 16-16h128L384 96c0 17.67 14.33 32 32 32h47.1V320zM272 448c0 8.836-7.164 16-16 16H63.1c-8.838 0-16-7.164-16-16L47.98 192.1c0-8.836 7.164-16 16-16H160V128H63.99c-35.35 0-64 28.65-64 64l.0098 256C.002 483.3 28.66 512 64 512h192c35.2 0 64-28.8 64-64v-32h-47.1L272 448z"/></svg></span></template>
+        <template id=fa-play><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M73 39c-14.8-9.1-33.4-9.4-48.5-.9S0 62.6 0 80V432c0 17.4 9.4 33.4 24.5 41.9s33.7 8.1 48.5-.9L361 297c14.3-8.7 23-24.2 23-41s-8.7-32.2-23-41L73 39z"/></svg></span></template>
+        <template id=fa-clock-rotate-left><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M75 75L41 41C25.9 25.9 0 36.6 0 57.9V168c0 13.3 10.7 24 24 24H134.1c21.4 0 32.1-25.9 17-41l-30.8-30.8C155 85.5 203 64 256 64c106 0 192 86 192 192s-86 192-192 192c-40.8 0-78.6-12.7-109.7-34.4c-14.5-10.1-34.4-6.6-44.6 7.9s-6.6 34.4 7.9 44.6C151.2 495 201.7 512 256 512c141.4 0 256-114.6 256-256S397.4 0 256 0C185.3 0 121.3 28.7 75 75zm181 53c-13.3 0-24 10.7-24 24V256c0 6.4 2.5 12.5 7 17l72 72c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-65-65V152c0-13.3-10.7-24-24-24z"/></svg></span></template>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr-ef4e11c1.min.js"></script>
+        <script src="mark-09e88c2c.min.js"></script>
+        <script src="searcher-c2a407aa.js"></script>
+
+        <script src="clipboard-1626706a.min.js"></script>
+        <script src="highlight-abc7f01d.js"></script>
+        <script src="book-a0b12cfe.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>

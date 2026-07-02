@@ -1,0 +1,313 @@
+<!DOCTYPE HTML>
+<html lang="ja" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>他言語との比較 ── 現代の言語の中での立ち位置 - Oven ── 言語の記録</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="依存型 + QTT + GPU 並列の実験的言語 Oven の設計と実装の記録">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon-de23e50b.svg">
+        <link rel="shortcut icon" href="favicon-8114d1fc.png">
+        <link rel="stylesheet" href="css/variables-8adf115d.css">
+        <link rel="stylesheet" href="css/general-2459343d.css">
+        <link rel="stylesheet" href="css/chrome-ae938929.css">
+        <link rel="stylesheet" href="css/print-9e4910d8.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="fonts/fonts-9644e21d.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="mdbook-highlight-css" href="highlight-493f70e1.css">
+        <link rel="stylesheet" id="mdbook-tomorrow-night-css" href="tomorrow-night-4c0ae647.css">
+        <link rel="stylesheet" id="mdbook-ayu-highlight-css" href="ayu-highlight-3fdfc3ac.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "searchindex-3d1a964c.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc-45cb7b16.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="mdbook-body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="mdbook-sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("mdbook-sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="mdbook-sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="mdbook-sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="mdbook-page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="mdbook-menu-bar-hover-placeholder"></div>
+                <div id="mdbook-menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="mdbook-sidebar-toggle" class="icon-button" for="mdbook-sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="mdbook-sidebar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M0 96C0 78.3 14.3 64 32 64H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32H32c-17.7 0-32-14.3-32-32s14.3-32 32-32H416c17.7 0 32 14.3 32 32z"/></svg></span>
+                        </label>
+                        <button id="mdbook-theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="mdbook-theme-list">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M371.3 367.1c27.3-3.9 51.9-19.4 67.2-42.9L600.2 74.1c12.6-19.5 9.4-45.3-7.6-61.2S549.7-4.4 531.1 9.6L294.4 187.2c-24 18-38.2 46.1-38.4 76.1L371.3 367.1zm-19.6 25.4l-116-104.4C175.9 290.3 128 339.6 128 400c0 3.9 .2 7.8 .6 11.6c1.8 17.5-10.2 36.4-27.8 36.4H96c-17.7 0-32 14.3-32 32s14.3 32 32 32H240c61.9 0 112-50.1 112-112c0-2.5-.1-5-.2-7.5z"/></svg></span>
+                        </button>
+                        <ul id="mdbook-theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-ayu">Ayu</button></li>
+                        </ul>
+                        <button id="mdbook-search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="mdbook-searchbar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352c79.5 0 144-64.5 144-144s-64.5-144-144-144S64 128.5 64 208s64.5 144 144 144z"/></svg></span>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Oven ── 言語の記録</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <span class=fa-svg id="print-button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M128 0C92.7 0 64 28.7 64 64v96h64V64H354.7L384 93.3V160h64V93.3c0-17-6.7-33.3-18.7-45.3L400 18.7C388 6.7 371.7 0 354.7 0H128zM384 352v32 64H128V384 368 352H384zm64 32h32c17.7 0 32-14.3 32-32V256c0-35.3-28.7-64-64-64H64c-35.3 0-64 28.7-64 64v96c0 17.7 14.3 32 32 32H64v64c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V384zm-16-88c-13.3 0-24-10.7-24-24s10.7-24 24-24s24 10.7 24 24s-10.7 24-24 24z"/></svg></span>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="mdbook-search-wrapper" class="hidden">
+                    <form id="mdbook-searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="mdbook-searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="mdbook-searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <span class=fa-svg id="fa-spin"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M304 48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zm0 416c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM48 304c26.5 0 48-21.5 48-48s-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48zm464-48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM142.9 437c18.7-18.7 18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zm0-294.2c18.7-18.7 18.7-49.1 0-67.9S93.7 56.2 75 75s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zM369.1 437c18.7 18.7 49.1 18.7 67.9 0s18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9z"/></svg></span>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="mdbook-searchresults-outer" class="searchresults-outer hidden">
+                        <div id="mdbook-searchresults-header" class="searchresults-header"></div>
+                        <ul id="mdbook-searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('mdbook-sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('mdbook-sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#mdbook-sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="mdbook-content" class="content">
+                    <main>
+                        <h1 id="他言語との比較--現代の言語の中での立ち位置"><a class="header" href="#他言語との比較--現代の言語の中での立ち位置">他言語との比較 ── 現代の言語の中での立ち位置</a></h1>
+<p>Oven は 3 つの伝統の交差点に立っています:<strong>依存型・証明支援系の伝統</strong>(MLTT・Agda・Idris)、<strong>資源を型で数える伝統</strong>(線形論理・Rust・Clean)、そして <strong>GPU で配列を計算する伝統</strong>(Futhark・Dex・シェーダ言語)。それぞれの伝統には成熟した言語がいますが、この 3 つを同時に踏んでいる言語はほとんどありません。この章は、各伝統の代表と Oven を突き合わせて、「何が同じで、どこで袂を分かったか」を記録します。</p>
+<p>先に一覧で見取り図を出します:</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th></th><th>依存型</th><th>線形性/資源</th><th>全域性</th><th>効果の扱い</th><th>GPU</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>Oven</strong></td><td>○(<code>Type:Type</code>)</td><td>○ QTT(<code>'0/'1/'ω</code>)</td><td>○(構文で強制)</td><td>線形 token threading</td><td>○ 明示 dispatch</td></tr>
+<tr><td>Agda / Lean</td><td>○(宇宙階層)</td><td>△(Agda に線形性なし)</td><td>○(停止性検査)</td><td>モナド等</td><td>×</td></tr>
+<tr><td>Idris 2</td><td>○</td><td>○ QTT</td><td>△(既定は partial)</td><td>モナド + 線形資源</td><td>×</td></tr>
+<tr><td>Haskell</td><td>×(拡張で擬似)</td><td>△(Linear Haskell)</td><td>×</td><td>モナド</td><td>×(Accelerate 等)</td></tr>
+<tr><td>Clean</td><td>×</td><td>○ 一意性型</td><td>×</td><td>世界の明示受け渡し</td><td>×</td></tr>
+<tr><td>Rust</td><td>×</td><td>○ 所有権 + 借用</td><td>×</td><td>効果系なし(unsafe 境界)</td><td>×(CUDA 連携等)</td></tr>
+<tr><td>Futhark</td><td>△(サイズ型)</td><td>○ 一意性型(in-place)</td><td>△(再帰に制限)</td><td>純粋(効果なし)</td><td>◎ 自動並列</td></tr>
+<tr><td>Dex</td><td>△(型付き添字)</td><td>×</td><td>△</td><td>代数的効果風</td><td>○</td></tr>
+<tr><td>CUDA / WGSL</td><td>×</td><td>×</td><td>×</td><td>命令的(生の副作用)</td><td>◎ 手動</td></tr>
+</tbody>
+</table>
+</div>
+<p>以下、伝統ごとに掘り下げます。</p>
+<h2 id="依存型言語agdaidris-2leanと比べて"><a class="header" href="#依存型言語agdaidris-2leanと比べて">依存型言語(Agda・Idris 2・Lean)と比べて</a></h2>
+<p><strong>共有しているもの</strong> は多い:MLTT ベースの依存 Π/Σ、帰納型、definitional equality を NbE で判定する処理系の骨格(elaboration-zoo 系の設計)まで、コアの作りは現代の依存型言語の標準そのものです。Agda 使いが Oven のコードを見れば、telescope・implicit 引数・instance 引数(<code>nominal</code> の自動プールは Agda の instance argument にかなり近い)にすぐ見覚えを感じるはずです。</p>
+<p><strong>決定的に違うのは目的です。</strong> Agda・Lean は証明支援系であり、健全性(「証明されたことは本当に正しい」)が存在意義です。Oven は <code>Type : Type</code> を承知で採り、Girard のパラドックスで <code>False</code> が証明できることを受け入れました。この一点で Oven は証明支援系のリーグから <strong>意図的に降りています</strong>。依存型は Oven にとって証明の道具ではなく、<strong>コンパイルの道具</strong> です ── 配列長を型に載せて単相化でサイズを静的化する、添字の範囲を消去された証明で保証する、GPU に載るかを型で判定する。「証明支援系の道具立てを、証明のためでなくコード生成のために使う」というのが依存型に対する Oven の姿勢です。</p>
+<p><strong>全域性の実現方法も対照的です。</strong> Agda は一般再帰を書かせて停止性検査器(構造的減少の解析)が後から検証します。Lean も同様で、well-founded recursion への elaboration が裏で走ります。これらの検査器は強力ですが、それ自体が複雑な機構であり、「なぜ通ったのか/通らないのか」が構文から見えないことがあります。Oven は逆に、<strong>再帰を書ける場所を構文で制限しました</strong>(<code>⟦w⟧</code> は再帰パターン変数にしか適用できない)。書けるものは全部全域、検査器は存在しない。表現力は落ちますが(相互再帰や複雑な減少測度は書けない)、GPU に載せる言語では「回数の決まらない計算」はどのみち存在できないため、この制限は GPU 制約と同じ方向を向いています。失うものが最初から失われている、という設計です。</p>
+<p><strong>Idris 2 とは QTT の兄弟です。</strong> <code>'0/'1/'ω</code> の 3 値 multiplicity、消去と線形性の統合は Idris 2(とその基盤の Atkey の QTT)から直接来ています。違いは 2 つ。第一に、Idris 2 は一般再帰の言語なので再帰呼び出しをただの関数適用(1 回)と数えますが、Oven は <code>case</code> 展開の再帰なので「再帰 branch は動的回数走る」を使用量規則(2 群 SUM)として自前で持つ必要がありました(→ <a href="qtt.html#case-の使用量規則">QTT</a>)。第二に、Oven は multiplicity を第一級の値(<code>Mult : Type</code>)にし、半環演算まで instance に落としました。Idris 2 の量は注釈の世界の住人で、量の多相はありません。なお研究言語まで含めれば、量を型で数える発想は Granule(graded modal types)がより一般的な形(任意の半環でのグレーディング)を追求しており、Oven の 3 値固定はその実用特化版と見ることもできます。</p>
+<h2 id="純粋関数型の効果haskellcleankokaと比べて"><a class="header" href="#純粋関数型の効果haskellcleankokaと比べて">純粋関数型の効果(Haskell・Clean・Koka)と比べて</a></h2>
+<p><strong>Haskell との対比が Oven の効果系を一番よく説明します。</strong> Haskell の <code>IO</code> は表面上はモナドですが、GHC の内部では <code>IO a = State# RealWorld -&gt; (# State# RealWorld, a #)</code> ── <strong>世界 token の受け渡し</strong> です。ただしこの表現はユーザから隠され、token の一回性はコンパイラだけが知る不変条件です。Oven がやったのは、<strong>この内部表現をそのまま表面の意味論にする</strong> ことです。<code>[&amp;World] A ≝ '1 World → (World, A)</code> は GHC の内部形とほぼ同じ形をしていて、違いは token の一回性を QTT がユーザレベルの型として強制すること。モナド・do 記法・transformer の階層は全部不要になり、効果の合成は「token が 2 本になる」だけです(→ <a href="effects.html">効果系</a>)。</p>
+<p>この系譜でいちばん近い祖先は <strong>Clean</strong> です。Clean は一意性型(uniqueness types)で <code>*World</code> を明示的に受け渡しし、モナドなしで IO を実現した言語で、Oven の効果系は「Clean の世界受け渡しを、一意性型でなく QTT の線形性の上に載せ、受け渡しの配管を elaboration で暗黙化したもの」と要約できます。Clean ではユーザが世界を手で持ち回りますが、Oven では token は implicit で、ユーザは <code>print("hello"); print("world")</code> と書くだけです。</p>
+<p><strong>代数的効果の系譜(Koka・Effekt)とは、明確に違う道を選びました。</strong> Koka は効果を row 多相で型に載せ、handler で自由に解釈を差し替えます。Oven は effect row を <strong>検討した上で却下</strong> しています(→ <a href="history.html#effect-row">経緯</a>)。理由は、row・存在量化・資源計算の機構が芋づるで膨らみ、「糖衣のために意味論を足さない」に反したこと。代わりに「capability は宣言・推論なし・単一抽象 <code>[&amp;E]</code> までは書ける」という保守的な線を引きました。効果の抽象化の柔軟さでは Koka に遠く及びませんが、効果の意味論が core にゼロ(ただの Π と Σ)である、という対価を得ています。handler に相当するものが「instance 解決で token を供給するだけ」で書けたのは、この設計の配当です。</p>
+<h2 id="rust-と比べて--線形性借用lifetime"><a class="header" href="#rust-と比べて--線形性借用lifetime">Rust と比べて ── 線形性・借用・lifetime</a></h2>
+<p>Rust は「資源を型で管理する言語」の現在の代表で、Oven の <code>&amp;</code> が Rust の <code>&amp;mut</code> を意識しているのは名前からも明らかです。しかし中身はかなり違います。</p>
+<p><strong>Rust の借用は「参照」です。</strong> 値はその場に留まり、参照が貸し出され、エイリアスの安全は lifetime と borrow checker(エイリアス解析)が守ります。<strong>Oven の <code>&amp;</code> は参照ではありません。</strong> <code>set(&amp;arr, i, v)</code> は「arr を消費して、更新後の arr を返してもらい、同じ名前に再束縛する」の糖衣 ── 値そのものが移動する consume-and-return です。参照が存在しないので、エイリアスという概念自体が型システムに現れず、<strong>lifetime が要りません</strong>。部分借用も Rust の disjoint borrows(<code>&amp;mut r.a</code> と <code>&amp;mut r.b</code> の非重複をコンパイラが追跡)ではなく、lens(get と putback の純粋な対)です。Oven が純粋・全域だからこそ成立する単純化で、Rust のように任意の命令的コードと共存する必要があれば、この手は使えません。</p>
+<p><strong>線形性の厳密さも違います。</strong> Rust の所有権は affine(高々 1 回 ── 黙って drop できる)ですが、Oven の <code>'1</code> は strict linear(ちょうど 1 回 ── drop にも <code>Consumable</code> の宣言が要る)です。IO token を「握り潰せない」ことが効果の完了保証になるので、この差は飾りではありません。逆に Rust が普通にできて Oven にできないのが <strong>共有読み取り借用</strong>(<code>&amp;T</code> を複数箇所へ同時に貸す)です。QTT の threading は「一本の糸を順に持つ」ことしか表せず、コピー不可資源の同時読み取りは fractional permission か region を将来足さない限り書けません(→ <a href="status.html">現状</a>)。Rust との比較で最も分が悪いのはここです。</p>
+<p>もうひとつの対照は <strong>escape 解析</strong> です。Rust は closure が参照を捕捉して逃げることを lifetime で防ぎます。Oven には対応する機構がなく、「closure は <code>'1</code> を capture できない」「<code>'1</code> の部分適用はできない」という 2 つの規則から escape 不可能性が定理として出ます(→ <a href="gems.html#escape-防止に専用機構がない">カタログ</a>)。機構の少なさをどこまで規則の帰結で賄えるか、という点で両言語は好対照です。</p>
+<h2 id="gpu-配列言語futharkdexと比べて"><a class="header" href="#gpu-配列言語futharkdexと比べて">GPU 配列言語(Futhark・Dex)と比べて</a></h2>
+<p>目的が一番近いのはこの系譜です。<strong>Futhark</strong> は純粋関数型のコードを GPU に落とす言語の現在の到達点で、「どんな断片なら GPU に乗るか」の設計は Oven が教科書として参照したものです。しかし並列性の扱いが正反対です。</p>
+<p><strong>Futhark は暗黙並列です。</strong> ユーザは <code>map</code>・<code>reduce</code>・<code>scan</code> などの SOAC(second-order array combinator)で書き、コンパイラが flattening・fusion を駆使して並列コードを合成します。races は言語モデル上存在せず、結果は決定的です。<strong>Oven は明示並列です。</strong> <code>dispatch(i in size){ … }</code> でスレッドグリッドを直接切り、スレッド ID から添字を計算し、atomic も競合も(compute shader と同様に)ユーザの責任です。これは compute shader のメンタルモデルを保ったまま型を強くしたい、という選択で、「コンパイラが並列化してくれる」安心と「このスレッド配置で走ると分かっている」制御のトレードオフです。creative coding・procedural generation という用途(Shadertoy 的な「ピクセルごとの関数」を書く世界)では、後者のほうが素直だという判断があります。</p>
+<p>型の強さでは Oven 側に分があります。Futhark のサイズ型は配列長の整合を追う専用機構ですが、Oven では長さはただの依存型の値です(単相化で静的化)。一方、成熟度・最適化(fusion・タイリング・マルチバックエンド)では比較になりません ── Futhark は 10 年選手の研究プロジェクトで、Oven の lowering は「inline して WGSL を吐く」段階です。</p>
+<p><strong>Dex</strong>(Google の研究言語)とは「添字を型にする」発想を共有しています。Dex の型付き index set は、Oven の <code>Fin(n)</code> と pull 配列(<code>Fin(n) → A</code> はただの関数)に対応します。Dex は effect system や自動微分まで積んだ野心的な設計でしたが、研究プロジェクトとして休眠しました。依存型 × 配列 × GPU という組み合わせが「誰も安定に届いていない空白地帯」であることの証左でもあります。</p>
+<p><strong>シェーダ言語そのもの(GLSL・WGSL・CUDA)</strong> と比べると、Oven が足そうとしているものが見えます。これらは高階関数も多相もほぼ持たず、カーネル間のコード共有は文字列インクルードやマクロの世界です。Oven は「普通の関数型言語の抽象(高階関数・typeclass・レコード・依存型)で書き、カーネル境界の特殊化とインライン展開で全部消して、素の WGSL に落とす」ことを狙います(→ <a href="gpu.html#host-特殊化--値--関数gpu-はそれを実行するだけ">host 特殊化</a>)。「抽象は書けるが、実行時には存在しない」── ゼロコスト抽象の GPU 版です。</p>
+<h2 id="ステージング言語metaocamlterrazig-comptimeと比べて"><a class="header" href="#ステージング言語metaocamlterrazig-comptimeと比べて">ステージング言語(MetaOCaml・Terra・Zig comptime)と比べて</a></h2>
+<p>「ホストの言語でコード生成し、制限された言語で実行する」という構図だけ見れば、Oven は 2 段階の言語(two-stage language)にも見えます。実際、最初の設計案は 2LTT(Two-Level Type Theory)による明示的なステージ分けでした。MetaOCaml のクォート <code>⟨e⟩</code>・Terra の Lua/Terra 分離・Zig の comptime は、みなこの「層を構文で見せる」系譜です。</p>
+<p>Oven はこれを <strong>却下した</strong> 側です(→ <a href="history.html#2ltt">経緯</a>)。理由は一貫して「host 用と kernel 用を構文で書き分けたくない。一つの言語で書きたい」。同じ関数 <code>stepC</code> が host でも GPU でも呼べて、印は付かない。層の分離はユーザの構文からは消え、コンパイラの中(消去・単相化・特殊化・表現可能性検査)に沈められました。ステージングの明示性は「何がいつ計算されるか」を確実にする長所がありますが、Oven はそれを「全域 + 単相化で、コンパイル時に決まるものは必ず決まる」という言語側の性質で代替しています。Zig の comptime が「普通のコードがそのままコンパイル時にも走る」で人気を得たのと、目指す書き味は案外近いところにあります。</p>
+<h2 id="creative-coding-の環境processingshadertoyと比べて"><a class="header" href="#creative-coding-の環境processingshadertoyと比べて">creative coding の環境(Processing・Shadertoy)と比べて</a></h2>
+<p>最後に、用途側の比較です。creative coding の現在の主流 ── Processing/p5.js、Shadertoy、TouchDesigner、Houdini VEX ── は、ほぼ例外なく <strong>動的か、C 系の弱い型</strong> の世界です。この分野で支配的な価値は「即時のフィードバック」と「書き始めの軽さ」で、強い静的型はむしろ邪魔だと考えられてきました。</p>
+<p>Oven はここに真っ向から逆張りしています:<strong>依存型と線形性を持つ全域言語で、画像と音とメッシュを作る</strong>。賭けているのは、生成的なプログラム(procedural generation・アセット生成)は書き捨てに見えて実は「壊れずに変形し続けたいプログラム」であり、型の強さが効く、という読みです。バッファサイズの不整合や解放忘れが実行時でなく型検査で落ちる Shadertoy、と言えば狙いの雰囲気が伝わるでしょうか。この立ち位置を狙った言語は、知られている範囲でほぼ存在しません(この niche 自体が Oven の最も珍しい点かもしれません)。</p>
+<p>ただし現状は正直に:即時フィードバックの点ではまだ <code>cargo run</code> + PNG 出力の段階で、ライブコーディング環境やホットリロードはありません。勝負はこれからです。</p>
+<h2 id="まとめ--どのマスにも先客がいない"><a class="header" href="#まとめ--どのマスにも先客がいない">まとめ ── どのマスにも先客がいない</a></h2>
+<p>各伝統の代表と比べたとき、Oven の立ち位置は消去法的に浮かび上がります:</p>
+<ul>
+<li><strong>証明支援系</strong>(Agda・Lean)は健全だが、GPU では走らない。Oven は健全性を捨てて実行を取った。</li>
+<li><strong>シェーダ言語</strong>(WGSL・CUDA)は走るが、抽象がない。Oven は抽象を書かせて、コンパイル時に消す。</li>
+<li><strong>GPU 配列言語</strong>(Futhark)は自動並列で安全だが、明示的な制御と依存型がない。Oven は compute shader のモデルを保ったまま型を強くした。</li>
+<li><strong>Rust</strong> は資源管理の王者だが、依存型も純粋性もない。Oven は参照そのものを捨てて、lifetime ごと問題を消した。</li>
+<li><strong>Haskell/Clean</strong> は純粋だが、GPU は他人事。Oven は効果系の設計自体を GPU と host で共有できる形(token threading)にした。</li>
+</ul>
+<p>つまり「依存型 + strict linear + 全域 + 明示 GPU + モナドなし効果」という組み合わせのマスには、現在ほぼ誰も座っていません。ただしこれは自慢であると同時に警告でもあります ── そのマスが空いているのは、需要がないからか、難しすぎるからか、まだ誰も試していないからか、Oven 自身が実験で確かめている最中です。設計ノートの流儀に従えば:このマスが本当に住める場所かどうかは、まだ分かっていません。</p>
+<h3 id="なぜ統合が綺麗でありうるのか--制約の合流"><a class="header" href="#なぜ統合が綺麗でありうるのか--制約の合流">なぜ統合が「綺麗」でありうるのか ── 制約の合流</a></h3>
+<p>このマスに誰もいないことには、コミュニティの分断という社会的な理由もあります。証明支援系の人は GPU を見ず、シェーダの人は型理論を見ず、Houdini のアーティストは自分たちが参照透過な関数型環境(recook = 再評価)を使っているとは思っていない。それぞれの世界の中では、他の世界の道具は「関係のないもの」に見えます。</p>
+<p>しかし各世界の芯だけを取り出して並べると、要求は衝突するどころか、<strong>多くの場所で同じ一点を指しています</strong>。Oven の設計を貫くのはこの合流です:</p>
+<ul>
+<li><strong>全域性</strong>:Agda の世界では型理論の衛生(論理として無矛盾であるための条件)、GPU の世界では物理的制約(一般再帰が存在しない)。「自由再帰を入れない」という一つの決断が、両方の要求を同時に満たす。</li>
+<li><strong><code>'0</code>(消去)</strong>:型理論側から見れば proof irrelevance(証明は実行に関与しない)、GPU 側から見れば erasure と単相化の根拠(サイズと型はコンパイル時に確定する)。一つの multiplicity が両方の顔を持つ。</li>
+<li><strong>線形性</strong>:Rust 側から見れば資源管理、Haskell/Clean 側から見れば効果の順序づけ。<code>'1</code> という一つの量が、バッファの二重解放防止と IO の逐次性を同じ規則で守る。</li>
+<li><strong>「値 = 関数」</strong>:Shadertoy の「画像は uv の純粋関数」、Houdini の「ジオメトリは手続きの評価結果」、関数型言語の第一級関数。<code>render(n, f)</code> に λ を渡してカーネルへ特殊化する機構は、この 3 つの言い換えを 1 つの実装で受け止めている。</li>
+<li><strong>per-element 並列</strong>:Houdini の wrangle(全ポイントに同じコード)、compute shader のスレッドグリッド、配列言語の map。<code>dispatch(i in size)</code> はこの共通の芯の直接の写しで、だからどの世界の住人にも「知っている形」に見える。</li>
+</ul>
+<p>統合が力づくの接合(どれかの世界に他を従わせる)にならずに済んでいるのは、この偶然とは思えない一致のおかげです。逆に言えば、Oven の設計判断で迷ったときの判定基準は「その選択は 4 つの世界のどの芯を写しているか。どれか一つの世界の都合に他を従わせていないか」でした。</p>
+<h3 id="その先--もっと多くのものが綺麗に表現できるはずだ"><a class="header" href="#その先--もっと多くのものが綺麗に表現できるはずだ">その先 ── もっと多くのものが綺麗に表現できるはずだ</a></h3>
+<p>この統合実験の仮説は「これで終わり」ではありません。同じ土台の上に、まだ言語として綺麗に表現されたことのないものが載るはずだ、という見立てがあります。いくつか、現在地から自然に延びている方向を記録しておきます:</p>
+<ul>
+<li><strong>メッシュ・ジオメトリ</strong>:Houdini の geometry は「要素数 + attribute の束」であり、依存レコード <code>(n : Nat, pos : Array(n, F32³), …)</code> がまさに欲しがっている形です。トポロジの不変条件(接続の整合性)を <code>'0</code> の証明として持てれば、VEX には原理的に書けない保証が得られます。Unity アセット生成という当初目標の延長線上です。</li>
+<li><strong>時間・シミュレーション</strong>:音は既に「時間の関数」として書けます(<code>sound.ov</code>)。アニメーションや時間発展を、線形な状態 threading(<code>iterateEff</code>)と純粋な「時刻の関数」の両方で書けて相互に行き来できるなら、FRP が目指した場所に別の道から届くかもしれません。</li>
+<li><strong>微分可能性</strong>:全域・純粋・一階に落ちる言語は、自動微分にとってほぼ理想の基質です(Dex が挑んだ場所)。procedural generation と最適化(目標に向けてパラメータを寄せる)が繋がると、生成の書き方自体が変わります。</li>
+</ul>
+<p>これらがこの土台に本当に綺麗に載るのかは、例によってまだ分かりません。ただ、「離れて見える世界たちの芯が実は同じ形をしている」という観察が一度成立した以上、同じことが他でも起きると期待するのは不自然ではない ── それがこの実験を続ける理由です。</p>
+<p>なお、この章の比較対象の選定と性格づけは執筆時点(2026 年)の状況認識です。各言語は動く標的であり、記述が古びる可能性があります。</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="gems.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
+                            </a>
+
+                            <a rel="next prefetch" href="impl.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="gems.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
+                    </a>
+
+                    <a rel="next prefetch" href="impl.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                    </a>
+            </nav>
+
+        </div>
+
+        <template id=fa-eye><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM432 256c0 79.5-64.5 144-144 144s-144-64.5-144-144s64.5-144 144-144s144 64.5 144 144zM288 192c0 35.3-28.7 64-64 64c-11.5 0-22.3-3-31.6-8.4c-.2 2.8-.4 5.5-.4 8.4c0 53 43 96 96 96s96-43 96-96s-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6z"/></svg></span></template>
+        <template id=fa-eye-slash><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zM223.1 149.5C248.6 126.2 282.7 112 320 112c79.5 0 144 64.5 144 144c0 24.9-6.3 48.3-17.4 68.7L408 294.5c5.2-11.8 8-24.8 8-38.5c0-53-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6c0 10.2-2.4 19.8-6.6 28.3l-90.3-70.8zm223.1 298L373 389.9c-16.4 6.5-34.3 10.1-53 10.1c-79.5 0-144-64.5-144-144c0-6.9 .5-13.6 1.4-20.2L83.1 161.5C60.3 191.2 44 220.8 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5z"/></svg></span></template>
+        <template id=fa-copy><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M502.6 70.63l-61.25-61.25C435.4 3.371 427.2 0 418.7 0H255.1c-35.35 0-64 28.66-64 64l.0195 256C192 355.4 220.7 384 256 384h192c35.2 0 64-28.8 64-64V93.25C512 84.77 508.6 76.63 502.6 70.63zM464 320c0 8.836-7.164 16-16 16H255.1c-8.838 0-16-7.164-16-16L239.1 64.13c0-8.836 7.164-16 16-16h128L384 96c0 17.67 14.33 32 32 32h47.1V320zM272 448c0 8.836-7.164 16-16 16H63.1c-8.838 0-16-7.164-16-16L47.98 192.1c0-8.836 7.164-16 16-16H160V128H63.99c-35.35 0-64 28.65-64 64l.0098 256C.002 483.3 28.66 512 64 512h192c35.2 0 64-28.8 64-64v-32h-47.1L272 448z"/></svg></span></template>
+        <template id=fa-play><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M73 39c-14.8-9.1-33.4-9.4-48.5-.9S0 62.6 0 80V432c0 17.4 9.4 33.4 24.5 41.9s33.7 8.1 48.5-.9L361 297c14.3-8.7 23-24.2 23-41s-8.7-32.2-23-41L73 39z"/></svg></span></template>
+        <template id=fa-clock-rotate-left><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M75 75L41 41C25.9 25.9 0 36.6 0 57.9V168c0 13.3 10.7 24 24 24H134.1c21.4 0 32.1-25.9 17-41l-30.8-30.8C155 85.5 203 64 256 64c106 0 192 86 192 192s-86 192-192 192c-40.8 0-78.6-12.7-109.7-34.4c-14.5-10.1-34.4-6.6-44.6 7.9s-6.6 34.4 7.9 44.6C151.2 495 201.7 512 256 512c141.4 0 256-114.6 256-256S397.4 0 256 0C185.3 0 121.3 28.7 75 75zm181 53c-13.3 0-24 10.7-24 24V256c0 6.4 2.5 12.5 7 17l72 72c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-65-65V152c0-13.3-10.7-24-24-24z"/></svg></span></template>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr-ef4e11c1.min.js"></script>
+        <script src="mark-09e88c2c.min.js"></script>
+        <script src="searcher-c2a407aa.js"></script>
+
+        <script src="clipboard-1626706a.min.js"></script>
+        <script src="highlight-abc7f01d.js"></script>
+        <script src="book-a0b12cfe.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>

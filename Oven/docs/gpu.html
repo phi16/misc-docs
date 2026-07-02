@@ -1,0 +1,340 @@
+<!DOCTYPE HTML>
+<html lang="ja" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>GPU 実行 ── dispatch と lowering - Oven ── 言語の記録</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="依存型 + QTT + GPU 並列の実験的言語 Oven の設計と実装の記録">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon-de23e50b.svg">
+        <link rel="shortcut icon" href="favicon-8114d1fc.png">
+        <link rel="stylesheet" href="css/variables-8adf115d.css">
+        <link rel="stylesheet" href="css/general-2459343d.css">
+        <link rel="stylesheet" href="css/chrome-ae938929.css">
+        <link rel="stylesheet" href="css/print-9e4910d8.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="fonts/fonts-9644e21d.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="mdbook-highlight-css" href="highlight-493f70e1.css">
+        <link rel="stylesheet" id="mdbook-tomorrow-night-css" href="tomorrow-night-4c0ae647.css">
+        <link rel="stylesheet" id="mdbook-ayu-highlight-css" href="ayu-highlight-3fdfc3ac.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "searchindex-3d1a964c.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc-45cb7b16.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="mdbook-body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="mdbook-sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("mdbook-sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="mdbook-sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="mdbook-sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="mdbook-page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="mdbook-menu-bar-hover-placeholder"></div>
+                <div id="mdbook-menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="mdbook-sidebar-toggle" class="icon-button" for="mdbook-sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="mdbook-sidebar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M0 96C0 78.3 14.3 64 32 64H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32H32c-17.7 0-32-14.3-32-32s14.3-32 32-32H416c17.7 0 32 14.3 32 32z"/></svg></span>
+                        </label>
+                        <button id="mdbook-theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="mdbook-theme-list">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M371.3 367.1c27.3-3.9 51.9-19.4 67.2-42.9L600.2 74.1c12.6-19.5 9.4-45.3-7.6-61.2S549.7-4.4 531.1 9.6L294.4 187.2c-24 18-38.2 46.1-38.4 76.1L371.3 367.1zm-19.6 25.4l-116-104.4C175.9 290.3 128 339.6 128 400c0 3.9 .2 7.8 .6 11.6c1.8 17.5-10.2 36.4-27.8 36.4H96c-17.7 0-32 14.3-32 32s14.3 32 32 32H240c61.9 0 112-50.1 112-112c0-2.5-.1-5-.2-7.5z"/></svg></span>
+                        </button>
+                        <ul id="mdbook-theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-ayu">Ayu</button></li>
+                        </ul>
+                        <button id="mdbook-search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="mdbook-searchbar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352c79.5 0 144-64.5 144-144s-64.5-144-144-144S64 128.5 64 208s64.5 144 144 144z"/></svg></span>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Oven ── 言語の記録</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <span class=fa-svg id="print-button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M128 0C92.7 0 64 28.7 64 64v96h64V64H354.7L384 93.3V160h64V93.3c0-17-6.7-33.3-18.7-45.3L400 18.7C388 6.7 371.7 0 354.7 0H128zM384 352v32 64H128V384 368 352H384zm64 32h32c17.7 0 32-14.3 32-32V256c0-35.3-28.7-64-64-64H64c-35.3 0-64 28.7-64 64v96c0 17.7 14.3 32 32 32H64v64c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V384zm-16-88c-13.3 0-24-10.7-24-24s10.7-24 24-24s24 10.7 24 24s-10.7 24-24 24z"/></svg></span>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="mdbook-search-wrapper" class="hidden">
+                    <form id="mdbook-searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="mdbook-searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="mdbook-searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <span class=fa-svg id="fa-spin"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M304 48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zm0 416c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM48 304c26.5 0 48-21.5 48-48s-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48zm464-48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM142.9 437c18.7-18.7 18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zm0-294.2c18.7-18.7 18.7-49.1 0-67.9S93.7 56.2 75 75s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zM369.1 437c18.7 18.7 49.1 18.7 67.9 0s18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9z"/></svg></span>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="mdbook-searchresults-outer" class="searchresults-outer hidden">
+                        <div id="mdbook-searchresults-header" class="searchresults-header"></div>
+                        <ul id="mdbook-searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('mdbook-sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('mdbook-sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#mdbook-sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="mdbook-content" class="content">
+                    <main>
+                        <h1 id="gpu-実行--dispatch-と-lowering"><a class="header" href="#gpu-実行--dispatch-と-lowering">GPU 実行 ── dispatch と lowering</a></h1>
+<p>言語の二枚看板の片方です(もう片方は<a href="effects.html">効果系</a>)。GPU 上で明示的に並列計算を走らせます。</p>
+<h2 id="データ所在array-と-buffer"><a class="header" href="#データ所在array-と-buffer">データ所在:<code>Array</code> と <code>Buffer</code></a></h2>
+<p>データが host(CPU)側か device(GPU)側かを型で区別します:</p>
+<pre><code>Array  : (n : U32, A : Type) -&gt; Type    // host 常駐・materialized。in-place 可変(&amp;Array 借用の set/get)
+Buffer : (n : U32, A : Type) -&gt; Type    // device 常駐。線形資源('1)── 勝手にコピー/破棄できない
+
+newBuffer : [A : Type] (n : U32) -&gt; Buffer(n, A)                    // 出力バッファ確保('1 資源)
+readback  : [A : Type] (n : U32, buf : '1 Buffer(n, A)) -&gt; Array(n, A)  // device → host(buffer を消費)
+</code></pre>
+<p>長さ・添字はともに <strong>機械整数 <code>U32</code></strong> です(unary な Nat の O(n) コストを排除し、GPU の現実に合わせる)。添字は生の U32 で境界証明を持ちません ── 将来、値 <code>i : U32</code> に消去証明 <code>'0 Lt(i, n)</code> を添える形で境界安全を復活させる構想があります(→ <a href="status.html">現状</a>)。</p>
+<p>遅延した pull 配列が欲しければ素の関数 <code>Fin(n) → A</code> を書きます。かつて存在した lazy generator(<code>FinArray</code>/<code>build</code>/<code>index</code>)は「<code>build f = f</code>・<code>index xs i = xs i</code> で済む偽装」だったため撤去されました。</p>
+<h2 id="dispatch--関数ではなく構文"><a class="header" href="#dispatch--関数ではなく構文">dispatch ── 関数ではなく構文</a></h2>
+<p>GPU の並列カーネルは専用構文です:</p>
+<pre><code>dispatch(i in size) { body };  cont
+//   size : U32³(グリッド = スレッド数)、i : U32³(スレッド ID。body 内で束縛)
+//   body : GPU の命令的コード([&amp;GPU] 効果)。全スレッドについて並列に走る
+</code></pre>
+<p><code>let</code> と並ぶ束縛文で、core では <code>Tm::Dispatch(size, body, borrows, cont)</code> という専用ノードです。<strong>なぜ関数ではないのか</strong>:</p>
+<ul>
+<li>カーネルは「任意個のリソース(入出力バッファ)」に触りたい。関数にすると closure が <code>'1</code> 資源を capture することになり、「closure は <code>'1</code> を capture できない」原則と衝突する(capture した線形資源が封印されて戻ってこない)。</li>
+<li>明示的にリソースをレコードで渡す形(explicit-R)は動くが冗長。region 機構は過剰。──と回り道した末に、「<strong>capture は書く。でも封印しない。そのために構文にする</strong>」に落ち着きました(→ <a href="history.html#dispatch">経緯</a>)。</li>
+<li>借りる資源の集合が body の中身で決まる = <strong>型が body に依存するので、そもそも関数型を持てない</strong> という事情もあります。</li>
+</ul>
+<h3 id="borrow-lift"><a class="header" href="#borrow-lift">borrow-lift</a></h3>
+<p><code>dispatch</code> の型検査は、body が参照する <strong>自由な host 線形(<code>'1</code>)変数</strong> を走査して集め、host 側で「1 回消費 → 継続へ fresh に返す」borrow(consume-and-return)を行います。これが borrow-lift です。</p>
+<pre><code>let '1 out : Buffer(n, F32) = newBuffer(n);
+dispatch(i in (n, 1[U32], 1[U32])) {
+  store(out, i.0, f(u32ToF32(i.0)))     // out は自由な '1 変数 → 構文が borrow-lift
+};
+readback(n, out)                         // out は dispatch 後も生きている
+</code></pre>
+<ul>
+<li>host の QTT はカーネル内部の使用回数を数えません。借りた資源を境界で各 1 回消費するだけです。</li>
+<li><code>release(out); dispatch { store(out,…) }</code> のような use-after-free は、外側の <code>'1</code> 束縛検査(消費済みの変数を借りに行けない)が弾きます。</li>
+<li><code>'0</code>/<code>'ω</code> の自由変数(サイズ・関数)は単相化・コピーで GPU コードに焼き込まれます。</li>
+<li>構文なので closure 値が存在せず、カーネルは脱出も封印もしません。代償として「カーネルを値として持ち回る」ことはできません。</li>
+</ul>
+<h3 id="カーネル内の効果順序"><a class="header" href="#カーネル内の効果順序">カーネル内の効果順序</a></h3>
+<p>カーネル内の <code>store</code>/<code>load</code> は <code>[&amp;GPU]</code> 効果です。零幅の <code>GPU</code> token を <code>'1</code> で threading して順序をデータ依存として型に載せます(→ <a href="effects.html">効果系</a>)。ユーザは token を書かず <code>store(buf, i, x)</code> とだけ書き、elaboration が縫います。</p>
+<p>buffer 自体は <code>'ω</code>(並列読み書き自由)で、<strong>race は型で追いません</strong>。スレッド間競合の正しさ(atomic・書き込み先の重複回避)は compute-shader と同じくプログラマの責任です。</p>
+<blockquote>
+<p>かつては「カーネル内は QTT オフの命令的コードで、順序は素のプログラム順」という整理でしたが、これは「評価器が字面順を守ることに意味が依存する = 参照透過でない」ため撤回され、host IO と同型の token threading に統一されました(2026-06-12。→ <a href="history.html#順序はプログラム順の撤回">経緯</a>)。</p>
+</blockquote>
+<h2 id="表現可能性"><a class="header" href="#表現可能性">表現可能性</a></h2>
+<p>GPU で走る断片に現れる型は「GPU でデータとして表現可能」でなければなりません。この検査は <code>dispatch</code> の境界(入出力 + borrow-lift される資源)と、kernel 本体の実行時 binder(λ 引数・<code>let</code>・<code>case</code> パターン・split)で課されます。実装上は型検査文脈の <code>in_kernel: bool</code> フラグ(dispatch body の検査中だけ立つ)が駆動します。</p>
+<ul>
+<li><strong>representable</strong>:スカラ(<code>F32</code>/<code>U32</code>/<code>U8</code>)、<code>Buffer(n, A)</code>(要素は storable)、Σ(struct。<code>Unit</code> は空 struct)、同型スカラのタプル(= ベクトル。下記)、有限 enum。</li>
+<li><strong>storable</strong>(buffer の要素にできる plain データ):スカラ・Σ・Unit のみ。<strong><code>Buffer</code> は不可</strong> ── 実 GPU 同様、buffer に buffer ハンドルを格納させません。これは美観ではなく soundness の要件です:カーネル内で <code>'1</code> 資源を別 buffer に store して host へ別名つきで返せば、線形資源が複製できてしまう ── この抜け道は敵対的レビューで実際に発見され、storable 制限で塞がれました(<code>tests/soundness.rs</code>)。</li>
+<li><strong>不可</strong>:<code>Nat</code>・<code>Vec</code>・関数型・<code>Type</code> など。<code>case</code> のパターンフィールドにも representable を課すので、<code>Nat</code>/<code>Vec</code> のような再帰型は <code>succ</code>/<code>vcons</code> のフィールド型で自動的に弾かれます(動的回数の再帰の排除)。</li>
+<li><strong>有限 enum</strong>(全 constructor が引数なし:<code>Bool</code>、<code>data Dir { east, west }</code> 等)は <code>u32</code> タグとして representable かつ storable です。<code>case</code> は WGSL の <code>switch</code>(Bool は <code>if/else</code>)に lower されます。引数つき sum(tag + payload)は未対応。</li>
+<li><code>'0</code> の消去値(サイズ・型)は自由に境界を越えられます。</li>
+</ul>
+<p>将来は binder ごとの検査を <code>Repr(A)</code> witness(「A は GPU-native な担体の retract」という証拠を instance として表明する)に置き換え、representability を「境界 + witness」へ寄せる構想があります。prelude には既に <code>nominal Repr (A : Type) = (Carrier : Type, into : A -&gt; Carrier, out : '0 …, coh : '0 …)</code> が置かれ、witnessed な inductive の fold が GPU の for ループに lower される縦串も実験済みです。</p>
+<h2 id="ベクトル型--同型スカラのタプルがそのまま-vecn"><a class="header" href="#ベクトル型--同型スカラのタプルがそのまま-vecn">ベクトル型 ── 同型スカラのタプルがそのまま vecN</a></h2>
+<p><code>F32²</code>/<code>F32³</code>/<code>F32⁴</code> は <strong>別の型ではありません</strong>。同型スカラの 2〜4 成分タプル <code>(F32, F32, …)</code> が、GPU lowering でそのままネイティブ <code>vecN&lt;f32&gt;</code> になります(U32 も同様)。</p>
+<ul>
+<li>構築はタプル <code>(a, b, c)</code>、成分アクセスは射影 <code>.0/.1/.2</code>(WGSL の <code>.x/.y/.z</code> に対応)。</li>
+<li>型位置の無名タプル <code>(F32, F32, F32)</code> は Σ 型に解釈されるので、<code>(x:F32, y:F32, z:F32)</code> と書かなくてもよい。色 <code>(r,g,b)</code> も自然に vec3 になります。</li>
+<li>演算はネイティブ WGSL に lower されます:<code>+ - *</code>(成分演算・instance 経由)、<code>dotF32xN</code>/<code>lengthF32xN</code>/<code>normalizeF32xN</code> など。これらは <code>src/builtins.rs::vec_builtins()</code> のレジストリに宣言的にまとまっています。</li>
+<li>CPU emulation は成分を分解して計算します(値の表現は普通のタプルのまま)。</li>
+<li><strong>std430 のアラインメント</strong>(vec3 のストライドが 16 バイト等)は「WGSL の都合」なので <code>gpu.rs</code> の buffer I/O だけに閉じ込め、コア型・runtime・言語には漏らしません。</li>
+</ul>
+<h3 id="narrow-型u8-と-u8⁴rgba8"><a class="header" href="#narrow-型u8-と-u8⁴rgba8">narrow 型:U8 と U8⁴(RGBA8)</a></h3>
+<p><code>U8</code> は整数バイト [0,255] の一級スカラです(算術・比較・変換つき。GPU に u8 は無いので u32 表現 + <code>&amp; 255u</code> マスク)。<code>U8⁴</code> = <code>(U8,U8,U8,U8)</code> は RGBA8 として <strong>1 個の u32 に bit パック</strong> されます(vec4&lt;u32&gt; の 16 バイトではなく 4 バイト)。PNG・テクスチャに native な形です。パックは GPU lowering と読み戻しのデコードだけで行い、CPU emulation は U8 タプルのまま扱います ── std430 と同じ「GPU の都合の局所化」です。正規化色 <code>UNorm8</code> は別の型として将来入れます。</p>
+<h2 id="数値-primitive-レジストリ"><a class="header" href="#数値-primitive-レジストリ">数値 primitive レジストリ</a></h2>
+<p>純スカラの数値 builtin(算術 <code>addF32</code>…<code>divU32</code>・変換 <code>u32ToF32</code> 等・比較 <code>ltF32</code> 等・math <code>sinF32</code>/<code>sqrtF32</code>/<code>clampF32</code> 等)は、<strong>単一の表 <code>src/builtins.rs::NUM_BUILTINS</code></strong> に「名前・引数型・戻り型・CPU 計算・WGSL 形」を宣言的に持ちます。prelude の postulate 型はこの表から自動生成され、NbE の畳み込み・CPU emulation・GPU lowering も同じ表を引きます。<strong>新しい数値 primitive の追加は表に 1 行</strong> で済みます(かつては 5 箇所の同期が必要でした)。</p>
+<p>CPU 計算は WGSL のセマンティクスに合わせます(<code>fract</code> = x−floor(x)、<code>log</code> = 自然対数)。超越関数は実 GPU と libm とで ULP 差がありうるため、GPU テストは許容誤差で比較します。</p>
+<h2 id="lowering-パイプライン"><a class="header" href="#lowering-パイプライン">lowering パイプライン</a></h2>
+<pre><code>表面構文 ── parse ──▶ surface AST ── elaborate ──▶ 型付き core Tm
+                                                      │
+                    ┌─────────────────────────────────┤
+                    ▼(CPU 経路)                       ▼(GPU 経路・dispatch body)
+              erasure('0 を消す)                lower(型主導)
+                    ▼                                  ▼
+              Rt(実行時 IR)                      KernelIR(一階・全式に型)
+                    ▼                                  ▼
+              tree-walking 実行                    WGSL テキスト
+             (CPU emulation)                          ▼
+                                                  wgpu(feature `gpu`)で実行
+</code></pre>
+<p>要点:</p>
+<ul>
+<li><strong>GPU lowering は無型の <code>Rt</code> からではなく、型付き elaborated <code>Tm</code> から行います</strong>。GPU は全式に型が要るためです(CPU emulation の <code>Rt</code> は無型・高階・構造的再帰ありで、GPU と性質が真逆)。</li>
+<li>shader になるのは <code>dispatch</code> の body だけで、host 部(<code>newBuffer</code>/<code>dispatch</code>/<code>readback</code> のオーケストレーション)は CPU 側ドライバに残ります。実 GPU 実行時、データは GPU 常駐 ── buffer は storage buffer として確保し、<code>readback</code> のときだけ CPU へ写します。</li>
+<li><strong>CPU emulation がリファレンス・オラクル</strong> です。同じプログラムを CPU 経路(依存ゼロ・既定)と GPU 経路(feature <code>gpu</code>)の両方で走らせ、同じ結果になることをテストが確認します。</li>
+<li>カーネル境界の inliner がヘルパ関数呼び出しを展開し、静的回数の <code>iterate</code> は(共有つきの)静的アンロールに落ちます。第一級関数は GPU に無いため、特殊化で消えます。</li>
+</ul>
+<h3 id="host-特殊化--値--関数gpu-はそれを実行するだけ"><a class="header" href="#host-特殊化--値--関数gpu-はそれを実行するだけ">host 特殊化 ── 「値 = 関数。GPU はそれを実行するだけ」</a></h3>
+<p>カーネルを関数でパラメタ化する汎用パターンが動きます(<code>examples/sound.ov</code>):</p>
+<pre><code>// n サンプルを GPU で並列レンダリング。f はコンパイル時に確定した closure で、
+// lowering 時にカーネルへ展開される(第一級関数は GPU に無い ── 特殊化で消える)
+render : (n : U32, f : F32 -&gt; F32) -&gt; Array(n, F32)
+  = λ(n, f) let '1 out : Buffer(n, F32) = newBuffer(n);
+            dispatch(i in (n, 1[U32], 1[U32])) {
+              store(out, i.0, f(u32ToF32(i.0) / 8.0))
+            };
+            readback(n, out);
+
+render(8[U32], λ(t) sinF32(t))
+</code></pre>
+<p><code>render</code> の関数引数 <code>f</code> は、inliner の host β 簡約(閉じた引数の適用をコンパイル時に展開)によってカーネルへ特殊化されます。「音も画像もアセットも、値 = 関数として書き、GPU はそれを実行するだけ」という言語の狙いの土台です。</p>
+<h3 id="共有を保つ-quote指数爆発の回避"><a class="header" href="#共有を保つ-quote指数爆発の回避">共有を保つ quote(指数爆発の回避)</a></h3>
+<p><code>escape(c) = (iterate(...)).cnt</code> のようにラッパ越しに反復を呼ぶと、GPU lowering の <code>quote(eval(…))</code> が NbE の共有 DAG を木に展開して指数爆発する(反復あたり13倍・30GB 到達)問題がありました。<code>nbe::quote_shared</code> ── eval の Rc-DAG を <code>let</code> 配列に平坦化し、GVN で共有を保ったまま quote する ── で解決済みです。showcase の 16 回反復マンデルブロが CPU/GPU 両経路で完走します。</p>
+<h3 id="caseforwitnessed-fold"><a class="header" href="#caseforwitnessed-fold">case→for(witnessed fold)</a></h3>
+<p><code>fromU32 : (n : U32) -&gt; Nat</code> は機械整数を「回数」に橋渡しします(論理的には <code>succ^n(zero)</code> だが、実行時は担体 u32 のまま)。これにより <code>iterate(fromU32(n), f, init)</code> の <code>case</code>(fold)が <strong>for ループ</strong> に lower されます ── 「functional を for に翻訳する」対象の最初の実例です。どの u32 も Nat なので全域です。</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="effects.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
+                            </a>
+
+                            <a rel="next prefetch" href="surface.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="effects.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
+                    </a>
+
+                    <a rel="next prefetch" href="surface.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                    </a>
+            </nav>
+
+        </div>
+
+        <template id=fa-eye><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM432 256c0 79.5-64.5 144-144 144s-144-64.5-144-144s64.5-144 144-144s144 64.5 144 144zM288 192c0 35.3-28.7 64-64 64c-11.5 0-22.3-3-31.6-8.4c-.2 2.8-.4 5.5-.4 8.4c0 53 43 96 96 96s96-43 96-96s-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6z"/></svg></span></template>
+        <template id=fa-eye-slash><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zM223.1 149.5C248.6 126.2 282.7 112 320 112c79.5 0 144 64.5 144 144c0 24.9-6.3 48.3-17.4 68.7L408 294.5c5.2-11.8 8-24.8 8-38.5c0-53-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6c0 10.2-2.4 19.8-6.6 28.3l-90.3-70.8zm223.1 298L373 389.9c-16.4 6.5-34.3 10.1-53 10.1c-79.5 0-144-64.5-144-144c0-6.9 .5-13.6 1.4-20.2L83.1 161.5C60.3 191.2 44 220.8 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5z"/></svg></span></template>
+        <template id=fa-copy><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M502.6 70.63l-61.25-61.25C435.4 3.371 427.2 0 418.7 0H255.1c-35.35 0-64 28.66-64 64l.0195 256C192 355.4 220.7 384 256 384h192c35.2 0 64-28.8 64-64V93.25C512 84.77 508.6 76.63 502.6 70.63zM464 320c0 8.836-7.164 16-16 16H255.1c-8.838 0-16-7.164-16-16L239.1 64.13c0-8.836 7.164-16 16-16h128L384 96c0 17.67 14.33 32 32 32h47.1V320zM272 448c0 8.836-7.164 16-16 16H63.1c-8.838 0-16-7.164-16-16L47.98 192.1c0-8.836 7.164-16 16-16H160V128H63.99c-35.35 0-64 28.65-64 64l.0098 256C.002 483.3 28.66 512 64 512h192c35.2 0 64-28.8 64-64v-32h-47.1L272 448z"/></svg></span></template>
+        <template id=fa-play><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M73 39c-14.8-9.1-33.4-9.4-48.5-.9S0 62.6 0 80V432c0 17.4 9.4 33.4 24.5 41.9s33.7 8.1 48.5-.9L361 297c14.3-8.7 23-24.2 23-41s-8.7-32.2-23-41L73 39z"/></svg></span></template>
+        <template id=fa-clock-rotate-left><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M75 75L41 41C25.9 25.9 0 36.6 0 57.9V168c0 13.3 10.7 24 24 24H134.1c21.4 0 32.1-25.9 17-41l-30.8-30.8C155 85.5 203 64 256 64c106 0 192 86 192 192s-86 192-192 192c-40.8 0-78.6-12.7-109.7-34.4c-14.5-10.1-34.4-6.6-44.6 7.9s-6.6 34.4 7.9 44.6C151.2 495 201.7 512 256 512c141.4 0 256-114.6 256-256S397.4 0 256 0C185.3 0 121.3 28.7 75 75zm181 53c-13.3 0-24 10.7-24 24V256c0 6.4 2.5 12.5 7 17l72 72c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-65-65V152c0-13.3-10.7-24-24-24z"/></svg></span></template>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr-ef4e11c1.min.js"></script>
+        <script src="mark-09e88c2c.min.js"></script>
+        <script src="searcher-c2a407aa.js"></script>
+
+        <script src="clipboard-1626706a.min.js"></script>
+        <script src="highlight-abc7f01d.js"></script>
+        <script src="book-a0b12cfe.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>

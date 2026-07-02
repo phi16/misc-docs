@@ -1,0 +1,1262 @@
+<!DOCTYPE HTML>
+<html lang="ja" class="coal sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Donut Language Guide</title>
+        <meta name="robots" content="noindex">
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon-de23e50b.svg">
+        <link rel="shortcut icon" href="favicon-8114d1fc.png">
+        <link rel="stylesheet" href="css/variables-8adf115d.css">
+        <link rel="stylesheet" href="css/general-2459343d.css">
+        <link rel="stylesheet" href="css/chrome-ae938929.css">
+        <link rel="stylesheet" href="css/print-9e4910d8.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="fonts/fonts-9644e21d.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="mdbook-highlight-css" href="highlight-493f70e1.css">
+        <link rel="stylesheet" id="mdbook-tomorrow-night-css" href="tomorrow-night-4c0ae647.css">
+        <link rel="stylesheet" id="mdbook-ayu-highlight-css" href="ayu-highlight-3fdfc3ac.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "";
+            const default_light_theme = "coal";
+            const default_dark_theme = "coal";
+            window.path_to_searchindex_js = "searchindex-97b48dd4.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc-c7cfe89a.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="mdbook-body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('coal')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="mdbook-sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("mdbook-sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="mdbook-sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="mdbook-sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="mdbook-page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="mdbook-menu-bar-hover-placeholder"></div>
+                <div id="mdbook-menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="mdbook-sidebar-toggle" class="icon-button" for="mdbook-sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="mdbook-sidebar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M0 96C0 78.3 14.3 64 32 64H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32H32c-17.7 0-32-14.3-32-32s14.3-32 32-32H416c17.7 0 32 14.3 32 32z"/></svg></span>
+                        </label>
+                        <button id="mdbook-theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="mdbook-theme-list">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M371.3 367.1c27.3-3.9 51.9-19.4 67.2-42.9L600.2 74.1c12.6-19.5 9.4-45.3-7.6-61.2S549.7-4.4 531.1 9.6L294.4 187.2c-24 18-38.2 46.1-38.4 76.1L371.3 367.1zm-19.6 25.4l-116-104.4C175.9 290.3 128 339.6 128 400c0 3.9 .2 7.8 .6 11.6c1.8 17.5-10.2 36.4-27.8 36.4H96c-17.7 0-32 14.3-32 32s14.3 32 32 32H240c61.9 0 112-50.1 112-112c0-2.5-.1-5-.2-7.5z"/></svg></span>
+                        </button>
+                        <ul id="mdbook-theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-ayu">Ayu</button></li>
+                        </ul>
+                        <button id="mdbook-search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="mdbook-searchbar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352c79.5 0 144-64.5 144-144s-64.5-144-144-144S64 128.5 64 208s64.5 144 144 144z"/></svg></span>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Donut Language Guide</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <span class=fa-svg id="print-button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M128 0C92.7 0 64 28.7 64 64v96h64V64H354.7L384 93.3V160h64V93.3c0-17-6.7-33.3-18.7-45.3L400 18.7C388 6.7 371.7 0 354.7 0H128zM384 352v32 64H128V384 368 352H384zm64 32h32c17.7 0 32-14.3 32-32V256c0-35.3-28.7-64-64-64H64c-35.3 0-64 28.7-64 64v96c0 17.7 14.3 32 32 32H64v64c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V384zm-16-88c-13.3 0-24-10.7-24-24s10.7-24 24-24s24 10.7 24 24s-10.7 24-24 24z"/></svg></span>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="mdbook-search-wrapper" class="hidden">
+                    <form id="mdbook-searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="mdbook-searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="mdbook-searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <span class=fa-svg id="fa-spin"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M304 48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zm0 416c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM48 304c26.5 0 48-21.5 48-48s-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48zm464-48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM142.9 437c18.7-18.7 18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zm0-294.2c18.7-18.7 18.7-49.1 0-67.9S93.7 56.2 75 75s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zM369.1 437c18.7 18.7 49.1 18.7 67.9 0s18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9z"/></svg></span>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="mdbook-searchresults-outer" class="searchresults-outer hidden">
+                        <div id="mdbook-searchresults-header" class="searchresults-header"></div>
+                        <ul id="mdbook-searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('mdbook-sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('mdbook-sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#mdbook-sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="mdbook-content" class="content">
+                    <main>
+                        <h1 id="donut-とは"><a class="header" href="#donut-とは">Donut とは</a></h1>
+<blockquote>
+<p><strong>Note:</strong> Donut は開発中のプロトタイプです。仕様や動作は予告なく変更される可能性があり、このドキュメントも不完全・不正確な部分を含む場合があります。ドキュメントの大部分は Claude Code によって生成されています。</p>
+</blockquote>
+<p>Donut は <strong>高次元セル</strong> を合成してプログラムを組み立てる言語です。</p>
+<p>通常のプログラミング言語が「値」と「関数」を扱うのに対し、Donut では <strong>セル</strong> を宣言して繋ぎ合わせます。セルには次元があり、次元ごとに異なる役割を持ちます:</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>次元</th><th>意味</th><th>例</th></tr>
+</thead>
+<tbody>
+<tr><td>0-cell</td><td>環境・コンテキスト</td><td><code>C: *</code></td></tr>
+<tr><td>1-cell</td><td>型</td><td><code>Int: C → C</code></td></tr>
+<tr><td>2-cell</td><td>演算・プログラム</td><td><code>add: Int Int → Int</code></td></tr>
+<tr><td>3-cell</td><td>等式・書き換え</td><td><code>α: m x; m → x m; m</code></td></tr>
+</tbody>
+</table>
+</div>
+<p>次元は上に開いており、4-cell、5-cell… と続きます。</p>
+<h2 id="基本的な考え方"><a class="header" href="#基本的な考え方">基本的な考え方</a></h2>
+<ul>
+<li><strong>宣言</strong>: プリミティブなセルを置く。型は source と target で決まる</li>
+<li><strong>合成</strong>: セルをスペースや <code>;</code> で繋ぐ。境界が一致すれば合成できる</li>
+<li><strong>型検査</strong>: 合成の整合性を自動で検証する</li>
+</ul>
+<h2 id="何ができる"><a class="header" href="#何ができる">何ができる？</a></h2>
+<p><strong>抽象構造の記述</strong>: モノイドなどの代数的構造を宣言し、結合律（pentagon identity）のような高次の coherence 条件を表現できます。</p>
+<p><strong>具体的な計算</strong>: <code>import "sys"</code> でプリミティブ型（<code>f32</code>, <code>bool</code> 等）を読み込み、2-cell の合成で Mandelbrot 集合のようなプログラムを書けます。評価結果はリアルタイムに確認でき、条件を満たせば GLSL にコンパイルしてシェーダー描画もできます。</p>
+<p><strong>Functor</strong>: <code>~&gt;</code> で2つの構造間のマッピングを定義します。プリミティブの対応だけ書けば、合成セルは自動的に変換されます。</p>
+<h2 id="最初の例"><a class="header" href="#最初の例">最初の例</a></h2>
+<pre><code>u: *
+x: u → u
+m: x x → x
+</code></pre>
+<ul>
+<li><code>u</code> は <strong>0-cell</strong>（環境）</li>
+<li><code>x</code> は <code>u</code> 上の <strong>1-cell</strong>（型）</li>
+<li><code>m</code> は <code>x x</code> から <code>x</code> への <strong>2-cell</strong>（二項演算）</li>
+</ul>
+<p><code>m</code> の型 <code>x x → x</code> は、1-cell <code>x</code> を2つ並べたものを受け取り <code>x</code> を返す 2-cell です。これだけで「モノイド的な構造」の骨格が記述できています。</p>
+<p>さらに結合律を表す 3-cell を宣言すると:</p>
+<pre><code>α: m x; m → x m; m
+</code></pre>
+<p><code>m(m(a,b), c) = m(a, m(b,c))</code> という結合律の「証拠」が 3-cell として現れます。</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="基本構文"><a class="header" href="#基本構文">基本構文</a></h1>
+<p>Donut のプログラムは <strong>宣言</strong> の列です。各宣言は名前、型、値を持ちます。</p>
+<pre><code>name: type
+name = value
+name: type = value
+name: type := value
+</code></pre>
+<p>コメントは <code>//</code> で始まる行コメントです。</p>
+<pre><code>// これはコメントです
+u: *
+</code></pre>
+<p>インデントはスペースのみ（タブ不可）。</p>
+<h2 id="同時宣言"><a class="header" href="#同時宣言">同時宣言</a></h2>
+<p>スペースで区切って複数の名前を同時に宣言できます。すべて同じ型になります。</p>
+<pre><code>C D: *       // C: * と D: * を同時に宣言
+a b: C → D  // a: C → D と b: C → D を同時に宣言
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="宣言と型"><a class="header" href="#宣言と型">宣言と型</a></h1>
+<h2 id="型宣言decl"><a class="header" href="#型宣言decl">型宣言（Decl）</a></h2>
+<p>名前と型を宣言します。値は自動的に生成されます。</p>
+<pre><code>u: *
+x: u → u
+</code></pre>
+<p><code>*</code> は 0-cell の型です。<code>u → u</code> は <code>u</code> から <code>u</code> への 1-cell の型です。</p>
+<h2 id="値の定義alias"><a class="header" href="#値の定義alias">値の定義（Alias）</a></h2>
+<p>名前に値を束縛します。型は値から推論されます。</p>
+<pre><code>f = x x
+</code></pre>
+<p>明示的な型注釈も可能です:</p>
+<pre><code>f: u → u = x x
+</code></pre>
+<h2 id="型エイリアスとしての利用"><a class="header" href="#型エイリアスとしての利用">型エイリアスとしての利用</a></h2>
+<p>型を表す値を alias に束縛すると、型として使えます。</p>
+<pre><code>T = x x → x
+m: T           // m: x x → x と同じ
+</code></pre>
+<p>パラメトリックな型エイリアスも可能です:</p>
+<pre><code>Endo[X: *] = X → X
+f: Endo[u]     // f: u → u と同じ
+</code></pre>
+<p>エイリアスの連鎖も展開されます: <code>T = x x → x</code> → <code>S = T</code> → <code>m: S</code> は <code>m: x x → x</code> と解釈されます。</p>
+<h2 id="型の階層"><a class="header" href="#型の階層">型の階層</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>型</th><th>意味</th><th>例</th></tr>
+</thead>
+<tbody>
+<tr><td><code>*</code></td><td>0-cell</td><td><code>u: *</code></td></tr>
+<tr><td><code>A → B</code></td><td>1-cell 以上（射）</td><td><code>x: u → u</code></td></tr>
+<tr><td><code>A ~ B</code></td><td>等価性</td><td><code>e: x ~ y</code></td></tr>
+<tr><td><code>A ~&gt; B</code></td><td>functor</td><td><code>F: src.C ~&gt; tgt.D</code></td></tr>
+<tr><td><code>meta</code></td><td>メタ値（nat, rat, color 等）</td><td><code>n: nat</code></td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="arrow-の次元"><a class="header" href="#arrow-の次元">Arrow の次元</a></h3>
+<p>Arrow の次元は source/target から自動的に決まります:</p>
+<pre><code>u: *                  // 0-cell
+x: u → u             // 1-cell (0-cell → 0-cell)
+μ: x x → x           // 2-cell (1-cell → 1-cell)
+α: μ x; μ → x μ; μ   // 3-cell
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="合成"><a class="header" href="#合成">合成</a></h1>
+<p>セルを繋ぎ合わせて高次のセルを構築します。</p>
+<h2 id="0次合成"><a class="header" href="#0次合成">0次合成</a></h2>
+<p>スペースで区切ると <strong>0次合成</strong> になります。左の target と右の source が一致する必要があります。</p>
+<pre><code>u: *
+x: u → u
+y: u → u
+
+xy = x y    // u → u
+</code></pre>
+<p><code>x</code> の target（<code>u</code>）と <code>y</code> の source（<code>u</code>）が一致するため合成でき、結果は <code>u → u</code> の 1-cell になります。</p>
+<h2 id="1次合成"><a class="header" href="#1次合成">1次合成</a></h2>
+<p><code>;</code> で区切ると <strong>1次合成</strong> になります。1つ上の次元で、左の target と右の source が一致する必要があります。</p>
+<pre><code>u: *
+x: u → u
+μ: x x → x
+
+xm = x x; μ    // x x → x
+</code></pre>
+<h2 id="n次合成"><a class="header" href="#n次合成">n次合成</a></h2>
+<p><code>;</code> を n 個並べると <strong>n次合成</strong> になります。<code>;;</code> は 2次、<code>;;;</code> は 3次です。(n+1) 次元以上のセルで使います。</p>
+<pre><code>α: μ x; μ → x μ; μ
+
+result =
+    α x; μ ;;
+    x μ x; α
+</code></pre>
+<p><code>;N</code>（例: <code>;3</code>）と書くことで任意の次数を数値で指定することもできます。</p>
+<h2 id="優先順位"><a class="header" href="#優先順位">優先順位</a></h2>
+<p>高次の合成ほど結合が弱くなります:</p>
+<ol>
+<li>スペース（0次）— 最も強い</li>
+<li><code>;</code>（1次）</li>
+<li><code>;;</code>（2次）</li>
+<li><code>;;;</code>（3次）— …</li>
+</ol>
+<p><code>a b; c d ;; e f; g</code> は <code>((a b); (c d)) ;; ((e f); g)</code> と解釈されます。</p>
+<p>括弧 <code>()</code> で優先順位を制御できます。</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="モジュール"><a class="header" href="#モジュール">モジュール</a></h1>
+<p><code>{ }</code> でモジュールを定義できます。モジュール内の宣言はドット記法でアクセスします。</p>
+<h2 id="基本"><a class="header" href="#基本">基本</a></h2>
+<pre><code>cat = {
+    u: *
+    x: u → u
+    m: x x → x
+}
+
+// モジュールのメンバーにアクセス
+f: cat.u → cat.u
+</code></pre>
+<h2 id="ネスト"><a class="header" href="#ネスト">ネスト</a></h2>
+<p>モジュールはネストできます。</p>
+<pre><code>a = {
+    b = {
+        u: *
+        x: u → u
+    }
+    y: b.u → b.u
+}
+
+// a.b.x でアクセス
+f: a.b.x a.b.x → a.b.x
+</code></pre>
+<h2 id="with-節"><a class="header" href="#with-節">with 節</a></h2>
+<p><code>with { }</code> で追加の宣言ができます。with 節の中では元の宣言のメンバーが直接使えます。</p>
+<p>モジュールに使う場合:</p>
+<pre><code>cat = {
+    u: *
+    x: u → u
+} with {
+    m: x x → x
+}
+
+// cat.m も定義される
+</code></pre>
+<p>宣言に使う場合:</p>
+<pre><code>C: *
+x: C → C with {
+    m: x x → x
+}
+
+// x.m でアクセスできる
+</code></pre>
+<h2 id="where-節"><a class="header" href="#where-節">where 節</a></h2>
+<p><code>where { }</code> でローカルな補助定義を書けます。where 節はモジュールだけでなく、一般の定義にも使えます。where 節の中の宣言は外部からはアクセスできません。</p>
+<pre><code>r[C: *, x: C → C, f: x → x]: x → x = g where {
+    g = f; f
+}
+</code></pre>
+<p>モジュールと組み合わせることもできます:</p>
+<pre><code>cat = {
+    u: *
+    x: u → u
+    m: x x → x
+} where {
+    helper = x x; m
+}
+</code></pre>
+<p>where 節はネストできます:</p>
+<pre><code>r[C: *, x: C → C, f: x → x]: x → x = k where {
+    k = g; g
+} where {
+    g = f; f
+}
+</code></pre>
+<p>内側の where 節が先に評価されます。上の例では <code>g</code> が先に定義され、それを使って <code>k</code> が定義されます。</p>
+<h2 id="-によるメンバー追加"><a class="header" href="#-によるメンバー追加"><code>+=</code> によるメンバー追加</a></h2>
+<p>既存のモジュールや宣言にメンバーを追加できます。</p>
+<pre><code>f32: C → C
+
+f32 += {
+    lit[n: rat]: C → f32
+    add: f32 f32 → f32
+    neg: f32 → f32
+}
+
+// f32.lit[1], f32.add 等が使える
+</code></pre>
+<p><code>+=</code> の右辺は <code>{ }</code> モジュールです。追加されたメンバーは元の名前のドット記法でアクセスできます。これは sys ライブラリの内部で、型に演算を追加するために使われています。</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="パラメータ"><a class="header" href="#パラメータ">パラメータ</a></h1>
+<p>宣言にパラメータを付けることで、構造を抽象化できます。</p>
+<h2 id="基本-1"><a class="header" href="#基本-1">基本</a></h2>
+<p>パラメータは名前の直後に <code>[...]</code> で書きます。</p>
+<pre><code>cat[C: *] = {
+    x: C → C
+    m: x x → x
+    assoc: m x; m → x m; m
+}
+</code></pre>
+<h2 id="インスタンス化"><a class="header" href="#インスタンス化">インスタンス化</a></h2>
+<p>パラメータを渡してインスタンスを作ります。</p>
+<pre><code>u: *
+c = cat[u]
+
+// c.x, c.m, c.assoc が使える
+</code></pre>
+<p>異なるパラメータで作ったインスタンスは異なるセルを持ちます: <code>cat[u].x</code> と <code>cat[v].x</code> は別のセルです。</p>
+<h2 id="複数パラメータ"><a class="header" href="#複数パラメータ">複数パラメータ</a></h2>
+<pre><code>Hom[X: *, Y: *] = X → Y
+</code></pre>
+<h2 id="高次のパラメータ"><a class="header" href="#高次のパラメータ">高次のパラメータ</a></h2>
+<p>0-cell だけでなく、1-cell や 2-cell もパラメータにできます。</p>
+<pre><code>rep2[C: *, x: C → C, f: x → x] = f; f
+</code></pre>
+<p><code>rep2</code> は 0-cell <code>C</code>、1-cell <code>x</code>、2-cell <code>f: x → x</code> を受け取り、<code>f</code> を2回合成した <code>f; f</code> を返します。</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="等価性-equality"><a class="header" href="#等価性-equality">等価性 (Equality)</a></h1>
+<p><code>~</code> は2つのセルの間の <strong>等価性</strong> を表す型です。</p>
+<h2 id="基本-2"><a class="header" href="#基本-2">基本</a></h2>
+<pre><code>u: *
+x: u → u
+y: u → u
+e: x ~ y
+</code></pre>
+<p><code>e</code> は <code>x</code> と <code>y</code> が等しいことを示す 2-cell です。<code>→</code> と同じく arrow 型ですが、方向を持たない（対称的な）関係を表現します。</p>
+<h2 id="-との違い"><a class="header" href="#-との違い"><code>→</code> との違い</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>型</th><th>意味</th><th>方向</th></tr>
+</thead>
+<tbody>
+<tr><td><code>x → y</code></td><td><code>x</code> から <code>y</code> への射</td><td>あり</td></tr>
+<tr><td><code>x ~ y</code></td><td><code>x</code> と <code>y</code> の等価性</td><td>なし</td></tr>
+</tbody>
+</table>
+</div>
+<p><code>→</code> は一方向の射を表しますが、<code>~</code> は双方向の等価関係を表します。</p>
+<h2 id="定義--との関連"><a class="header" href="#定義--との関連">定義 (<code>:=</code>) との関連</a></h2>
+<p><a href="#定義">定義</a> (<code>:=</code>) を使うと、等価性が自動的に生成されます。</p>
+<pre><code>x: * := y
+</code></pre>
+<p>これは <code>x: *</code> を宣言し、<code>x.def: x ~ y</code> を自動生成します。<code>x</code> と <code>y</code> は異なるセルとして存在しますが、評価上は等しいことを <code>~</code> で表現しています。</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="定義"><a class="header" href="#定義">定義</a></h1>
+<p><code>:=</code> を使うと、宣言と定義を同時に行えます。</p>
+<h2 id="基本-3"><a class="header" href="#基本-3">基本</a></h2>
+<pre><code>a: *
+x: * := a
+</code></pre>
+<p>これは以下を行います:</p>
+<ul>
+<li><code>x: *</code> を新しいセルとして宣言する</li>
+<li><code>x.def: x ~ a</code> を自動生成する（<code>x</code> と <code>a</code> の等価性）</li>
+<li>ランタイムで <code>x</code> を評価する際、<code>a</code> として計算する</li>
+</ul>
+<p>型は右辺から推論することもできます:</p>
+<pre><code>import "sys"
+add := f32.add
+</code></pre>
+<h2 id="用途"><a class="header" href="#用途">用途</a></h2>
+<p>定義は「新しい名前を付けつつ、計算は既存のセルに委譲する」パターンで使います。図式上では独立したセルとして表示されますが、評価時には右辺として計算されます。</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="次元の自動リフト"><a class="header" href="#次元の自動リフト">次元の自動リフト</a></h1>
+<p>低次元のセルが高次元の位置で使われた場合、自動的に <strong>identity cell</strong> としてリフト（昇格）されます。</p>
+<h2 id="例"><a class="header" href="#例">例</a></h2>
+<pre><code>u: *
+h: u → u = u
+</code></pre>
+<p><code>u</code> は 0-cell ですが、<code>u → u</code>（1-cell の型）の位置で使われています。この場合 <code>u</code> は <code>u</code> 上の identity 1-cell（恒等射）として解釈されます。</p>
+<h2 id="合成での自動リフト"><a class="header" href="#合成での自動リフト">合成での自動リフト</a></h2>
+<p>合成の中で次元の異なるセルが混在する場合、低い方が自動的にリフトされます。</p>
+<pre><code>u: *
+x: u → u
+μ: x x → x
+
+// μ は 2-cell。x は 1-cell だが、2-cell の位置で使われると id(x) にリフトされる
+α: μ x; μ → x μ; μ
+</code></pre>
+<p><code>μ x</code> の <code>x</code> は 2-cell の文脈で使われているので、自動的に <code>id(x)</code> (identity 2-cell) にリフトされます。</p>
+<h2 id="仕組み"><a class="header" href="#仕組み">仕組み</a></h2>
+<p>k-cell が n-cell（n &gt; k）の位置で使われた場合、identity cell で包んで次元を合わせます。リフトは必要な回数だけ自動的に適用されます。</p>
+<ul>
+<li>0-cell <code>A</code> を 1-cell の位置で → <code>A</code> 上の identity 1-cell</li>
+<li>1-cell <code>x</code> を 2-cell の位置で → <code>id(x)</code>（identity 2-cell）</li>
+<li>1-cell <code>x</code> を 3-cell の位置で → <code>id(id(x))</code>（2回リフト）</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="デコレータ"><a class="header" href="#デコレータ">デコレータ</a></h1>
+<p>デコレータは宣言の表示スタイルを制御します。宣言の前に <code>[...]</code> で記述します。</p>
+<p>使用するには <code>import "ui"</code> が必要です。</p>
+<h2 id="色の指定"><a class="header" href="#色の指定">色の指定</a></h2>
+<pre><code>import "ui"
+
+// HSV で指定
+[style.color[hsv[0.6, 1, 1]]]
+x: u → u
+
+// RGB で指定
+[style.color[rgb[255, 0, 128]]]
+m: x x → x
+
+// グレースケール
+[style.color[gray[80]]]
+u: *
+
+// 色相のみ指定（彩度・明度は自動）
+[style.color[hue[0.33]]]
+y: u → u
+</code></pre>
+<h2 id="自動カラー"><a class="header" href="#自動カラー">自動カラー</a></h2>
+<p>デコレータを指定しない場合、自動的に色が割り当てられます。色はセルの次元と宣言順に基づいて決まります。</p>
+<h2 id="lighten--darken"><a class="header" href="#lighten--darken">Lighten / Darken</a></h2>
+<p>自動色をベースに明るさを調整できます。</p>
+<pre><code>[style.lighten[0.3]]
+a: x → x
+
+[style.darken[0.2]]
+b: x → x
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="import-と-use"><a class="header" href="#import-と-use">import と use</a></h1>
+<p>組み込みライブラリを読み込むための2つの方法があります。</p>
+<h2 id="import"><a class="header" href="#import">import</a></h2>
+<p><code>import</code> はライブラリの中身をスコープに読み込みます。</p>
+<pre><code>import "sys"
+
+// f32, f32.add 等が直接使える
+x = f32.lit[1]
+</code></pre>
+<p>名前を付けて import すると、モジュールとしてスコープに入ります:</p>
+<pre><code>s = import "sys"
+
+// s.f32, s.f32.add 等でアクセス
+x = s.f32.lit[1]
+</code></pre>
+<h2 id="use"><a class="header" href="#use">use</a></h2>
+<p><code>use</code> も同様にライブラリの中身をスコープに展開します。</p>
+<pre><code>use "base"
+
+// nat, rat 等が直接使える
+n: nat = 42
+</code></pre>
+<h2 id="import-と-use-の違い"><a class="header" href="#import-と-use-の違い">import と use の違い</a></h2>
+<p><code>import</code> と <code>use</code> はどちらも無名で使うとライブラリの中身をスコープに展開します。違いは origin の扱いです。<code>import</code> で読み込まれた宣言はライブラリ由来としてマークされ、donut-app のセル一覧には表示されません。<code>use</code> で読み込まれた宣言にはそのようなマークが付きません。</p>
+<h2 id="組み込みライブラリ一覧"><a class="header" href="#組み込みライブラリ一覧">組み込みライブラリ一覧</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>ライブラリ</th><th>内容</th></tr>
+</thead>
+<tbody>
+<tr><td><code>"sys"</code></td><td>プリミティブ型と演算（<code>f32</code>, <code>u32</code>, <code>bool</code>, <code>val.dup</code> 等）</td></tr>
+<tr><td><code>"base"</code></td><td>メタ型の定義（<code>nat</code>, <code>rat</code>, <code>color</code>, <code>decorator</code>）</td></tr>
+<tr><td><code>"ui"</code></td><td>デコレータ関連（<code>rgb</code>, <code>hsv</code>, <code>hue</code>, <code>gray</code>, <code>style</code> 等）</td></tr>
+</tbody>
+</table>
+</div>
+<p><code>"ui"</code> は内部で <code>"base"</code> を <code>use</code> しているため、<code>import "ui"</code> だけで <code>nat</code> や <code>rat</code> も使えます。</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="functor"><a class="header" href="#functor">Functor</a></h1>
+<p>Functor は2つの構造間のマッピングを定義します。プリミティブの対応だけ指定すれば、合成セルは自動的に変換されます。</p>
+<h2 id="宣言"><a class="header" href="#宣言">宣言</a></h2>
+<p><code>~&gt;</code> で functor の型を宣言し、各プリミティブの対応を <code>F(src) = tgt</code> の形で記述します。</p>
+<pre><code>nat = {
+    C: *
+    Nat: C → C
+    zero: C → Nat
+    succ: Nat → Nat
+    add: Nat Nat → Nat
+}
+
+u8 = {
+    D: *
+    U8: D → D
+    zero: D → U8
+    succ: U8 → U8
+    add: U8 U8 → U8
+}
+
+compile: nat.C ~&gt; u8.D
+compile(nat.Nat)  = u8.U8
+compile(nat.zero) = u8.zero
+compile(nat.succ) = u8.succ
+compile(nat.add)  = u8.add
+</code></pre>
+<h2 id="自動変換"><a class="header" href="#自動変換">自動変換</a></h2>
+<p>functor を定義すると、プリミティブセルの合成で作られたセルにも自動的に適用できます。</p>
+<pre><code>// nat のプリミティブだけで構成されたセル
+two = nat.zero; nat.succ; nat.succ
+
+// compile(two) は自動的に u8.zero; u8.succ; u8.succ になる
+compiled_two = compile(two)
+</code></pre>
+<p>functor はソース構造のプリミティブの合成を再帰的に辿り、各プリミティブを対応するターゲットに置き換えます。ソース構造に属さないプリミティブが含まれている場合はエラーになります。</p>
+<h2 id="functoriality-チェック"><a class="header" href="#functoriality-チェック">functoriality チェック</a></h2>
+<p>functor のマッピングは整合性がチェックされます。各マッピング <code>F(X) = Y</code> に対して、<code>X</code> の source/target を functor で変換した結果が <code>Y</code> の source/target と一致するか検証されます。一致しない場合はエラーになります。</p>
+<h2 id="制約の自動生成"><a class="header" href="#制約の自動生成">制約の自動生成</a></h2>
+<p>パラメータのセルに functor を適用すると、マッピングが未定義なため即座には解決できません。この場合 <strong>制約</strong> が自動生成されます。</p>
+<pre><code>src = {
+    C: *
+    X: C → C
+}
+tgt = {
+    D: *
+    Y: D → D
+}
+F: src.C ~&gt; tgt.D
+F(src.X) = tgt.Y
+
+h[m: src.C → src.X] = F(m)
+</code></pre>
+<p><code>F(m)</code> の <code>m</code> はパラメータであり <code>F</code> のマッピングに含まれないので、Donut は <code>F(m)</code> の結果を表すフレッシュなセルを生成します。<code>h</code> の型は制約付きで表示されます:</p>
+<pre><code>h[m: src.C → src.X | F(m) = ...]: tgt.D → tgt.Y
+</code></pre>
+<p><code>|</code> の後が制約です。制約はユーザーが記述するものではなく、自動的に生成されます。</p>
+<h3 id="呼び出し時の検証"><a class="header" href="#呼び出し時の検証">呼び出し時の検証</a></h3>
+<p><code>h</code> を具体的なセルで呼び出すとき、制約が検証されます。</p>
+<pre><code>src += { u: C → X }
+tgt += { v: D → Y }
+F(src.u) = tgt.v
+
+result = h[src.u]   // OK: F(src.u) = tgt.v が定義されている
+</code></pre>
+<p><code>F</code> のマッピングに含まれないセルを渡すとエラーになります。</p>
+<h3 id="制約の伝搬"><a class="header" href="#制約の伝搬">制約の伝搬</a></h3>
+<p>制約付きの定義を別の定義から呼ぶと、制約が伝搬します。</p>
+<pre><code>g[n: src.C → src.X] = h[n]
+// g にも h と同じ制約が付く
+</code></pre>
+<h3 id="ネストした-functor"><a class="header" href="#ネストした-functor">ネストした functor</a></h3>
+<p>functor の適用をネストすることもできます。</p>
+<pre><code>f(g(m))
+// g(m) と f(g(m)) の両方に制約が生成される
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="計算の書き方"><a class="header" href="#計算の書き方">計算の書き方</a></h1>
+<p><code>import "sys"</code> を使った具体的な計算の書き方を説明します。</p>
+<h2 id="ワイヤーの束"><a class="header" href="#ワイヤーの束">ワイヤーの束</a></h2>
+<p>Donut の計算では、データは <strong>ワイヤー</strong>（1-cell）の束として流れます（donut-app では上から下に描画されます）。計算のどの時点でも「今、手元にどんなワイヤーがあるか」を意識します。</p>
+<pre><code>import "sys"
+
+// f32.lit[3] は「何もないところから f32 を1本生やす」
+//   C → f32
+three = f32.lit[3]
+</code></pre>
+<p>ここで <code>C</code> は「ワイヤーが0本」の状態です。<code>f32.lit[3]</code> は 0本の状態から f32 ワイヤーを1本作ります。</p>
+<h2 id="1次合成-1"><a class="header" href="#1次合成-1">1次合成（<code>;</code>）</a></h2>
+<p><code>;</code> で2つの操作を繋ぐと、前の出力が次の入力になります。</p>
+<pre><code>// f32.lit[3]; f32.neg
+//   C → f32 → f32
+// = -3
+neg_three = f32.lit[3]; f32.neg
+</code></pre>
+<p><code>f32.lit[3]</code> が <code>C → f32</code>、<code>f32.neg</code> が <code>f32 → f32</code> なので、繋ぐと <code>C → f32</code> になります。</p>
+<h2 id="0次合成スペース"><a class="header" href="#0次合成スペース">0次合成（スペース）</a></h2>
+<p>スペースで2つの操作を並べると、別々のワイヤーに対して同時に動作します。</p>
+<pre><code>// f32.lit[1] f32.lit[2]
+//   C → f32 f32
+// 手元に f32 が2本ある状態
+pair = f32.lit[1] f32.lit[2]
+</code></pre>
+<p>この2本のワイヤーを <code>f32.add</code> に渡すと:</p>
+<pre><code>// f32.lit[1] f32.lit[2]; f32.add
+//   C → f32 f32 → f32
+// = 3
+sum = f32.lit[1] f32.lit[2]; f32.add
+</code></pre>
+<h2 id="ワイヤーの管理"><a class="header" href="#ワイヤーの管理">ワイヤーの管理</a></h2>
+<p>通常のプログラミング言語では変数に名前を付けて自由に何度でも参照できます。Donut ではそうではなく、ワイヤーの束を明示的に操作します。</p>
+<h3 id="複製-valdup"><a class="header" href="#複製-valdup">複製: <code>val.dup</code></a></h3>
+<p>値を2回使いたい場合、明示的に複製します。</p>
+<pre><code>// val.dup[f32]: f32 → f32 f32
+// 1本のワイヤーを2本に分ける
+
+// x² を計算する: x を複製して掛ける
+square: f32 → f32 = val.dup[f32]; f32.mul
+</code></pre>
+<h3 id="破棄-valdrop"><a class="header" href="#破棄-valdrop">破棄: <code>val.drop</code></a></h3>
+<p>使わないワイヤーは明示的に捨てます。</p>
+<pre><code>// val.drop[f32]: f32 → C
+// ワイヤーを1本消す
+
+// 2本のうち最初だけ残す
+first: f32 f32 → f32 = f32 val.drop[f32]
+</code></pre>
+<p><code>f32 val.drop[f32]</code> は「最初の f32 はそのまま通し、2番目の f32 を捨てる」という並列合成です。</p>
+<h3 id="入れ替え-valswap"><a class="header" href="#入れ替え-valswap">入れ替え: <code>val.swap</code></a></h3>
+<p>ワイヤーの順番を入れ替えます。</p>
+<pre><code>// val.swap[f32, u32]: f32 u32 → u32 f32
+</code></pre>
+<h2 id="考え方-手元のワイヤーを追う"><a class="header" href="#考え方-手元のワイヤーを追う">考え方: 手元のワイヤーを追う</a></h2>
+<p>計算を書くときは、各ステップで「今ワイヤーが何本、どんな型で並んでいるか」を追います。</p>
+<p>例: <code>(a + b) * (a - b)</code> を計算する関数 <code>f32 f32 → f32</code></p>
+<pre><code>// 入力: a b  (f32 が2本)
+
+diff_of_squares: f32 f32 → f32 =
+  val.dup[f32] val.dup[f32];       // a a b b
+  f32 val.swap[f32, f32] f32;      // a b a b
+  f32.add f32.sub;                 // (a+b) (a-b)
+  f32.mul                          // (a+b)*(a-b)
+</code></pre>
+<p>各行で手元のワイヤーがどう変化するかを追うのがコツです:</p>
+<ol>
+<li><code>a b</code> — 入力 (2本)</li>
+<li><code>val.dup[f32] val.dup[f32]</code> — 各ワイヤーを複製: <code>a a b b</code> (4本)</li>
+<li><code>f32 val.swap[f32, f32] f32</code> — 1本目はそのまま、中央2本を入れ替え、4本目はそのまま: <code>a b a b</code></li>
+<li><code>f32.add f32.sub</code> — 前2本を加算、後2本を減算: <code>(a+b) (a-b)</code> (2本)</li>
+<li><code>f32.mul</code> — 乗算: <code>(a+b)*(a-b)</code> (1本)</li>
+</ol>
+<h2 id="identity-と定数の組み合わせ"><a class="header" href="#identity-と定数の組み合わせ">identity と定数の組み合わせ</a></h2>
+<p>1-cell の名前をそのまま値として書くと、そのワイヤーを素通りさせる identity になります。これと定数生成を 0次合成すると「元の値を保ちつつ定数を追加」できます。</p>
+<pre><code>// x を受け取り、x と 1 のペアにする
+with_one: f32 → f32 f32 = f32 f32.lit[1]
+</code></pre>
+<p><code>f32</code> は identity（<code>f32 → f32</code>）、<code>f32.lit[1]</code> は定数（<code>C → f32</code>）。0次合成で <code>f32 → f32 f32</code> になります。</p>
+<p>括弧 <code>()</code> を使うと部分式をまとめられます:</p>
+<pre><code>// 入力 x に対して (x², x) を作る
+square_and_keep: f32 → f32 f32 = val.dup[f32]; (val.dup[f32]; f32.mul) f32
+</code></pre>
+<h2 id="まとめ"><a class="header" href="#まとめ">まとめ</a></h2>
+<ul>
+<li>計算の状態は常に「ワイヤーの束」</li>
+<li><code>;</code> で前の出力を次の入力に繋ぐ</li>
+<li>スペースで別々のワイヤーに同時に操作する</li>
+<li>値を使い回すには <code>val.dup</code> で複製</li>
+<li>不要な値は <code>val.drop</code> で破棄</li>
+<li>変数名で参照する代わりに、ワイヤーの並び順で管理する</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="sys-ライブラリ"><a class="header" href="#sys-ライブラリ">sys ライブラリ</a></h1>
+<p><code>import "sys"</code> で使えるプリミティブ型と演算の一覧です。</p>
+<p>すべての型は <code>C → C</code> の 1-cell として定義されています。<code>C</code> は sys ライブラリの共通の 0-cell です。</p>
+<h2 id="型"><a class="header" href="#型">型</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>型</th><th>説明</th></tr>
+</thead>
+<tbody>
+<tr><td><code>bool</code></td><td>真偽値</td></tr>
+<tr><td><code>u32</code></td><td>32bit 符号なし整数</td></tr>
+<tr><td><code>i32</code></td><td>32bit 符号付き整数</td></tr>
+<tr><td><code>f32</code></td><td>32bit 浮動小数点数</td></tr>
+<tr><td><code>f32x2</code></td><td>f32 の2要素ベクトル</td></tr>
+<tr><td><code>f32x3</code></td><td>f32 の3要素ベクトル</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="bool"><a class="header" href="#bool">bool</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>演算</th><th>型</th><th>説明</th></tr>
+</thead>
+<tbody>
+<tr><td><code>bool.lit[n]</code></td><td><code>C → bool</code></td><td>リテラル（<code>n: nat</code>）</td></tr>
+<tr><td><code>bool.true</code></td><td><code>C → bool</code></td><td>真</td></tr>
+<tr><td><code>bool.false</code></td><td><code>C → bool</code></td><td>偽</td></tr>
+<tr><td><code>bool.not</code></td><td><code>bool → bool</code></td><td>否定</td></tr>
+<tr><td><code>bool.and</code></td><td><code>bool bool → bool</code></td><td>論理積</td></tr>
+<tr><td><code>bool.or</code></td><td><code>bool bool → bool</code></td><td>論理和</td></tr>
+<tr><td><code>bool.ind[x]</code></td><td><code>x x bool → x</code></td><td>分岐。真なら第1引数、偽なら第2引数を返す</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="u32"><a class="header" href="#u32">u32</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>演算</th><th>型</th><th>説明</th></tr>
+</thead>
+<tbody>
+<tr><td><code>u32.lit[n]</code></td><td><code>C → u32</code></td><td>リテラル（<code>n: nat</code>）</td></tr>
+<tr><td><code>u32.add</code></td><td><code>u32 u32 → u32</code></td><td>加算</td></tr>
+<tr><td><code>u32.sub</code></td><td><code>u32 u32 → u32</code></td><td>減算</td></tr>
+<tr><td><code>u32.mul</code></td><td><code>u32 u32 → u32</code></td><td>乗算</td></tr>
+<tr><td><code>u32.div</code></td><td><code>u32 u32 → u32</code></td><td>除算</td></tr>
+<tr><td><code>u32.mod</code></td><td><code>u32 u32 → u32</code></td><td>剰余</td></tr>
+<tr><td><code>u32.neg</code></td><td><code>u32 → u32</code></td><td>符号反転</td></tr>
+<tr><td><code>u32.eq</code>, <code>u32.ne</code></td><td><code>u32 u32 → bool</code></td><td>等値比較</td></tr>
+<tr><td><code>u32.lt</code>, <code>u32.le</code>, <code>u32.gt</code>, <code>u32.ge</code></td><td><code>u32 u32 → bool</code></td><td>順序比較</td></tr>
+<tr><td><code>u32.to_f32</code></td><td><code>u32 → f32</code></td><td>f32 への変換</td></tr>
+<tr><td><code>u32.to_i32</code></td><td><code>u32 → i32</code></td><td>i32 への変換</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="i32"><a class="header" href="#i32">i32</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>演算</th><th>型</th><th>説明</th></tr>
+</thead>
+<tbody>
+<tr><td><code>i32.lit[n]</code></td><td><code>C → i32</code></td><td>リテラル（<code>n: nat</code>）</td></tr>
+<tr><td><code>i32.add</code></td><td><code>i32 i32 → i32</code></td><td>加算</td></tr>
+<tr><td><code>i32.sub</code></td><td><code>i32 i32 → i32</code></td><td>減算</td></tr>
+<tr><td><code>i32.mul</code></td><td><code>i32 i32 → i32</code></td><td>乗算</td></tr>
+<tr><td><code>i32.div</code></td><td><code>i32 i32 → i32</code></td><td>除算</td></tr>
+<tr><td><code>i32.mod</code></td><td><code>i32 i32 → i32</code></td><td>剰余</td></tr>
+<tr><td><code>i32.neg</code></td><td><code>i32 → i32</code></td><td>符号反転</td></tr>
+<tr><td><code>i32.eq</code>, <code>i32.ne</code></td><td><code>i32 i32 → bool</code></td><td>等値比較</td></tr>
+<tr><td><code>i32.lt</code>, <code>i32.le</code>, <code>i32.gt</code>, <code>i32.ge</code></td><td><code>i32 i32 → bool</code></td><td>順序比較</td></tr>
+<tr><td><code>i32.to_f32</code></td><td><code>i32 → f32</code></td><td>f32 への変換</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="f32"><a class="header" href="#f32">f32</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>演算</th><th>型</th><th>説明</th></tr>
+</thead>
+<tbody>
+<tr><td><code>f32.lit[n]</code></td><td><code>C → f32</code></td><td>リテラル（<code>n: rat</code>）</td></tr>
+<tr><td><code>f32.add</code></td><td><code>f32 f32 → f32</code></td><td>加算</td></tr>
+<tr><td><code>f32.sub</code></td><td><code>f32 f32 → f32</code></td><td>減算</td></tr>
+<tr><td><code>f32.mul</code></td><td><code>f32 f32 → f32</code></td><td>乗算</td></tr>
+<tr><td><code>f32.div</code></td><td><code>f32 f32 → f32</code></td><td>除算</td></tr>
+<tr><td><code>f32.neg</code></td><td><code>f32 → f32</code></td><td>符号反転</td></tr>
+<tr><td><code>f32.floor</code></td><td><code>f32 → i32</code></td><td>切り捨て</td></tr>
+<tr><td><code>f32.ceil</code></td><td><code>f32 → i32</code></td><td>切り上げ</td></tr>
+<tr><td><code>f32.eq</code>, <code>f32.ne</code></td><td><code>f32 f32 → bool</code></td><td>等値比較</td></tr>
+<tr><td><code>f32.lt</code>, <code>f32.le</code>, <code>f32.gt</code>, <code>f32.ge</code></td><td><code>f32 f32 → bool</code></td><td>順序比較</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="f32x2"><a class="header" href="#f32x2">f32x2</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>演算</th><th>型</th><th>説明</th></tr>
+</thead>
+<tbody>
+<tr><td><code>f32x2.lit[x, y]</code></td><td><code>C → f32x2</code></td><td>リテラル（<code>x, y: rat</code>）</td></tr>
+<tr><td><code>f32x2.pack</code></td><td><code>f32 f32 → f32x2</code></td><td>2つの f32 をパック</td></tr>
+<tr><td><code>f32x2.unpack</code></td><td><code>f32x2 → f32 f32</code></td><td>f32x2 を2つの f32 に展開</td></tr>
+<tr><td><code>f32x2.add</code></td><td><code>f32x2 f32x2 → f32x2</code></td><td>加算</td></tr>
+<tr><td><code>f32x2.sub</code></td><td><code>f32x2 f32x2 → f32x2</code></td><td>減算</td></tr>
+<tr><td><code>f32x2.mul</code></td><td><code>f32x2 f32x2 → f32x2</code></td><td>乗算</td></tr>
+<tr><td><code>f32x2.div</code></td><td><code>f32x2 f32x2 → f32x2</code></td><td>除算</td></tr>
+<tr><td><code>f32x2.neg</code></td><td><code>f32x2 → f32x2</code></td><td>符号反転</td></tr>
+<tr><td><code>f32x2.scale</code></td><td><code>f32 f32x2 → f32x2</code></td><td>スカラー倍</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="f32x3"><a class="header" href="#f32x3">f32x3</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>演算</th><th>型</th><th>説明</th></tr>
+</thead>
+<tbody>
+<tr><td><code>f32x3.lit[x, y, z]</code></td><td><code>C → f32x3</code></td><td>リテラル（<code>x, y, z: rat</code>）</td></tr>
+<tr><td><code>f32x3.pack</code></td><td><code>f32 f32 f32 → f32x3</code></td><td>3つの f32 をパック</td></tr>
+<tr><td><code>f32x3.unpack</code></td><td><code>f32x3 → f32 f32 f32</code></td><td>f32x3 を3つの f32 に展開</td></tr>
+<tr><td><code>f32x3.add</code></td><td><code>f32x3 f32x3 → f32x3</code></td><td>加算</td></tr>
+<tr><td><code>f32x3.sub</code></td><td><code>f32x3 f32x3 → f32x3</code></td><td>減算</td></tr>
+<tr><td><code>f32x3.mul</code></td><td><code>f32x3 f32x3 → f32x3</code></td><td>乗算</td></tr>
+<tr><td><code>f32x3.div</code></td><td><code>f32x3 f32x3 → f32x3</code></td><td>除算</td></tr>
+<tr><td><code>f32x3.neg</code></td><td><code>f32x3 → f32x3</code></td><td>符号反転</td></tr>
+<tr><td><code>f32x3.scale</code></td><td><code>f32 f32x3 → f32x3</code></td><td>スカラー倍</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="val構造操作"><a class="header" href="#val構造操作">val（構造操作）</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>演算</th><th>型</th><th>説明</th></tr>
+</thead>
+<tbody>
+<tr><td><code>val.dup[x]</code></td><td><code>x → x x</code></td><td>値の複製</td></tr>
+<tr><td><code>val.drop[x]</code></td><td><code>x → C</code></td><td>値の破棄</td></tr>
+<tr><td><code>val.swap[x, y]</code></td><td><code>x y → y x</code></td><td>値の入れ替え</td></tr>
+</tbody>
+</table>
+</div>
+<p><code>x</code>, <code>y</code> は任意の <code>C → C</code> 型（1-cell）をパラメータとして受け取ります。</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="実行"><a class="header" href="#実行">実行</a></h1>
+<p>donut-app では、<code>import "sys"</code> で定義されたプリミティブだけで構成された 2-cell を <strong>評価</strong> できます。</p>
+<h2 id="評価の条件"><a class="header" href="#評価の条件">評価の条件</a></h2>
+<p>評価できるセルは以下を満たす必要があります:</p>
+<ul>
+<li><code>import "sys"</code> の <code>C</code> 上の 2-cell であること（<code>C → C</code> の 1-cell 間の射）</li>
+<li>パラメータを持たないこと</li>
+<li>すべてのプリミティブが sys ライブラリに属すること</li>
+</ul>
+<p>ドロップダウンでセルを選択すると、評価可能な場合は結果が表示されます。</p>
+<h2 id="例-1"><a class="header" href="#例-1">例</a></h2>
+<pre><code>import "sys"
+
+one = f32.lit[1]
+// → 1
+
+add_one: f32 → f32 = f32.lit[1] f32; f32.add
+// → failed to eval: needs 1 input(s)
+</code></pre>
+<p>入力がないセル（<code>C → ...</code>）はそのまま値が計算されます。入力を取るセル（<code>f32 → f32</code> 等）は評価できず、エラーメッセージが表示されます。</p>
+<h2 id="glsl-コンパイル"><a class="header" href="#glsl-コンパイル">GLSL コンパイル</a></h2>
+<p>sys のプリミティブだけで構成された 2-cell は GLSL にコンパイルできます。シェーダービューポートで描画するには以下の条件を満たす必要があります:</p>
+<ul>
+<li>入力の float 成分数が 1〜2（例: <code>f32</code>, <code>f32x2</code>, <code>f32 f32</code>）</li>
+<li>出力の float 成分数が 1〜3（例: <code>f32</code>, <code>f32x2</code>, <code>f32x3</code>, <code>f32 f32 f32</code>）</li>
+</ul>
+<p>入力にはピクセル座標（<code>vec2 uv</code>）が渡され、出力は RGB 色として解釈されます。出力が 1 成分ならグレースケール、2 成分なら RG、3 成分なら RGB になります。</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="例-2"><a class="header" href="#例-2">例</a></h1>
+<p>Donut の具体的な使い方を例を通じて紹介します。</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="例-pentagon"><a class="header" href="#例-pentagon">例: pentagon</a></h1>
+<p>モノイドの結合律に関する <strong>pentagon identity</strong>（五角恒等式）を Donut で記述する例です。</p>
+<h2 id="全体コード"><a class="header" href="#全体コード">全体コード</a></h2>
+<pre><code>u: *
+x: u → u
+μ: x x → x
+α: μ x; μ → x μ; μ
+icl: (x μ; μ) x → x μ x; μ x
+icr: x μ x; x μ → x (μ x; μ)
+top =
+    α x; μ ;;
+    icl; μ ;;
+    x μ x; α ;;
+    icr; μ ;;
+    x α; μ
+ic0: μ x x; x μ → μ μ
+ic1: μ μ → x x μ; μ x
+
+kl: (μ x; μ) x → μ x x; μ x
+kr: x x μ; x μ → x (x μ; μ)
+bot =
+    kl; μ ;;
+    μ x x; α ;;
+    (ic0 ;; ic1); μ ;;
+    x x μ; α ;;
+    kr; μ
+
+pentagon: top → bot
+result = pentagon
+</code></pre>
+<h2 id="解説"><a class="header" href="#解説">解説</a></h2>
+<h3 id="基本構造"><a class="header" href="#基本構造">基本構造</a></h3>
+<pre><code>u: *
+x: u → u
+μ: x x → x
+</code></pre>
+<ul>
+<li><code>u</code> — 0-cell（対象）</li>
+<li><code>x</code> — 1-cell（<code>u</code> 上の射）</li>
+<li><code>μ</code> — 2-cell（二項演算。<code>x</code> を2つ受け取り <code>x</code> を返す）</li>
+</ul>
+<p>これはモノイドの骨格です。</p>
+<h3 id="結合律-associator"><a class="header" href="#結合律-associator">結合律 (associator)</a></h3>
+<pre><code>α: μ x; μ → x μ; μ
+</code></pre>
+<p><code>α</code> は 3-cell です。source と target はそれぞれ <code>x</code> を3つ合成する2通りの括弧付けを表します:</p>
+<ul>
+<li><code>μ x; μ</code> — <code>μ(μ(a, b), c)</code> — 左から結合</li>
+<li><code>x μ; μ</code> — <code>μ(a, μ(b, c))</code> — 右から結合</li>
+</ul>
+<h3 id="interchange-cell"><a class="header" href="#interchange-cell">interchange cell</a></h3>
+<pre><code>icl: (x μ; μ) x → x μ x; μ x
+icr: x μ x; x μ → x (μ x; μ)
+</code></pre>
+<p>4つの <code>x</code> を結合する際に、括弧の位置を入れ替える 3-cell です。</p>
+<h3 id="2つの経路"><a class="header" href="#2つの経路">2つの経路</a></h3>
+<p><code>x</code> を4つ結合するとき、括弧の付け方は5通りあります:</p>
+<pre><code>((ab)c)d  →  (a(bc))d  →  a((bc)d)  →  a(b(cd))
+
+((ab)c)d  →  (ab)(cd)  →  a(b(cd))
+</code></pre>
+<p>完全左結合 <code>((ab)c)d</code> から完全右結合 <code>a(b(cd))</code> に至る経路が2通りあり、それぞれが <code>top</code> と <code>bot</code> に対応します。</p>
+<h4 id="top-上の経路"><a class="header" href="#top-上の経路">top: 上の経路</a></h4>
+<pre><code>top =
+    α x; μ ;;        -- ((ab)c)d → (a(bc))d
+    icl; μ ;;         -- interchange: 括弧を外す
+    x μ x; α ;;      -- 内側に α を適用
+    icr; μ ;;         -- interchange: 括弧を戻す
+    x α; μ            -- → a(b(cd))
+</code></pre>
+<p>各ステップは 3-cell で、<code>;;</code> による 2次合成で繋いでいます。上の経路の図では3ステップですが、コードでは interchange cell（<code>icl</code>, <code>icr</code>）による中間ステップが必要なため5ステップになっています。<code>α x; μ</code> は「左3つに α を適用し、残りの <code>x</code> は恒等的に通す」ことを意味します。</p>
+<h4 id="bot-下の経路"><a class="header" href="#bot-下の経路">bot: 下の経路</a></h4>
+<pre><code>bot =
+    kl; μ ;;           -- ((ab)c)d → (ab)(cd)
+    μ x x; α ;;       -- (ab)(cd) に α を適用
+    (ic0 ;; ic1); μ ;; -- interchange
+    x x μ; α ;;       -- 左側に α を適用
+    kr; μ              -- → a(b(cd))
+</code></pre>
+<p>こちらは途中で <code>(ab)(cd)</code> という「2つずつに分ける」括弧付けを経由します。</p>
+<h4 id="pentagon-coherence"><a class="header" href="#pentagon-coherence">pentagon: coherence</a></h4>
+<pre><code>pentagon: top → bot
+</code></pre>
+<p><code>top</code> と <code>bot</code> はどちらも同じ source（完全左結合）と target（完全右結合）を持つ 3-cell です。<code>pentagon</code> はこの2つの経路の間の <strong>4-cell</strong> であり、「どちらの経路で括り直しても結果は同じ」という coherence 条件を表現しています。</p>
+<p>これが Mac Lane の <strong>pentagon identity</strong> — モノイダル圏の公理の中核です。</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="例-functor-によるコンパイル"><a class="header" href="#例-functor-によるコンパイル">例: functor によるコンパイル</a></h1>
+<p>Functor は抽象的な構造のプログラムを具体的な実装に翻訳する「コンパイラ」として使えます。しかし functor <code>F(...)</code> は Donut のメタ操作であり、型チェック時に展開されるだけの存在です。この例では、functor と同じ翻訳を <strong>セル合成</strong> で表現する方法を示します。</p>
+<h2 id="設定"><a class="header" href="#設定">設定</a></h2>
+<p>自然数のような抽象構造を定義します。</p>
+<pre><code>D: *
+x: D → D
+zero: D → x
+succ: x → x
+add: x x → x
+</code></pre>
+<h2 id="functor-メタ的なコンパイル"><a class="header" href="#functor-メタ的なコンパイル">Functor: メタ的なコンパイル</a></h2>
+<p>functor でマッピングを定義すると、<code>D</code> のプログラムを sys の <code>i32</code> 演算に翻訳できます。</p>
+<pre><code>import "sys"
+
+F: D ~&gt; C
+F(x) = i32
+F(zero) = i32.lit[0]
+F(succ) = i32.lit[1] i32; i32.add
+F(add) = i32.add
+</code></pre>
+<pre><code>two = zero; succ; succ
+F(two)              // i32.lit[0]; ...; i32.add
+F(two two; add)     // F(two) F(two); i32.add
+</code></pre>
+<p><code>F(...)</code> は便利ですが、あくまでメタ操作です。Donut のセル合成 (<code>;</code>, <code>;;</code>, スペース) の体系からは外にあり、セルとして合成したり、高次のセルの source/target に置いたりすることはできません。</p>
+<h2 id="セル合成による翻訳"><a class="header" href="#セル合成による翻訳">セル合成による翻訳</a></h2>
+<p>functor と同じ翻訳を、通常のセルの合成で表現するプリミティブを導入します。</p>
+<pre><code>L: C → D
+R: D → C
+T: C → L R
+B: L x R → F(x)
+</code></pre>
+<ul>
+<li><code>L</code>, <code>R</code> — C と D を行き来する 1-cell</li>
+<li><code>T: C → L R</code> — C から L R への変換</li>
+<li><code>B: L x R → F(x)</code> — L で埋め込んだ空間での計算結果を F(x) に変換</li>
+</ul>
+<p>これらを組み合わせると:</p>
+<pre><code>compile[u: D → x] = T; L u R; B
+</code></pre>
+<p><code>compile[u]</code> の型は <code>C → F(x)</code> です。<code>T</code> で L R の空間に入り、<code>L u R</code> で抽象プログラム <code>u</code> を適用し、<code>B</code> で具体的な値に変換します。</p>
+<h2 id="メタ操作との等価性"><a class="header" href="#メタ操作との等価性">メタ操作との等価性</a></h2>
+<p><code>compile</code> と functor <code>F</code> が同じ結果を生むことを宣言できます。</p>
+<pre><code>η[u: D → x]: compile[u] ~ F(u)
+</code></pre>
+<p><code>u</code> はパラメータなので <code>F(u)</code> に対して functor 制約が自動生成されます。</p>
+<p>具体的なプログラムでは:</p>
+<pre><code>three = zero; succ; succ; succ
+result = compile[three]
+</code></pre>
+<p><code>result</code> は <code>T; L (zero; succ; succ; succ) R; B</code> というセル合成です。<code>F(three)</code> がメタ操作による展開なのに対し、<code>compile[three]</code> は L, R, T, B という宣言されたセルの合成として構成されています。</p>
+<h2 id="なぜこれが重要か"><a class="header" href="#なぜこれが重要か">なぜこれが重要か</a></h2>
+<p><code>F(...)</code> はメタ操作なので、セル合成の体系の中では「見えない」存在です。<code>F(two)</code> の結果は i32 の演算に展開されますが、その「翻訳した」という構造は消えてしまいます。</p>
+<p>一方 <code>compile[u] = T; L u R; B</code> はセル合成そのものです。つまり:</p>
+<ul>
+<li><code>compile[u]</code> を source/target に持つ <strong>3-cell</strong> を宣言できる</li>
+<li>他のセルと <code>;</code> や <code>;;</code> で自由に <strong>合成</strong> できる</li>
+<li><code>η</code> のような等価性を通じて、メタ操作 <code>F</code> との関係を高次セルで記述できる</li>
+</ul>
+<p>翻訳という操作自体がセル合成の体系の中の一級市民になり、その性質（正しさ、他の翻訳との関係など）をセルの言葉で語れるようになります。</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="例-mandelbrot"><a class="header" href="#例-mandelbrot">例: mandelbrot</a></h1>
+<p><code>import "sys"</code> のプリミティブを使って <strong>Mandelbrot 集合</strong> を描画するプログラムです。すべてのロジックが 2-cell の合成として記述されています。</p>
+<h2 id="全体コード-1"><a class="header" href="#全体コード-1">全体コード</a></h2>
+<pre><code>import "sys"
+
+fdup = val.dup[f32]
+
+square :=
+  val.dup[f32x2];
+  f32x2.unpack f32x2.unpack;
+  (fdup; f32.mul) (fdup; f32.mul) (f32.lit[2] f32.mul; f32.mul);
+  f32.sub f32;
+  f32x2.pack
+
+step: f32x2 f32x2 → f32x2 f32x2 =
+  square val.dup[f32x2]; f32x2.add f32x2
+
+rep4[x: C → C, f: x → x]: x → x = f; f; f; f
+step4 := rep4[f32x2 f32x2, step]
+step16 := rep4[f32x2 f32x2, step4]
+step64 := rep4[f32x2 f32x2, step16]
+
+coloring: f32x2 → f32 := f32x2.unpack;
+  (fdup; f32.mul) (fdup; f32.mul);
+  f32.add f32.lit[2];
+  f32.le;
+  f32.lit[1] f32.lit[0] bool;
+  bool.ind[f32]
+
+result = f32x2.lit[0,0] (f32x2 f32x2.lit[0.6,0.5]; f32x2.sub; f32.lit[3] f32x2; f32x2.scale);
+  step64; 
+  f32x2 val.drop[f32x2];
+  coloring
+</code></pre>
+<h2 id="解説-1"><a class="header" href="#解説-1">解説</a></h2>
+<h3 id="前提-sys-ライブラリ"><a class="header" href="#前提-sys-ライブラリ">前提: sys ライブラリ</a></h3>
+<p><code>import "sys"</code> により、以下のプリミティブが使えます:</p>
+<ul>
+<li><code>f32</code>, <code>f32x2</code> — 浮動小数点型。すべて <code>C → C</code> の 1-cell</li>
+<li><code>f32.add</code>, <code>f32.mul</code>, <code>f32.sub</code> — 算術演算（2つの <code>f32</code> を受け取り <code>f32</code> を返す 2-cell）</li>
+<li><code>f32x2.pack</code> / <code>f32x2.unpack</code> — <code>f32 f32 ↔ f32x2</code> の変換</li>
+<li><code>val.dup[x]</code> — <code>x → x x</code>（値の複製）</li>
+<li><code>val.drop[x]</code> — <code>x → C</code>（値の破棄）</li>
+</ul>
+<p>Donut では関数は 2-cell の合成であり、すべてのデータは 1-cell の「ワイヤー」として流れます。</p>
+<h3 id="fdup-f32-の複製"><a class="header" href="#fdup-f32-の複製">fdup: f32 の複製</a></h3>
+<pre><code>fdup = val.dup[f32]
+</code></pre>
+<p><code>f32 → f32 f32</code>。1つの <code>f32</code> 値を複製して2つにします。頻出するのでエイリアスしています。</p>
+<h3 id="square-複素数の二乗"><a class="header" href="#square-複素数の二乗">square: 複素数の二乗</a></h3>
+<pre><code>square :=
+  val.dup[f32x2];
+  f32x2.unpack f32x2.unpack;
+  (fdup; f32.mul) (fdup; f32.mul) (f32.lit[2] f32.mul; f32.mul);
+  f32.sub f32;
+  f32x2.pack
+</code></pre>
+<p>型は <code>f32x2 → f32x2</code>。複素数 (z = a + bi) の二乗 (z^2 = (a^2 - b^2) + 2abi) を計算します。</p>
+<p>データフローを追うと:</p>
+<ol>
+<li><strong><code>val.dup[f32x2]</code></strong> — 入力 <code>(a, b)</code> を複製: <code>(a, b) (a, b)</code></li>
+<li><strong><code>f32x2.unpack f32x2.unpack</code></strong> — 展開: <code>a b a b</code></li>
+<li><strong><code>(fdup; f32.mul) (fdup; f32.mul) (f32.lit[2] f32.mul; f32.mul)</code></strong>
+<ul>
+<li>最初の2つ: <code>a</code> を複製して <code>a*a</code>、<code>b</code> を複製して <code>b*b</code></li>
+<li>3つ目: 定数 <code>2</code> と <code>a</code> と <code>b</code> を掛けて <code>2*a*b</code></li>
+<li>結果: <code>a² b² 2ab</code></li>
+</ul>
+</li>
+<li><strong><code>f32.sub f32</code></strong> — <code>a² - b²</code> と <code>2ab</code></li>
+<li><strong><code>f32x2.pack</code></strong> — <code>(a² - b², 2ab)</code> にパック</li>
+</ol>
+<p><code>:=</code> で定義しているので、<code>square</code> は独立したセルとして宣言されつつ、評価時にはこの合成として計算されます。</p>
+<h3 id="step-mandelbrot-の反復ステップ"><a class="header" href="#step-mandelbrot-の反復ステップ">step: Mandelbrot の反復ステップ</a></h3>
+<pre><code>step: f32x2 f32x2 → f32x2 f32x2 =
+  square val.dup[f32x2]; f32x2.add f32x2
+</code></pre>
+<p>型は <code>f32x2 f32x2 → f32x2 f32x2</code>。入力は <code>(z, c)</code> で、(z \leftarrow z^2 + c) を計算して <code>(z', c)</code> を返します。</p>
+<ol>
+<li><strong><code>square val.dup[f32x2]</code></strong> — <code>z</code> に <code>square</code> を適用して <code>z²</code> にし、<code>c</code> を複製: <code>z² c c</code></li>
+<li><strong><code>f32x2.add f32x2</code></strong> — <code>z² + c</code> と <code>c</code>: <code>(z²+c, c)</code></li>
+</ol>
+<p><code>c</code> を保持したまま <code>z</code> を更新するので、繰り返し適用できます。</p>
+<h3 id="rep4-と反復"><a class="header" href="#rep4-と反復">rep4 と反復</a></h3>
+<pre><code>rep4[x: C → C, f: x → x]: x → x = f; f; f; f
+step4 := rep4[f32x2 f32x2, step]
+step16 := rep4[f32x2 f32x2, step4]
+step64 := rep4[f32x2 f32x2, step16]
+</code></pre>
+<p><code>rep4</code> はパラメトリックな定義で、任意の 2-cell <code>f: x → x</code> を4回繰り返します。</p>
+<ul>
+<li><code>step4</code> = step を 4 回 = 4 回反復</li>
+<li><code>step16</code> = step4 を 4 回 = 16 回反復</li>
+<li><code>step64</code> = step16 を 4 回 = 64 回反復</li>
+</ul>
+<p><code>:=</code> で定義しているので、それぞれ独立したセルとして扱いつつ、評価時には展開されます。</p>
+<h3 id="coloring-発散判定"><a class="header" href="#coloring-発散判定">coloring: 発散判定</a></h3>
+<pre><code>coloring: f32x2 → f32 := f32x2.unpack;
+  (fdup; f32.mul) (fdup; f32.mul);
+  f32.add f32.lit[2];
+  f32.le;
+  f32.lit[1] f32.lit[0] bool;
+  bool.ind[f32]
+</code></pre>
+<p>型は <code>f32x2 → f32</code>。最終的な <code>z</code> の値から色を決定します。</p>
+<ol>
+<li><strong><code>f32x2.unpack</code></strong> — <code>(a, b)</code> を <code>a b</code> に展開</li>
+<li><strong><code>(fdup; f32.mul) (fdup; f32.mul)</code></strong> — <code>a²</code> と <code>b²</code> を計算</li>
+<li><strong><code>f32.add f32.lit[2]</code></strong> — <code>a² + b²</code> と定数 <code>2</code></li>
+<li><strong><code>f32.le</code></strong> — <code>a² + b² ≤ 2</code> → <code>bool</code></li>
+<li><strong><code>f32.lit[1] f32.lit[0] bool</code></strong> — 定数 <code>1</code>、定数 <code>0</code>、判定結果を並べる</li>
+<li><strong><code>bool.ind[f32]</code></strong> — <code>bool</code> の値で分岐。真なら <code>1</code>（集合内）、偽なら <code>0</code>（発散）</li>
+</ol>
+<h3 id="result-全体の組み立て"><a class="header" href="#result-全体の組み立て">result: 全体の組み立て</a></h3>
+<pre><code>result = f32x2.lit[0,0] (f32x2 f32x2.lit[0.6,0.5]; f32x2.sub; f32.lit[3] f32x2; f32x2.scale);
+  step64; 
+  f32x2 val.drop[f32x2];
+  coloring
+</code></pre>
+<p>型は <code>f32x2 → f32</code>。ピクセル座標 <code>f32x2</code>（入力）を受け取り、色 <code>f32</code> を返します。</p>
+<ol>
+<li><strong>初期値の準備</strong>: <code>z = (0, 0)</code> と <code>c</code> を用意。<code>c</code> は入力座標を <code>(0.6, 0.5)</code> を中心に、スケール <code>3</code> で変換したもの</li>
+<li><strong><code>step64</code></strong> — 64 回反復</li>
+<li><strong><code>f32x2 val.drop[f32x2]</code></strong> — <code>c</code> を捨てて <code>z</code> だけ残す</li>
+<li><strong><code>coloring</code></strong> — 発散判定して色に変換</li>
+</ol>
+<h2 id="ポイント"><a class="header" href="#ポイント">ポイント</a></h2>
+<ul>
+<li>すべてのロジックが <strong>2-cell の合成</strong> で表現されている</li>
+<li>分岐（if/else）は <code>bool.ind</code> で実現</li>
+<li>ループは <code>rep4</code> のパラメトリック定義を入れ子にして実現</li>
+<li><code>:=</code>（定義）を使うことで、中間セルに名前を付けつつ評価時は展開</li>
+</ul>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+
+            </nav>
+
+        </div>
+
+        <template id=fa-eye><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM432 256c0 79.5-64.5 144-144 144s-144-64.5-144-144s64.5-144 144-144s144 64.5 144 144zM288 192c0 35.3-28.7 64-64 64c-11.5 0-22.3-3-31.6-8.4c-.2 2.8-.4 5.5-.4 8.4c0 53 43 96 96 96s96-43 96-96s-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6z"/></svg></span></template>
+        <template id=fa-eye-slash><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zM223.1 149.5C248.6 126.2 282.7 112 320 112c79.5 0 144 64.5 144 144c0 24.9-6.3 48.3-17.4 68.7L408 294.5c5.2-11.8 8-24.8 8-38.5c0-53-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6c0 10.2-2.4 19.8-6.6 28.3l-90.3-70.8zm223.1 298L373 389.9c-16.4 6.5-34.3 10.1-53 10.1c-79.5 0-144-64.5-144-144c0-6.9 .5-13.6 1.4-20.2L83.1 161.5C60.3 191.2 44 220.8 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5z"/></svg></span></template>
+        <template id=fa-copy><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M502.6 70.63l-61.25-61.25C435.4 3.371 427.2 0 418.7 0H255.1c-35.35 0-64 28.66-64 64l.0195 256C192 355.4 220.7 384 256 384h192c35.2 0 64-28.8 64-64V93.25C512 84.77 508.6 76.63 502.6 70.63zM464 320c0 8.836-7.164 16-16 16H255.1c-8.838 0-16-7.164-16-16L239.1 64.13c0-8.836 7.164-16 16-16h128L384 96c0 17.67 14.33 32 32 32h47.1V320zM272 448c0 8.836-7.164 16-16 16H63.1c-8.838 0-16-7.164-16-16L47.98 192.1c0-8.836 7.164-16 16-16H160V128H63.99c-35.35 0-64 28.65-64 64l.0098 256C.002 483.3 28.66 512 64 512h192c35.2 0 64-28.8 64-64v-32h-47.1L272 448z"/></svg></span></template>
+        <template id=fa-play><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M73 39c-14.8-9.1-33.4-9.4-48.5-.9S0 62.6 0 80V432c0 17.4 9.4 33.4 24.5 41.9s33.7 8.1 48.5-.9L361 297c14.3-8.7 23-24.2 23-41s-8.7-32.2-23-41L73 39z"/></svg></span></template>
+        <template id=fa-clock-rotate-left><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M75 75L41 41C25.9 25.9 0 36.6 0 57.9V168c0 13.3 10.7 24 24 24H134.1c21.4 0 32.1-25.9 17-41l-30.8-30.8C155 85.5 203 64 256 64c106 0 192 86 192 192s-86 192-192 192c-40.8 0-78.6-12.7-109.7-34.4c-14.5-10.1-34.4-6.6-44.6 7.9s-6.6 34.4 7.9 44.6C151.2 495 201.7 512 256 512c141.4 0 256-114.6 256-256S397.4 0 256 0C185.3 0 121.3 28.7 75 75zm181 53c-13.3 0-24 10.7-24 24V256c0 6.4 2.5 12.5 7 17l72 72c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-65-65V152c0-13.3-10.7-24-24-24z"/></svg></span></template>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr-ef4e11c1.min.js"></script>
+        <script src="mark-09e88c2c.min.js"></script>
+        <script src="searcher-c2a407aa.js"></script>
+
+        <script src="clipboard-1626706a.min.js"></script>
+        <script src="highlight-abc7f01d.js"></script>
+        <script src="book-a0b12cfe.js"></script>
+
+        <!-- Custom JS scripts -->
+
+        <script>
+        window.addEventListener('load', function() {
+            window.setTimeout(window.print, 100);
+        });
+        </script>
+
+
+    </div>
+    </body>
+</html>

@@ -1,0 +1,343 @@
+<!DOCTYPE HTML>
+<html lang="ja" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>効果系 ── 借りて返す - Oven ── 言語の記録</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="依存型 + QTT + GPU 並列の実験的言語 Oven の設計と実装の記録">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon-de23e50b.svg">
+        <link rel="shortcut icon" href="favicon-8114d1fc.png">
+        <link rel="stylesheet" href="css/variables-8adf115d.css">
+        <link rel="stylesheet" href="css/general-2459343d.css">
+        <link rel="stylesheet" href="css/chrome-ae938929.css">
+        <link rel="stylesheet" href="css/print-9e4910d8.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="fonts/fonts-9644e21d.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="mdbook-highlight-css" href="highlight-493f70e1.css">
+        <link rel="stylesheet" id="mdbook-tomorrow-night-css" href="tomorrow-night-4c0ae647.css">
+        <link rel="stylesheet" id="mdbook-ayu-highlight-css" href="ayu-highlight-3fdfc3ac.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "searchindex-3d1a964c.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc-45cb7b16.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="mdbook-body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="mdbook-sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("mdbook-sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="mdbook-sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="mdbook-sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="mdbook-page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="mdbook-menu-bar-hover-placeholder"></div>
+                <div id="mdbook-menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="mdbook-sidebar-toggle" class="icon-button" for="mdbook-sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="mdbook-sidebar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M0 96C0 78.3 14.3 64 32 64H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32H32c-17.7 0-32-14.3-32-32s14.3-32 32-32H416c17.7 0 32 14.3 32 32z"/></svg></span>
+                        </label>
+                        <button id="mdbook-theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="mdbook-theme-list">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M371.3 367.1c27.3-3.9 51.9-19.4 67.2-42.9L600.2 74.1c12.6-19.5 9.4-45.3-7.6-61.2S549.7-4.4 531.1 9.6L294.4 187.2c-24 18-38.2 46.1-38.4 76.1L371.3 367.1zm-19.6 25.4l-116-104.4C175.9 290.3 128 339.6 128 400c0 3.9 .2 7.8 .6 11.6c1.8 17.5-10.2 36.4-27.8 36.4H96c-17.7 0-32 14.3-32 32s14.3 32 32 32H240c61.9 0 112-50.1 112-112c0-2.5-.1-5-.2-7.5z"/></svg></span>
+                        </button>
+                        <ul id="mdbook-theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-ayu">Ayu</button></li>
+                        </ul>
+                        <button id="mdbook-search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="mdbook-searchbar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352c79.5 0 144-64.5 144-144s-64.5-144-144-144S64 128.5 64 208s64.5 144 144 144z"/></svg></span>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Oven ── 言語の記録</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <span class=fa-svg id="print-button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M128 0C92.7 0 64 28.7 64 64v96h64V64H354.7L384 93.3V160h64V93.3c0-17-6.7-33.3-18.7-45.3L400 18.7C388 6.7 371.7 0 354.7 0H128zM384 352v32 64H128V384 368 352H384zm64 32h32c17.7 0 32-14.3 32-32V256c0-35.3-28.7-64-64-64H64c-35.3 0-64 28.7-64 64v96c0 17.7 14.3 32 32 32H64v64c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V384zm-16-88c-13.3 0-24-10.7-24-24s10.7-24 24-24s24 10.7 24 24s-10.7 24-24 24z"/></svg></span>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="mdbook-search-wrapper" class="hidden">
+                    <form id="mdbook-searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="mdbook-searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="mdbook-searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <span class=fa-svg id="fa-spin"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M304 48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zm0 416c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM48 304c26.5 0 48-21.5 48-48s-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48zm464-48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM142.9 437c18.7-18.7 18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zm0-294.2c18.7-18.7 18.7-49.1 0-67.9S93.7 56.2 75 75s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zM369.1 437c18.7 18.7 49.1 18.7 67.9 0s18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9z"/></svg></span>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="mdbook-searchresults-outer" class="searchresults-outer hidden">
+                        <div id="mdbook-searchresults-header" class="searchresults-header"></div>
+                        <ul id="mdbook-searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('mdbook-sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('mdbook-sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#mdbook-sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="mdbook-content" class="content">
+                    <main>
+                        <h1 id="効果系--借りて返す"><a class="header" href="#効果系--借りて返す">効果系 ── 借りて返す</a></h1>
+<p>Oven は純粋言語ですが、IO・可変状態・GPU への書き込みを書けます。核となる考え方は一つだけです:</p>
+<blockquote>
+<p><strong>副作用も借用も「線形に借りて返す」(<code>&amp;</code>)で表す。</strong></p>
+</blockquote>
+<p>モナドはありません。<code>print</code> や <code>store</code> のような効果は、その世界の <strong>token</strong>(<code>World</code>・<code>GPU</code> などの不透明な型)を <strong>借りて(消費して)・返す</strong> 関数として型が付きます。token は線形(<code>'1</code>)なので「一度使ったら次の token に進む」── 効果の順序がデータ依存として型で強制されます。そして token は暗黙に供給されるため、ユーザは書きません。</p>
+<p>2026-06-14 に設計確定し、Phase 1〜6 前半まで実装済みです(→ <a href="status.html">現状</a>)。</p>
+<h2 id="-の核consume-and-return"><a class="header" href="#-の核consume-and-return"><code>&amp;</code> の核:consume-and-return</a></h2>
+<p><code>&amp;</code> は型の頭に付く borrow 注釈です。意味は「線形に消費し、結果で返す」:</p>
+<pre><code>// あなたが書く型:
+set : [A : Type] [n : '0 U32] (&amp;Array(n, A), i : U32, x : A) -&gt; Unit
+
+// 脱糖後(借りた Array を結果タプルで返す):
+set : … ('1 Array(n, A), i : U32, x : A) -&gt; (Array(n, A), Unit)
+</code></pre>
+<p>呼び出し側 <code>set(&amp;arr, i, v)</code> は <code>arr</code> を消費し、更新後の配列を <strong>同じ名前に再束縛</strong> します(パーサが <code>let (arr, _) = set(arr, i, v)</code> へ脱糖)。呼び出し以降の <code>arr</code> は更新後を指します。</p>
+<p>Rust の <code>&amp;mut</code> に相当しますが、<strong>lifetime は要りません</strong>。「消費して返す」threading 符号化なので、借用の有効範囲はデータの流れそのもので決まります。安全性を担保するのは linearity です ── token や資源を明示的に名前で書いても構いませんが、二度使えば QTT の線形検査が弾きます。「名前で書けないから安全」ではなく「<code>'1</code> だから安全」が正しい筋、と設計は明言しています。</p>
+<h2 id="22-は括弧と直交する"><a class="header" href="#22-は括弧と直交する">2×2:<code>&amp;</code> は括弧と直交する</a></h2>
+<p>borrow は「implicit(<code>[]</code>)か explicit(<code>()</code>)か」と独立の装飾です:</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th></th><th>非 borrow</th><th>borrow(<code>&amp;</code>)</th></tr>
+</thead>
+<tbody>
+<tr><td>explicit <code>()</code></td><td>普通の引数 <code>(x : A)</code></td><td><strong><code>a : &amp;X</code> = 明示借用</strong>(可変資源)</td></tr>
+<tr><td>implicit <code>[]</code></td><td>辞書/型 <code>[d : C]</code></td><td><strong><code>[&amp;X]</code> = 効果</strong>(暗黙借用 token)</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li><strong>明示借用 <code>a : &amp;X</code></strong>:資源を名前で渡す(<code>set(&amp;arr, …)</code>)。host の可変 <code>Array</code> がこれ。</li>
+<li><strong>暗黙借用 <code>[&amp;X]</code></strong>:資源を型で暗黙解決する(ambient から拾う)。効果 token がこれ。</li>
+</ul>
+<p>脱糖の核(<code>'1</code> 引数 + 結果へ資源を返す)は両者で同一で、違うのは解決方法(名前で引くか型で引くか)だけです。既存の implicit/explicit の二択を、そのまま borrow に流用した形になっています。</p>
+<h2 id="効果-former-x"><a class="header" href="#効果-former-x">効果 former <code>[&amp;X]</code></a></h2>
+<p>効果は capability 型 <code>X : Type</code> で表します。<code>World</code>(host IO)・<code>GPU</code>(カーネル)・将来の <code>Log</code>・<code>State S</code> など。token は零幅でも(World/GPU)、データ持ちでも(State S)構いません ── 単なる線形値です。</p>
+<pre><code>[&amp;X] A        ≝  '1 X → (X, A)
+[&amp;X, &amp;Y] A    ≝  '1 X → '1 Y → (X, Y, A)    // 相異型なので独立に threading
+</code></pre>
+<p>prelude の効果プリミティブ:</p>
+<pre><code>postulate assert : (b : '1 Bool) -&gt; [&amp;World] Unit
+postulate print  : [A : Type] (x : '1 A) -&gt; [&amp;World] Unit
+postulate store  : [A : Type] [n : '0 U32] (buf : Buffer(n, A), i : U32, x : A) -&gt; [&amp;GPU] Unit
+postulate load   : [A : Type] [n : '0 U32] (buf : Buffer(n, A), i : U32) -&gt; [&amp;GPU] A
+</code></pre>
+<p><code>World</code> と <code>GPU</code> が <strong>別の型</strong> であることが安全性を担います:host で <code>store</code> を呼ぼうとしても、host の ambient には <code>GPU</code> token が無いので型不一致で弾かれます。かつてこの安全性を担っていた <code>'GPU</code> modality(型に付く world 印)は全廃されました(→ <a href="history.html#gpu-modality">経緯</a>)。</p>
+<p><code>assert</code>/<code>print</code> の引数が <code>'1</code> なのは細かいが実際的な設計です:<code>assert(eqArray(readback(a), readback(b)))</code> のように線形 buffer 由来の値を渡すとき、引数が <code>'ω</code> だと引数式の使用量が ω 倍にスケールされて線形性違反になってしまうためです。</p>
+<h2 id="ambient-と-threading-規則"><a class="header" href="#ambient-と-threading-規則">ambient と threading 規則</a></h2>
+<p>elaboration の文脈は「いま使用可能な <code>'1</code> 効果束縛」(ambient)を持ちます。同型の ambient は常に一意です(同型二重取りは禁止 ── 解決の曖昧性を断つため)。</p>
+<ul>
+<li><strong>entry</strong>:<code>[&amp;X] _</code> ブロックに入ると fresh な <code>w₀ : '1 X</code> を据える(<code>main</code> は <code>World</code>、<code>dispatch</code> body は <code>GPU</code>)。</li>
+<li><strong>consume + rebind</strong>:効果呼び出し <code>c : [&amp;X] A</code> は token を即時供給 → 返る <code>(X, A)</code> を分解し、新しい token を ambient に、値を文の値とする。</li>
+<li><strong>exit</strong>:ブロック値 <code>r</code> と最終 ambient <code>wₙ</code> を組にして返す。</li>
+<li><strong>case</strong>:各枝を同じ入り ambient で elaborate し、同型の出 token を合流(「同じ world を各排他枝へ」)。</li>
+</ul>
+<p>つまりユーザが</p>
+<pre><code>main : [&amp;World] Unit
+main = { print("hello"); print("world") }
+</code></pre>
+<p>と書くと、elaboration が <code>λ(w0) let (w1, _) = print("hello", w0); print("world", w1)</code> 相当の core 項(実際は implicit 供給形)へ縫い上げます。効果の順序は「字面の順」= token のデータ依存の順です。core に出る形は素の Π と Σ の分解束縛の連鎖なので、実行系は効果を知りません。</p>
+<p><strong>≤1 効果/文</strong> の規則があります:<code>load</code> を関数引数に直接ネストせず、<code>let v = load(…)</code> で束縛してから使います(1 つの式に効果ある部分式は 1 つまで。順序は <code>;</code>/<code>let</code> だけが作る)。</p>
+<h3 id="多-capability"><a class="header" href="#多-capability">多 capability</a></h3>
+<p><code>[&amp;X, &amp;Y]</code> ブロックでは、各効果呼び出しの capability 列を ambient から <strong>型(structural equality)で対応づけ</strong>、該当する token だけを消費・再束縛します。それぞれの効果が独立の線形チェーンを成すため、<code>[&amp;World, &amp;Log] Unit</code> のようにビルトイン効果とユーザ効果を同じブロックで合成できます。零幅(World)か実値(Log)かは threading に無関係です ── token は単なる線形値なので。</p>
+<h2 id="resolution-の統一--ω-辞書と-linear-token-は同じ規則"><a class="header" href="#resolution-の統一--ω-辞書と-linear-token-は同じ規則">resolution の統一 ── ω 辞書と linear token は同じ規則</a></h2>
+<p>typeclass の辞書(implicit)と効果 token(implicit borrow)を別機構にしません。一つの規則:</p>
+<blockquote>
+<p>implicit/borrow 引数の解決 = wanted 型の「使用可能な束縛/プール項」を文脈から見つけ、usage を消費する。</p>
+</blockquote>
+<ul>
+<li><strong>ω 辞書</strong>(<code>Mul(A)</code> 等):使用が尽きない=再利用可。型が ground でないことがあるため <strong>遅延</strong> 解決(メタ変数 + pending)。</li>
+<li><strong>linear token</strong>(<code>'1 X</code>):一度で消費。型は ground(<code>World</code>/<code>GPU</code>)なので <strong>即時</strong> 解決。</li>
+</ul>
+<p>ω/linear の差は multiplicity から、遅延/即時の差は「型が ground か」から落ちる ── どちらも別扱いではありません。実際に「<code>implicit w0 : X = init</code> を置けば既存の instance 解決が <code>[&amp;X]</code> の token を型で自動供給する」ことが実装で確認されています(discharge が新機構ゼロで書ける、ということ)。</p>
+<h2 id="escape-は-2-規則から閉じる"><a class="header" href="#escape-は-2-規則から閉じる">escape は 2 規則から閉じる</a></h2>
+<p>threading された token(io 等)がスコープ外へ漏れないことは、closure 設計の 2 規則(<a href="qtt.html#closure-は-ω-だけ-capture-する">QTT の章</a>)だけから出ます:</p>
+<ol>
+<li>closure は <code>'1</code> を capture できない → token を閉包に持ち出せない。</li>
+<li><code>'1</code> 引数の部分適用ができない → <code>let k = print(io0)</code> で token を握れない。</li>
+</ol>
+<p>加えて <code>'1</code> は複製不可(2 回使用は違反)、token は drop 不可(返り型 <code>(X, …)</code> を満たせず握り潰せない)。よって token は 1 本の線形スレッドに閉じ、必ず caller に戻ります。一方 <strong>capability 関数(<code>[&amp;X] A→B</code>)自体は <code>'ω</code> 値で token を抱えない</strong>(呼ぶたび引数で受ける)ので、自由に持ち回れます。escape 防止のための新しい機構はゼロです。</p>
+<h2 id="効果つきの分岐と反復"><a class="header" href="#効果つきの分岐と反復">効果つきの分岐と反復</a></h2>
+<p>分岐も反復も <code>case</code> 一本です(専用の <code>if</code> はありません)。branch は <code>'1</code> を capture できないので、threaded 資源は branch の <strong>引数</strong> で受けます = motive を <code>[&amp;R]</code> 付きの関数型にするだけ:</p>
+<pre><code>case[λ(_) [&amp;World] () → ()](b) {
+  true  =&gt; λ[&amp;World]() print("yes"),
+  false =&gt; λ[&amp;World]() (),          // token を使わない枝も、[&amp;R] 糖衣が末尾で token を自動で返す
+}
+</code></pre>
+<p>「使わない枝で token を素通しする(padding)」は独立の機構ではなく、<code>[&amp;R]</code> の「宣言した capability を末尾で必ず返す」性質に吸収されます。線形性も既存規則のまま:両枝が token を 1 回ずつ使うので <code>⊔(1,1)=1</code> で生存します。</p>
+<p>反復は motive に threaded 型を載せ、<code>⟦⟧</code>(帰納仮説)に資源を通します(<code>iterateEff</code>。→ <a href="qtt.html#case-の使用量規則">QTT</a>)。<code>succ</code> 枝は <code>'ω</code> なので <code>'1</code> を capture できず、資源は <code>⟦⟧</code> を通すしかない ── これも型から自動で強制されます。</p>
+<h2 id="部分借用-rfield--lens"><a class="header" href="#部分借用-rfield--lens">部分借用 <code>&amp;r.field</code> = lens</a></h2>
+<p><code>&amp;r.a</code> とフィールドへ絞って借りられます(設計確定・実装は今後)。これは Rust の(エイリアスと lifetime を気にする)部分借用ではなく、<strong>線形 lens</strong>(getter と putback の対)です:</p>
+<pre><code>Lens(S, A) = (s : '1 S) → ('1 A, ('1 A) → S)   // 焦点 A と「埋め戻し」関数を返す
+</code></pre>
+<p>レコードのフィールドや配列要素には lens が構造的に導出でき、合成もできます(<code>&amp;r.a.b</code> は lens の合成)。呼び出し側の脱糖は「get → 関数で thread → putback で再構成 → 元の名前へ再束縛」。純粋・全域なので線形性と矛盾しません。lens にできる path(フィールド/要素)に限られ、<code>&amp;(任意の式)</code> は書けません。</p>
+<h2 id="dischargehandler"><a class="header" href="#dischargehandler">discharge(handler)</a></h2>
+<p>効果はどこかの境界で discharge されます:</p>
+<ul>
+<li><strong>World</strong>(host IO):プログラムのトップレベルが host ブロック(chain に host 効果がある)だと、コンパイラが自動で <code>runHost(λ[w] …)</code> に包みます。runtime の iota が初期 token を供給して走らせ、<code>assert</code> の失敗は panic 報告、最終 token は捨てられます。built-in。</li>
+<li><strong>GPU</strong>:<code>dispatch</code> が body の GPU 効果を discharge します(スレッドごとに fresh token を供給してカーネル実行)。built-in。</li>
+<li><strong>ユーザ効果(Log / State 等)</strong>:「explicit な値を ambient token として供給する」は既存機構(<code>implicit w0 : X = init</code> + instance 解決)で既に書けます。効果操作はただの <code>[&amp;X]</code> 関数、可変資源版は <code>&amp;T</code> 借用関数 ── 「ユーザ handler」の大半は既存機能の組み合わせで済むことが分かっています。残っているのはトップレベルで合成ブロック(<code>[&amp;World, &amp;Log]</code>)を discharge する runner の配線です(<code>runHost</code> は <code>[&amp;World] Unit</code> 専用)。</li>
+</ul>
+<h2 id="buffer-は効果の外"><a class="header" href="#buffer-は効果の外">buffer は効果の外</a></h2>
+<p>GPU の <code>Buffer</code> は <code>[&amp;Buffer]</code> にも <code>&amp;Buffer</code> にもしません。カーネル内の buffer は <strong><code>'ω</code>(並列読み書き自由・race は型で追わない)</strong> で、命令の順序づけは <code>GPU</code> token が一手に担います。host→kernel の移動は <code>dispatch</code> の borrow-lift(明示借用の built-in 特例)が処理します。<code>&amp;Array</code> の明示借用が活きるのは host 側の <strong>逐次</strong> 可変配列(<code>set</code>/<code>get</code>)です。</p>
+<pre><code>// examples/setget.ov の要素:host の可変配列を借用で更新する
+let '1 a : Array(4[U32], U32) = newArray(4[U32], 0[U32]);
+set(&amp;a, 2[U32], 7[U32]);        // a を消費し、更新後の a を同名に再束縛
+let v = get(&amp;a, 2[U32]);        // 読み出しも借用
+</code></pre>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="qtt.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
+                            </a>
+
+                            <a rel="next prefetch" href="gpu.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="qtt.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
+                    </a>
+
+                    <a rel="next prefetch" href="gpu.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                    </a>
+            </nav>
+
+        </div>
+
+        <template id=fa-eye><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM432 256c0 79.5-64.5 144-144 144s-144-64.5-144-144s64.5-144 144-144s144 64.5 144 144zM288 192c0 35.3-28.7 64-64 64c-11.5 0-22.3-3-31.6-8.4c-.2 2.8-.4 5.5-.4 8.4c0 53 43 96 96 96s96-43 96-96s-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6z"/></svg></span></template>
+        <template id=fa-eye-slash><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zM223.1 149.5C248.6 126.2 282.7 112 320 112c79.5 0 144 64.5 144 144c0 24.9-6.3 48.3-17.4 68.7L408 294.5c5.2-11.8 8-24.8 8-38.5c0-53-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6c0 10.2-2.4 19.8-6.6 28.3l-90.3-70.8zm223.1 298L373 389.9c-16.4 6.5-34.3 10.1-53 10.1c-79.5 0-144-64.5-144-144c0-6.9 .5-13.6 1.4-20.2L83.1 161.5C60.3 191.2 44 220.8 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5z"/></svg></span></template>
+        <template id=fa-copy><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M502.6 70.63l-61.25-61.25C435.4 3.371 427.2 0 418.7 0H255.1c-35.35 0-64 28.66-64 64l.0195 256C192 355.4 220.7 384 256 384h192c35.2 0 64-28.8 64-64V93.25C512 84.77 508.6 76.63 502.6 70.63zM464 320c0 8.836-7.164 16-16 16H255.1c-8.838 0-16-7.164-16-16L239.1 64.13c0-8.836 7.164-16 16-16h128L384 96c0 17.67 14.33 32 32 32h47.1V320zM272 448c0 8.836-7.164 16-16 16H63.1c-8.838 0-16-7.164-16-16L47.98 192.1c0-8.836 7.164-16 16-16H160V128H63.99c-35.35 0-64 28.65-64 64l.0098 256C.002 483.3 28.66 512 64 512h192c35.2 0 64-28.8 64-64v-32h-47.1L272 448z"/></svg></span></template>
+        <template id=fa-play><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M73 39c-14.8-9.1-33.4-9.4-48.5-.9S0 62.6 0 80V432c0 17.4 9.4 33.4 24.5 41.9s33.7 8.1 48.5-.9L361 297c14.3-8.7 23-24.2 23-41s-8.7-32.2-23-41L73 39z"/></svg></span></template>
+        <template id=fa-clock-rotate-left><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M75 75L41 41C25.9 25.9 0 36.6 0 57.9V168c0 13.3 10.7 24 24 24H134.1c21.4 0 32.1-25.9 17-41l-30.8-30.8C155 85.5 203 64 256 64c106 0 192 86 192 192s-86 192-192 192c-40.8 0-78.6-12.7-109.7-34.4c-14.5-10.1-34.4-6.6-44.6 7.9s-6.6 34.4 7.9 44.6C151.2 495 201.7 512 256 512c141.4 0 256-114.6 256-256S397.4 0 256 0C185.3 0 121.3 28.7 75 75zm181 53c-13.3 0-24 10.7-24 24V256c0 6.4 2.5 12.5 7 17l72 72c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-65-65V152c0-13.3-10.7-24-24-24z"/></svg></span></template>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr-ef4e11c1.min.js"></script>
+        <script src="mark-09e88c2c.min.js"></script>
+        <script src="searcher-c2a407aa.js"></script>
+
+        <script src="clipboard-1626706a.min.js"></script>
+        <script src="highlight-abc7f01d.js"></script>
+        <script src="book-a0b12cfe.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>
