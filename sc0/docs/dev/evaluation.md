@@ -1,21 +1,33 @@
-# 評価（eval.rs）
+# NbE（eval.rs）——型検査の評価器
 
-対象ソース：`core/src/eval.rs`（約 1300 行）＋ `core/src/prim.rs`（簡約規則）
+対象ソース：`core/src/eval.rs`＋`core/src/prim.rs`（簡約規則）
 
-## 責務
+## 責務（2026-07 の再編後）
 
 NbE（Normalization by Evaluation）。`eval : &[V] × &Term → V` で値にし、
 `quote : level × &Value → Term` で正規形の項へ読み戻します。定義的等価（types.rs）は
-「両者を quote して項比較」。**型検査の正規化と実行時評価が同じ機構に相乗り**しています
-（→ この相乗りを解消するのが進行中の IR runtime 化・末尾参照）。
+「両者を quote して項比較」。
+
+かつては実行時の値計算もこの機構に相乗りしていましたが、**runtime は eval IR
+（[dev/ir](dev/ir.md)）に一本化**され、NbE の役割は次の 2 つに絞られました：
+
+1. **型検査**。型の中の計算の正規化・定義的等価・メタ解決。`member_val`（NbE 値）は
+   「型の中で使う値」のために残ります。
+2. **差分テストの独立参照実装**。NbE の `parallel` は常に per-sample
+   （各格子点で f を `apply` する honest-slow な評価）で、kernel IR を一切使いません。
+   「IR ≡ NbE」の差分テストが、独立した 2 実装の一致として意味を持つのはこのためです。
+   strict / fallback の区別は kernel IR を持つ eval IR 側にだけ存在します。
+
+**quote の共有破壊問題**（λ の下の mandelbrot が 2ⁿ に爆発）はこの分離の動機でした。
+型検査で quote する対象は型のサイズなので、実用上問題になりません。
 
 規約：
 
 - `Term` の変数は de Bruijn **添字**、`Neutral` の変数は de Bruijn **レベル**。
   env は `Vec<V>` で `Var(i)` は `env[len-1-i]`。
-- 値は **Rc 共有**（`V = Rc<Value>`）。変数参照は束縛値の Rc を refcount だけ増やして返すので、
-  `let x = e in x + x` のような共有は**構造共有された DAG** になり deep clone で 2ⁿ に
-  膨らまない。座標を抽象にした部分評価（kernel.rs）はこの共有に依存しています。
+- 値は **Rc 共有**（`V = Rc<Value>`）。
+- readback（quote / quote_sp）は **`Readback` トレイト**で骨格を共有しています
+  （かつて 4 本あった重複を 2 本の骨格に）。
 
 ## Value の設計
 
@@ -36,16 +48,18 @@ NbE（Normalization by Evaluation）。`eval : &[V] × &Term → V` で値にし
 判定**します（`gridTopo 2 3` から生まれた Topo は quote すると `gridTopo 2 3` に戻る＝
 正準形がそのまま往復する）。`data` は consumer だけが触る native 実体で、`Foreign` trait の
 `type_name` で downcast 前に取り違えを honest に弾きます。**ネイティブ関数は裸の値だけを
-返す**のが規約です（`some Topo` のような複合を native が返すと中の Topo の round-trip が
-壊れる。合成はライブラリ側の let でやる）。
+返す**のが規約です（複合を native が返すと中の値の round-trip が壊れる。合成はライブラリの
+let でやる）。eval IR 側の `Node::Foreign` も同じ「(head, args) が同一性」の原則で intern
+します。
 
 ### Neutral の 2 つの特殊頭
 
 - `NStuck(V)`：簡約しきれない rigid 値（neutral 引数を持つ stuck な VPrim など）を
   neutral の頭として包む。「stuck prim を if/case/proj に晒す」式でも panic せず stuck の
-  まま残せる（抽象座標を流す部分評価で必須）。quote は中身を書き戻す。
-- `NMember(module, name)`：簡約規則を持たないモジュールメンバ。**エラー多重化**で
-  「elaborate に失敗した宣言＝型はあるが値が決まらない stuck メンバ」を表すのに使う。
+  まま残せる。quote は中身を書き戻す。
+- `NMember(module, name)`：簡約規則を持たないモジュールメンバ。**エラー多重化**
+  （elaborate に失敗した宣言＝型はあるが値が決まらない stuck メンバ）と、
+  **`extern` 宣言**（型検査では opaque な入力）の両方がこれで表されます。
   値を捏造せず、後続宣言の eval を panic させない。
 
 ## メタ変数
@@ -53,39 +67,30 @@ NbE（Normalization by Evaluation）。`eval : &[V] × &Term → V` で値にし
 `METAS`（thread_local の `Vec<MetaEntry>`）。`solve_meta` で解を書き、`force` が
 VFlex のスパインを解へ適用して畳む。`zonk` は解を項に書き戻す。
 `snapshot_metas` / `restore_metas` は elaboration のトライアルが使う
-（**restore は truncate 相当**——だから trial から返す値は zonk で detach が必要。
+（**restore は truncate 相当**——trial から返す値は zonk で detach が必要。
 [elaboration](dev/elaboration.md) 参照）。
 
 ## 評価エラーチャネル
 
 wasm/ライブラリとして panic は許されないので、実行時の失敗は
 `set_eval_error` / `take_eval_error`（thread_local・**最初の 1 件が勝つ**）で運びます。
-`eval_program` が末尾で拾って `Err` にします。発生源の例：
+発生源の例：
 
 - 存在しないフィールドの射影・ベクトル添字の範囲外・非関数の適用
 - `J` の実行時等式検査の不一致（`trustMe` の嘘。両端が具体値のときだけ検査し、
   neutral の間は stuck に残す——**stuck に残すこと自体が重要**で、さもないと
   transport/sym などの派生定義がビルド時正規化で J を消してしまい検査機会が失われる）
-- strict な `parallel` の IR 化失敗
+- strict な `parallel` の kernel IR 化失敗（eval IR 側）
 
-エラー値を返して継続する経路（`Option`/`Result`）とこのチャネルの使い分け：
-簡約器の深部（`Value → Value` で失敗を型に載せられない場所）だけがチャネルを使います。
+## メンバの二重メモ（module.rs）
 
-## 遅延メンバ
+メンバの実体は `MemberEntry { ty, def, v, ir }`：
 
-モジュールメンバの値は `MemberVal { Lazy(Term) | Forced(V) }`（module.rs）で、
-**初回参照時に eval してメモ化**します。表（Module）レベルの遅延であって `Value` enum は
-無傷です。動機は実測：build_decls の eager eval では render が未解決メタを含む段階で
-評価されて IR 落ち → per-sample 空走＋再 eval の二度手間（Mandelbrot 7.3s→69ms の改善）。
+- `def` は **メタ無しの Core 項が真実**（`Term`）。opaque / nominal / instance は
+  native 値（`Native`）、`extern` は既定値項（`Extern`）。
+- そこから **NbE 値 `v`（型検査用）と eval IR `ir`（runtime 用）を対称に遅延導出**して
+  それぞれメモします。初回 `member_val` / `member_ir` で埋まる。
+- メンバの再定義は entry ごと差し替え＝メモも自然に無効化（side-cache を持たない）。
+  incremental の green 再適用は `with_ir` で前回の IR id をそのまま載せて再導出を省く。
 
-## 流動的な部分：IR runtime 化（進行中）
-
-**この層は近く大きく変わる予定です**（`design-workspace-tasks.md` §5・方針決定済み）。
-
-- 現状の問題：NbE の `quote` は**共有を潰す**。λ の下の重い計算（mandelbrot under λ）を
-  quote すると DAG が木に展開されて 2ⁿ に爆発し、worker が死ぬ（実測）。また render の
-  「IR 化失敗 → fallback」も同根。
-- 方針：**elaboration は型検査専用**に絞り、実行は record / enum / closure / nominal / Topo を
-  含む**汎用 IR に一本化**。NbE 相乗りの実行時評価を撤去する。
-- ドキュメントとしては、本ページの「Value が実行時表現を兼ねる」記述は改修後に
-  「Value は型検査の正規形専用」へ書き換えることになる想定です。
+旧構造（`MemberVal { Lazy | Forced }` の一本値）はこの二重メモに置き換わっています。

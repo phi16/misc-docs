@@ -65,8 +65,9 @@ React の仮想 DOM 差分や、Jane Street の Incremental（DAG ベースの i
 系譜全体に共通する成立条件が 2 つあります。
 
 1. **比較できること**。early cutoff は「結果が前と同じ」を判定できて初めて成り立つ。
-   Cook が正規形（quote した項）を比較するのはこのためで、NbE が正規形を持つ言語で
-   あることが incremental の土台になっています。
+   Cook の一致判定は hash-cons された runtime IR の**正準 id の比較 O(1)**です——
+   「同じ構造の値は同じ id に intern される」表現を選んだことが、そのまま
+   incremental の土台になっています（初期実装は正規形の項比較で、id 比較へ進化した）。
 2. **正しさの基準は full 再計算との一致**。Cook はこれを differential テスト
    （incremental ≡ full・しかも同じ関数 `build_decls_impl` の 2 モード）で担保して
    います。「full と incr を別実装にしない」は、この分野で壊れやすさの筆頭が

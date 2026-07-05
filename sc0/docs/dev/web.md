@@ -26,7 +26,8 @@ main（UI スレッド）          worker                     wasm（sc0_wasm.wa
 | メッセージ | 意味 |
 |---|---|
 | `setSource { src }` | 冷たい resync（初期化・構造編集・Source 自由編集）。唯一の全文経路 |
-| `editDecl { name, text }` | hot path＝1 宣言差し替え（slider・Code）→ 下流だけ再評価 |
+| `editDecl { name, text }` | 1 宣言差し替え（`let` の slider・Code）→ 下流だけ再評価 |
+| `setExtern { name, vals }` | **`extern` の現在値を差し替え**（数値葉の平坦列）。ソース不変・member_ir 不変＝**再ビルドすら走らない**最速路 |
 | `eval { id, node }` | per-node 最小評価。結果＋この評価の Log を返す |
 | `glyphs { config }` | pretty の glyph 設定を main と揃える |
 
@@ -55,8 +56,14 @@ main は「次の rebuild で worker にどう追随するか」を変数 `cookS
 | 値 | 意味 | 例 |
 |---|---|---|
 | `"full"` | 全文 `setSource` | Source の打鍵・構造編集（add/delete/rename/connect/Code 実行）・Examples ロード・Reformat |
-| `{decl: name}` | その 1 宣言だけ `editDecl`（hot path） | slider のドラッグ |
+| `{decl: name}` | その 1 宣言だけ `editDecl` | `let` ノードの slider（ソースが真実なので書き換える） |
+| `{extern: name, vals}` | `setExtern`＝内部値だけ差し替え | **`extern` ノードの slider**。ソースも member_ir も不変＝再ビルド無し・カーネル再コンパイル無し |
 | `null` | 追随不要（eval に効かない） | ノード選択・`pos` 注釈のドラッグ永続化 |
+
+slider は対象ノードの kind で経路が分かれます：`extern` なら最速路（値の供給だけ）、
+`let` なら従来どおり source の surgical 書き換え。多成分（`Vec` の extern）は
+「値の数値葉の平坦列」を葉ごとにハンドルし、`onEdit(texts)` が全葉の文字列配列を返す
+一般形になっています（Vec 固有の component 概念は持たない）。
 
 `pos` の永続化（`persistPos`）が `cookSync = null` に**打ち消す**のは意図的です：
 注釈は意味に効かない透明層なので worker に送る必要がなく、送っても early-cutoff で

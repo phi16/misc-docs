@@ -26,6 +26,7 @@ cargo run -- prog.sc0            # ファイルを評価して「値 : 型」を
 cargo run -- render prog.sc0 out.png   # Buffer 2 [w,h] (Vec 3 R) を PNG に書き出し
 cargo run                        # 引数なし＝組み込みデモを実行
 cargo test                       # テスト
+cargo test --features gpu        # GPU 実行（wgpu）込みのテスト。GPU が無ければ自動 skip
 ```
 
 - 標準ライブラリのモジュールは `core/modules/*.sc0` からディスク読みされます

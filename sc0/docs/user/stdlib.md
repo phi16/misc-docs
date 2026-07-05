@@ -44,6 +44,15 @@
 
 `rand : Vec n N -> R` — seed ハッシュの決定的擬似乱数（[評価モデル](user/evaluation.md#乱数)）。
 
+### N の整数算術
+
+| 名前 | 型 |
+|---|---|
+| `modN` | `N -> N -> N`（剰余。0 割りは stuck） |
+| `divN` | `N -> N -> N`（floor 除算。0 割りは stuck） |
+
+格子座標（`[i % w, i / w]`）などに。mesh の `gridCoordAt` もこれで書かれています。
+
 ### 数値の塔をまたぐ変換（損失あり・明示）
 
 | 名前 | 型 |
@@ -62,6 +71,7 @@
 ```
 Lt : N -> N -> U                              -- 「より小さい」命題
 nominal Fin (k : N) = { i : N, lt : Lt i k };
+clampFin : (?k : N) -> N -> Fin k             -- 常に [0, k-1] へクランプ（Fin の唯一の作り口）
 enum Maybe a { some a, none };
 fromMaybe : a -> Maybe a -> a                 -- 既定値つき取り出し
 ```
