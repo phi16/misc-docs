@@ -46,6 +46,7 @@ i3 風の 2 階層タイルシステムです：デスクトップに複数の�
 | Library | 標準ライブラリ（std / math / mesh 集約）の `名前 : 型` 一覧 |
 | Syntax | 構文の形の一覧（雛形集） |
 | Log | 時系列ログ（後述） |
+| Live | **音まわりの runtime ダッシュボード**：走行中の hold（種類・依存・crossfade 中か）・再生中のストリーム・poly の voice 数・MIDI / ボタン / extern hold の現在値。憶測でなく実状態を見る窓 |
 | Settings | glyph 設定（`->`/`→`・`=>`/`⇒`・`λ`/`\`——意味は不変・表示だけ）・Workspace の辺スタイル |
 | Theme | 配色 JSON の直接編集（CSS 変数へ反映・保存） |
 
@@ -132,7 +133,11 @@ view の種類：
 | `surface` | `Buffer 2 [m,n] (Vec 3 R)`（曲面・高さ場） |
 | `mesh` | `{j : Topo, pos : Point j -> Vec 3 R, …}` レコード（3D） |
 | `audio` | `Buffer 1 [n] R`（mono）/ `Buffer 1 [n] (Vec 2 R)`（stereo） |
-| `slider` | 数値の**入力**（`R`・多成分なら `Vec n R` も葉ごとのスライダに）。min / max / step は**著者が明示**（型からは出ない。未指定なら「未指定」と正直に出る） |
+| `slider` | 数値の**入力**（`R`・多成分なら `Vec n R` も葉ごとのスライダに・次元別の min / max 可）。min / max / step は**著者が明示**（型からは出ない。未指定なら「未指定」と正直に出る） |
+| `toggle` | `B` の**入力**（トグル） |
+| `color` / `point` | `Vec 3 R` / `Vec 2 R` の**入力**（色・座標のエディタ。数値葉ベースで let / extern 共通） |
+| `stream` | `Stream _` の**ライブ再生**（▶ / ⏹。[音とストリーム](user/stream.md)） |
+| `button` | `extern hold x : Trigger Unit;` の**発火ボタン**（押下の瞬間に発火） |
 | `graph` | その宣言の **AST グラフ**（Graph パネルと同じ描画の埋め込み・縮小版） |
 
 view 無しのノードは小さな○、view 付きは箱＋I/O ポートで描かれます。
@@ -152,6 +157,21 @@ slider を付ける宣言は 2 種類あり、挙動が違います。
 
 どちらもドラッグ中は画像などの下流 view がリアルタイムに追従します。迷ったら
 「作品のパラメータは extern・定数の調整は let」くらいの使い分けです。
+
+### 音のライブ再生とライブコーディング
+
+- `stream` view の ▶ で鳴り始めます（初回はエンジン起動で数秒「⋯」が出ます）。
+  鳴らしながら動かせるのは **`extern hold`** の slider / button です（素の extern は
+  再生開始時点の値で焼き込まれます——[音とストリーム](user/stream.md#宣言の-22let--hold--extern--extern-hold)）。
+- **`hold` 宣言のコードは、鳴らしたまま編集できます**。Run すると走行中の音が
+  crossfade（約 15ms・Trigger は即時差し替え）で新しい定義に繋がります。編集が
+  コンパイルできない間は直前の正常な音が鳴り続けます（livecode / livesynth サンプル参照。
+  規則と反映の粒度は [音とストリーム](user/stream.md#宣言の-22let--hold--extern--extern-hold)）。
+  Workspace では hold ノードは専用色（オレンジ）で描かれます。
+- **Live パネル**で走行状態（どの hold が生きているか・crossfade 中か・voice 数など）を
+  実際に確認できます。
+- 再生が実時間に間に合わないと Log に `audio underrun: …` が負荷内訳つきで出ます。
+- `midiIn` を使うストリームは、再生開始時にブラウザの MIDI 許可を求めます。
 
 ### Pop out（view を窓に出す）
 

@@ -71,6 +71,8 @@ NbE の `quote`（Value → Term）は**共有 DAG を木に展開**します。
 カーネルへコンパイルされ、`KernelRender { kernel, shape, captures }` ノードになります。
 
 - `kernel` は kernel.rs 側の side-table ハンドル。compile はこの 1 回きり。
+  GC はこのハンドルの生存を追い、生存 KernelRender が指さないカーネルを回収します。
+- `shape` は**実行時の size 式（Id 列）**です——解像度を extern にしても recompile-free。
 - `captures` は「カーネルが `Var(d+i)` スロットで読む捕捉入力式」（外側 λ の Input や
   Extern を含むスカラ式）。**カーネル本体は captures について symbolic** なので、
   適用や extern 供給で captures の**値**だけが変わってもカーネルは再利用されます——
@@ -84,10 +86,25 @@ NbE の `quote`（Value → Term）は**共有 DAG を木に展開**します。
 `parallel` は常に per-sample の honest-slow な参照実装として残してある（[evaluation](dev/evaluation.md)）
 ので、「同じプログラムを両実行系で走らせて一致」が机上でなくテストとして回ります。
 
+## GC（非移動 mark-sweep）
+
+アリーナは伸びる一方だと slider を触るほど遅くなる（実測）ので、**非移動の mark-sweep GC**
+が入っています。id は動かさず、死んだスロットを再利用します。
+
+**root の登録が生命線です**：モジュールの member_ir・走行中 stream の先端（worklet の
+pull 先）・hold のセル・hold の source id などが root。**新しい「id を保持するキャッシュ」を
+追加したら、必ず GC root への登録も追加すること**——忘れると動くように見えて、GC の
+タイミングで中身がすり替わるか、解放済み id への `ir::get` で panic します。wasm では
+panic=abort・hook 無しなので **console にも何も出ずに全機能が silent に死ぬ**
+（HOLD_SOURCE の root 漏れで実際に踏んだ・症状は「音もスライダも無反応」だけ）。
+
 ## 落とし穴
 
 - `Input` / `Coord` / `Extern` は**別名前空間**です。置換系の操作（run_code の入力置換・
   apply_externs）がどれを触りどれを素通りするかを混ぜると、カーネルの symbolic 性
   （再コンパイル無し）が静かに壊れます。
 - `Foreign` の実体は side-table にあるので、アリーナの intern だけ見て「値が全部ある」と
-  思わないこと。
+  思わないこと。**状態を持つ値を side-table 経由で持ち込まない**こと——head+args が同じ
+  だけで intern が state を clobber します（Stream が VForeign をやめて Tag 木になった理由。
+  [dev/stream](dev/stream.md)）。
+- id を保持する新キャッシュ＝GC root 登録（上述）。

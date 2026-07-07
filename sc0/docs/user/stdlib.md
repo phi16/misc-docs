@@ -108,9 +108,10 @@ fromMaybe : a -> Maybe a -> a                 -- 既定値つき取り出し
 
 `_+_` `_-_` `_*_` `_/_` `_<_` `_==_`（中置）、`-_` `+_`（前置）、`from`（変換の適用）。
 
-### 論理
+### 論理・単位型
 
 `not` `and` `or`（`B` 上。prim ではなく `if` による定義＝短絡）。
+`Unit = enum { tt }` — 「payload 無し」の正直な表現（ボタンの `Trigger Unit` などに）。
 
 ### ベクトル連結・配列
 
@@ -161,3 +162,8 @@ fromMaybe : a -> Maybe a -> a                 -- 既定値つき取り出し
 ## mesh — トポロジ
 
 [メッシュ](user/mesh.md) 参照。
+
+## stream / dsp — 音とストリーム
+
+[音とストリーム](user/stream.md) 参照（`Stream`・osc / biquad / delay / echo …・
+`Trigger` / `metro` / `poly` / `midiIn`・`renderStream`・`dft` / `idft`）。

@@ -20,6 +20,7 @@
   - [評価モデルと実体化](user/evaluation.md)
   - [標準ライブラリ](user/stdlib.md)
   - [メッシュ](user/mesh.md)
+  - [音とストリーム](user/stream.md)
   - [Web 環境](user/web-ui.md)
 
 - 開発ドキュメント
@@ -29,5 +30,6 @@
   - [NbE（型検査の評価器）](dev/evaluation.md)
   - [eval IR（runtime）](dev/ir.md)
   - [kernel IR と GPU](dev/kernel.md)
+  - [Stream](dev/stream.md)
   - [モジュールと Cook](dev/modules-cook.md)
   - [Web 層](dev/web.md)

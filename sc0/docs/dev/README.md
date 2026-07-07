@@ -9,8 +9,9 @@ SC0 の実装に手を入れる人向けのドキュメントです。
 - [Surface / Core と表示](dev/surface-core.md) — 型分割・CommonF・Deco・pretty・構造編集・graph/workspace
 - [Elaboration](dev/elaboration.md) — 双方向検査・メタ・postpone fixpoint・instance 探索・リテラル解決・診断記録
 - [NbE](dev/evaluation.md) — Value/Neutral・VForeign・メタ・評価エラーチャネル（型検査専用＋参照実装）
-- [eval IR](dev/ir.md) — runtime の値モデル（hash-cons・closure conversion・KernelRender・extern）
-- [kernel IR と GPU](dev/kernel.md) — 残差の lowering・CPU Runner・WGSL/wgpu（feature gpu）
+- [eval IR](dev/ir.md) — runtime の値モデル（hash-cons・closure conversion・KernelRender・extern・GC）
+- [kernel IR と GPU](dev/kernel.md) — 残差の lowering・CPU Runner・WGSL/wgpu（native＋Web）
+- [Stream](dev/stream.md) — 音のランタイム（Tag 木・peel・live 2 経路・hold/xfade。真実文書＝design-stream.md）
 - [モジュールと Cook](dev/modules-cook.md) — Module レジストリ・build_decls 3 フェーズ・incremental・forest
 - [Web 層](dev/web.md) — worker/main 分担・wasm ABI・WebModule・view/placement システム
 
@@ -79,8 +80,9 @@ clippy は警告ゼロを保つ運用です。
 | `eval.rs` | NbE（Value・quote・VForeign）＝型検査専用＋差分テストの参照実装 |
 | `ir.rs`（＋`ir/tests.rs`） | **eval IR**＝runtime の値モデル（hash-cons DAG・closure conversion・KernelRender・extern） |
 | `kernel.rs` | **kernel IR**＝数値カーネル（eval IR 残差の lowering・CPU Runner） |
-| `kernel/gpu.rs` | kernel IR → WGSL 翻訳・wgpu headless 実行（feature `gpu`） |
-| `prim.rs` | プリミティブ実装（`by_name`・簡約規則） |
+| `kernel/gpu.rs` | kernel IR → WGSL 翻訳・wgpu headless 実行（feature `gpu`）・Web 用 WGSL 記述子 |
+| `stream.rs` | **Stream ランタイム**（peel / trigger_peel・hold セル・crossfade・WebAudio descriptor） |
+| `prim.rs` | プリミティブの**単一真実テーブル**（`prims!` マクロ＝型・NbE 簡約・kernel lowering が 1 行に並ぶ。追加漏れは網羅 match でコンパイルエラー） |
 | `module.rs` / `modules.rs` | Module 表現／ビルド・ソース供給（DirModules / BakedModules） |
 | `cook.rs` | incremental ビルドエンジン |
 | `graph.rs` | ノードグラフ表現・構造編集 |

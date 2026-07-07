@@ -57,8 +57,7 @@ sampler   : Interp -> Buffer d shape T -> Vec d R -> T               -- 読み�
 - `render` / `rasterize` は**原始ではなく** `std` の普通の `let` です。`parallel`（整数添字）の上に
   「添字 → 実座標」のアフィン写像を載せただけで、定義はライブラリとして読めます。
 - `Sampling = enum { center, edge, closed }` はセル内サンプル位置。
-  `Interp = enum { nearest, linear, cubic }` は補間方式です
-  （**⚙ 実装メモ**：`cubic` は当面 `linear` と同じ実装）。
+  `Interp = enum { nearest, linear, cubic }` は補間方式です（cubic は Catmull-Rom）。
 - 「画像」「音」という固定型はありません。`Buffer 2 [w,h] (Vec 3 R)` を画像として PNG に書き出し、
   1 次元バッファを音として扱う、という**ビューの解釈**だけがあります。
 - `Array k A = Buffer 1 [k] A`。`at`（`Fin k` 添字の全域読み）と `tabulate`（関数を焼く）、
@@ -77,10 +76,10 @@ sampler   : Interp -> Buffer d shape T -> Vec d R -> T               -- 読み�
   激重のサイレントフォールバックを防ぐためです。遅くてもよいから per-sample で評価したい
   ときは、明示的に `parallel_fallback` / `render_fallback` / `rasterize_fallback` を使います。
 - どちらの経路で実行されたか・次元・サンプル数・所要時間は Web の Log パネルに出ます。
-- **GPU 実行**：同じカーネルを WGSL に翻訳して実 GPU（wgpu）で回すバックエンドがあります
-  （ビルドオプション `--features gpu`・精度は f32・正しさは CPU 実行との差分テストで検証）。
-  mandelbrot のような動的ループも 1 枚のシェーダに翻訳されます。Web（ブラウザの WebGPU）
-  への配線はこれからです。
+- **GPU 実行**：同じカーネルを WGSL に翻訳して実 GPU で回します。**Web ではトップレベルの
+  render がブラウザの WebGPU で実行されます**（実測で 22ms → 3.5ms・`sampler` / `at` を含む
+  カーネルは当面 CPU 実行）。native 側は `--features gpu`（精度 f32・正しさは CPU 実行との
+  差分テストで検証）。mandelbrot のような動的ループも 1 枚のシェーダに翻訳されます。
 
 ## 型消去
 

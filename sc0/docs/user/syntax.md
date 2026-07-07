@@ -18,7 +18,9 @@ SC0 の表層構文は関数型言語寄りです。関数適用は並置 `f x`�
 |---|---|
 | `let x : T = e;` | 値の定義（型注釈は省略可：`let x = e;`） |
 | `opaque x : T;` | 本体を持たない定義。実装は処理系がネイティブに供給する（ライブラリ用） |
-| `extern x : T = init;` | **外部 runtime 入力**。値はソースに書かず実行環境（Web の slider など）が供給する。`init` は必須の既定値（[Web 環境](user/web-ui.md#slider-のライブ編集)） |
+| `extern x : T = init;` | **外部 runtime 入力**（観測ごとに凍る scalar）。値はソースに書かず実行環境（Web の slider など）が供給する |
+| `extern hold x : T [= init];` | **live な外部入力**。型が `Stream _` なら走行中に動く値（slider）、`Trigger _` ならイベント（ボタン・init 不要）（[音とストリーム](user/stream.md#宣言の-22let--hold--extern--extern-hold)） |
+| `hold x = e;` | **コード定義の持続ストリーム**（ライブコーディング用）。構文は let と同じで、走行状態が編集を越えて生き、編集は crossfade で繋がる |
 | `nominal X params = RHS;` | 剛体な名前つき型（[型システム](user/types.md#nominal-型)） |
 | `enum X params { tag payload, … };` | payload 付き列挙型（[型システム](user/types.md#enum)） |
 | `instance x : T = e;` | インスタンス（探索対象になる値。[クラス](user/classes.md)） |
@@ -69,7 +71,7 @@ let inc : N -> N = λx. x + 1 in inc 4     -- let … in 式
 ブロック・`in` の位置に書ける宣言は `let` だけではありません。
 **`nominal`・名前付き `enum`・`instance`・fixity 宣言も式の中に書けます**
 （`宣言; 続きの式` の形。ローカルな型・インスタンス・演算子を作れる）。
-トップレベル専用なのは `import` / `private` / `opaque` / `extern` / `#[node]` です。
+トップレベル専用なのは `import` / `private` / `opaque` / `extern` / `hold` / `#[node]` です。
 
 ### 制御
 

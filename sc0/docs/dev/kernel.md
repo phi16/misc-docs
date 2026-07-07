@@ -69,9 +69,13 @@ kernel IR は元々 GPU 前提の形（index 昇順 1 パス・eager 分岐＝pr
 - **検証は UI 非依存**：`cargo test --features gpu` が **GPU 出力 ≡ CPU Runner 出力**の
   差分テストを回します。Sample/Gather は CPU と同じ算術で bit 一致。Rand だけは
   hash 実装が別（u64 の無い f32 世界で murmur3）なので値一致を要求しません。
-- 既知の制限：Sample/Gather はトップレベルのみ（ループ body 内は buf の scope 衝突で未対応）。
-- **残り＝Web の WebGPU 配線**（同じ WGSL をブラウザで dispatch して viewer へ・
-  CPU フォールバックは残す）。
+- **Web 配線済み**：core が **WGSL 記述子**を出し、JS（`web/webgpu.js`）が worker 上で
+  dispatch します（wasm は同期のまま・実行だけ browser GPU へ・`cook_eval_or_gpu`）。
+  実測 22ms → 3.5ms。pipeline / バッファ / bind group は WGSL 単位でプール。
+  CPU フォールバックあり。**Sample/Gather を含むカーネルの Web 対応は未**（native の
+  headless テストでは対応済み・ループ body 内は buf scope 衝突で両方未対応）。
+- `KernelRender` の shape は**実行時の size 式**です（リテラル焼きから一般化）——
+  解像度を extern にしても recompile-free。
 
 ## 計測
 

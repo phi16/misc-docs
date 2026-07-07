@@ -27,9 +27,13 @@ main（UI スレッド）          worker                     wasm（sc0_wasm.wa
 |---|---|
 | `setSource { src }` | 冷たい resync（初期化・構造編集・Source 自由編集）。唯一の全文経路 |
 | `editDecl { name, text }` | 1 宣言差し替え（`let` の slider・Code）→ 下流だけ再評価 |
-| `setExtern { name, vals }` | **`extern` の現在値を差し替え**（数値葉の平坦列）。ソース不変・member_ir 不変＝**再ビルドすら走らない**最速路 |
+| `setExtern { name, vals }` | **`extern` の現在値を差し替え**（数値葉の平坦列）。ソース不変・member_ir 不変＝**再ビルドすら走らない**最速路（軽量 reeval） |
 | `eval { id, node }` | per-node 最小評価。結果＋この評価の Log を返す |
+| `fireTrigger { name }` / `midi { channel, note, velocity }` | **イベントを worker の queue に積む**（button・Web MIDI）。peel が走る wasm に積むのが肝（[dev/stream](dev/stream.md)） |
 | `glyphs { config }` | pretty の glyph 設定を main と揃える |
+
+worker のメッセージ処理は**直列化**されています（順序保証）。ライブ再生（stream の
+open/pull/close）と WebGPU の dispatch も worker 上で走ります。
 
 - メッセージは FIFO 処理なので「編集 → eval」の順序は自然に保たれます。
 - `editDecl` の失敗（drift）は**握りつぶします**——Cook は前の有効な状態のまま・crash しない。
@@ -176,6 +180,10 @@ onChange 非発火にしてあり、エコーバックしません。
 | `tilewin.js` | タイル窓エンジン（floatwin.js は el/drag ヘルパの残骸） |
 | `views.js` / `lenses.js` | view kind レジストリ／レンズボタン |
 | `imageview.js` / `curveview.js` / `viewer3d.js` / `audioview.js` | 各 content 実装 |
+| `streamplay.js` | ライブ再生の host 側（descriptor→WebAudio graph 構築・worklet 配線・poly の voice spawn・所有キー比較） |
+| `streamproc.js` | AudioWorkletProcessor（worker からの block を再生・underrun 検知） |
+| `livepanel.js` | Live パネル（worker からの liveState **push** を購読——polling しない・パネル可視時のみ） |
+| `webgpu.js` | WGSL 記述子を受けて dispatch（pipeline / バッファのプール） |
 | `graphview.js` | Graph 描画（layoutGraph / renderGraph / hitTest・THEME・mini モード） |
 | `workspaceview.js` | Workspace レイアウト（forest 規則）・`parseAnno` |
 | `canvasview.js` | pan / zoom / DPR / ResizeObserver つき canvas（Graph と Workspace で共有） |

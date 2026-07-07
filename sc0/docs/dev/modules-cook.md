@@ -104,8 +104,13 @@ Cook { module: WebModule, cache: BuildCache, dirty, ambient, built, last_errors,
 - **ambient**：fixity / nominal / instance / enum / import の変化は精密な依存に乗らない
   （暗黙の型文脈・パース文脈）ので、粗く全再計算。opaque はメンバを足すだけなので
   ambient ではない。
-- **query**（eval/diagnose/workspace/graph）は `ensure_built` で最小再計算してから読む。
+- **query**（eval/diagnose/workspace/graph）は `Cook::build` で最小再計算してから読む
+  （旧名 ensure_built——build のログ・計時を出す実体に合わせて改名。modules.rs の
+  self-populating `ensure_built` は別物で健在）。
   1 フレームの複数 query は `built` フラグで **1 回のビルドを共有**。
+- **`set_source` も `apply_edit` 経由**です（冷たい「キャッシュ全捨て」は廃止）。全文が
+  来ても前後の decl text 差分で dirty が出るので、full setSource 後の hold swap 判定などが
+  「本当に変わった decl」を見られる（[dev/stream](dev/stream.md) の編集検知）。
 - **broken**：`set_source` の parse 失敗は module を前のまま触らず broken 印だけ立て、
   eval はそれを返す（**stale な旧値を返さない**・§6）。一方、**編集メソッドの失敗は
   broken にしない**（module は前の有効なまま＝他の decl の eval を毒さない）。

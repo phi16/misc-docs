@@ -58,6 +58,8 @@ private opaque gridTopo : (m n : N) -> Topo;
 | `algebra` | 法則つき数学構造（`Semigroup` … `Ring`） |
 | `math` | `N` / `Z` / `Complex` / `Quaternion` の構造インスタンス |
 | `mesh` | ハーフエッジトポロジ `Topo` と要素・生成系 |
+| `stream` | 時間で変化する値（`Stream`・音の合成・`Trigger`/`poly`・ライブ再生） |
+| `dsp` | バッファ領域の信号処理（`dft` / `idft`） |
 
 詳細は [標準ライブラリ](user/stdlib.md)。
 
